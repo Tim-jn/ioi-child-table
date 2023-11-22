@@ -66,5 +66,33 @@ def get_custom_fields():
 				"insert_after": "page_break",
 				"read_only": 1
 			},
-		]
+		],
+		"Project": [
+			{
+				"fieldname": "documents_tab",
+				"fieldtype": "Tab Break",
+				"label": "Documents",
+				"insert_after": "message",
+			},
+			{
+				"fieldname": "documents_html",
+				"fieldtype": "HTML",
+				"label": "Documents",
+				"insert_after": "documents_tab",
+			},
+		],
+		"Task": [
+			{
+				"fieldname": "documents_tab",
+				"fieldtype": "Tab Break",
+				"label": "Documents",
+				"insert_after": "template_task",
+			},
+			{
+				"fieldname": "documents_html",
+				"fieldtype": "HTML",
+				"label": "Documents",
+				"insert_after": "documents_tab",
+			},
+		],
 	}
