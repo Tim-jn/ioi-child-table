@@ -1,0 +1,121 @@
+{% set with_numbers = 0 %}
+
+{% macro chantier_title(d, section) %}
+<tr class="chantier-section-start">
+	{% set tag = "h" + d.row_type[-1] %}
+	<td colspan="{{ (data|length) + with_numbers }}">
+		<{{ tag }}>
+			<span class="chantier-section-title">
+				<span class="chantier-counter">{{ section.counter }}</span>
+				{{ section.title }}
+			</span>
+		</{{ tag }}>
+	</td>
+</tr>
+{% endmacro %}
+
+{% macro chantier_section_end(d, section, visible_columns) %}
+<tr class="chantier-section-end">
+	{% set tdfs = visible_columns | selectattr("fieldname", "in", doc.print_chantier_section_columns) | list %}
+	<td colspan="{{ (data|length) + with_numbers - 3 - (tdfs|length) }}">
+		<b>{{ _("Subtotal") }} ({{ section.counter }} {{ section.title }})</b>
+	</td>
+
+	{% for tdf in tdfs %}
+		<td class="{{ get_align_class(tdf) }}" {{ fieldmeta(df) }}>
+			<strong>{{ frappe.format_value(section[tdf.fieldname], df=tdf, doc=doc, translated=df.translatable) }}</strong>
+		</td>
+	{% endfor %}
+</tr>
+{% endmacro %}
+
+{% macro chantier_comment(d) %}
+<tr>
+	<td colspan="{{ (data|length) + with_numbers }}">{{ d.description }}</td>
+</tr>
+{% endmacro %}
+
+{%- if data -%}
+	{%- set visible_columns = get_visible_columns(doc.get(df.fieldname),
+		table_meta, df) -%}
+	<div {{ fieldmeta(df) }}>
+		<table class="table table-bordered table-condensed">
+			<thead>
+				<tr>
+					{# <th style="width: 40px" class="table-sr">{{ _("Sr") }}</th> #}
+					{% for tdf in visible_columns %}
+					{% if (data and not print_settings.compact_item_print) or tdf.fieldname in doc.flags.compact_item_fields %}
+						<th style="width: {{ get_width(tdf) }};" class="{{ get_align_class(tdf) }}" {{ fieldmeta(df) }}>
+							{{ _(tdf.label) }}</th>
+					{% endif %}
+					{% endfor %}
+				</tr>
+			</thead>
+			<tbody>
+				{% for d in data %}
+				{% if d.row_type in ("title1", "title2", "title3") %}
+					{{ chantier_title(d, doc.print_chantier_sections[d.name]) }}
+				{% elif d.row_type == "text" %}
+					{{ chantier_comment(d) }}
+				{% else %}
+					{% if d.title or d.print_title %}
+					<tr>
+						{# <td class="table-sr"></td> #}
+						<td class="bold print-title" colspan="{{ data|length }}" {{ fieldmeta(df) }}>{{ d.title or d.print_title or "" }}</td>
+					</tr>
+					{% endif %}
+					<tr>
+						{# <td class="table-sr">{{ d.idx }}</td> #}
+						{% for tdf in visible_columns %}
+						{% if not print_settings.compact_item_print or tdf.fieldname in doc.flags.compact_item_fields %}
+							<td class="{{ get_align_class(tdf) }}" {{ fieldmeta(df) }}>
+							{% if doc.child_print_templates %}
+								{%- set child_templates = doc.child_print_templates.get(df.fieldname) %}
+								<div class="value">{{ print_value(tdf, d, doc, visible_columns, child_templates) }}</div></td>
+							{% else %}
+								<div class="value">{{ print_value(tdf, d, doc, visible_columns) }}</div></td>
+							{% endif %}
+						{% endif %}
+						{% endfor %}
+					</tr>
+				{% endif %}
+
+				{% if d.name in doc.print_chantier_section_ends %}
+					{% for section_name in doc.print_chantier_section_ends[d.name] %}
+						{{ chantier_section_end(d, doc.print_chantier_sections[section_name], visible_columns) }}
+					{% endfor %}
+				{% endif %}
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{%- endif -%}
+
+<style>
+.chantier-section-title {
+	border-bottom: 2px solid hsl(210, 100%, 45%);
+}
+.chantier-section-end td {
+	background-color: hsla(210, 100%, 45%, 0.1);
+	padding-top: 2px !important;
+	padding-bottom: 2px !important;
+}
+.chantier-section-end td strong {
+	color: hsl(210, 100%, 45%);
+}
+.chantier-counter {
+	color: hsl(210, 100%, 45%);
+}
+.chantier-section-start td h1 {
+	font-weight: 900;
+	margin: 0;
+}
+.chantier-section-start td h2 {
+	font-weight: 800;
+	margin: 0;
+}
+.chantier-section-start td h3 {
+	font-weight: 700;
+	margin: 0;
+}
+</style>
