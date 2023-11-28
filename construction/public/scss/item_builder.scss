@@ -5,3 +5,52 @@
 .item-table-footer {
 	margin-top: 2rem;
 }
+
+
+// Counter
+.item-builder-table,
+.item-builder-tree {
+	counter-reset: chantierheading1 0 chantierheading2 0 chantierheading3 0;
+}
+
+.chantier-heading-1 {
+	counter-increment: chantierheading1 1;
+	counter-reset: chantierheading2 0 chantierheading3 0;
+}
+.chantier-heading-2 {
+	counter-increment: chantierheading2 1;
+	counter-reset: chantierheading3 0;
+}
+.chantier-heading-3 {
+	counter-increment: chantierheading3 1;
+}
+
+.chantier-heading-1 .chantier-counter::before {
+	content: counter(chantierheading1, decimal) '. ';
+}
+.chantier-heading-2 .chantier-counter::before {
+	content: counter(chantierheading1, decimal) '.' counter(chantierheading2, decimal) '. ';
+}
+.chantier-heading-3 .chantier-counter::before {
+	content: counter(chantierheading1, decimal) '.' counter(chantierheading2, decimal) '.' counter(chantierheading3, decimal) '. ';
+}
+
+.chantier-counter {
+	position: relative;
+	cursor: pointer;
+
+	&::before {
+		opacity: 0.5;
+	}
+
+	&:hover::before {
+		opacity: 1;
+		color: var(--primary);
+	}
+
+	select {
+		position: absolute;
+		inset: 0;
+		opacity: 0;
+	}
+}

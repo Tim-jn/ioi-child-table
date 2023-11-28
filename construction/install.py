@@ -7,6 +7,10 @@ def after_install():
 	add_custom_fields()
 
 
+def after_migrate():
+	add_custom_fields()
+
+
 def add_custom_fields():
 	click.secho("* Adding Construction Custom Fields")
 	custom_fields = get_custom_fields()
@@ -16,30 +20,33 @@ def add_custom_fields():
 		frappe.clear_cache(doctype=dt)
 
 
-def get_custom_fields():
+def get_custom_fields_for_transaction_doctype(dt: str):
 	return {
-		"Quotation": [
+		dt: [
 			{
 				"fieldname": "construction_tab",
 				"fieldtype": "Tab Break",
 				"label": "Chantier",
 				"insert_after": "connections_tab",
+				"print_hide": 1,
 			},
 			{
 				"fieldname": "item_builder_html",
 				"fieldtype": "HTML",
 				"label": "Item Builder",
 				"insert_after": "construction_tab",
+				"print_hide": 1,
 			},
 		],
-		"Quotation Item": [
+		dt + " Item": [
 			{
 				"fieldname": "row_type",
 				"fieldtype": "Select",
 				"label": "Row Type",
-				"read_only": 1,
-				"options": "title1\ntitle2\ntitle3\ntext\nitem",
-				"default": "item"
+				# "hidden": 1,
+				"options": "\nitem\ntitle1\ntitle2\ntitle3\ntext",
+				"default": "",
+				"print_hide": 1,
 			},
 			{
 				"fieldname": "dimensions_section",
@@ -60,13 +67,19 @@ def get_custom_fields():
 				"insert_after": "height",
 			},
 			{
-				"fieldname": "subtotal",
+				"fieldname": "with_subtotal",
 				"fieldtype": "Check",
-				"label": "Sub-Total",
+				"label": "With Subtotal",
 				"insert_after": "page_break",
-				"read_only": 1
+				"depends_on": "eval:doc.row_type?.startsWith?.('title')",
+				"print_hide": 1,
 			},
 		],
+	}
+
+def get_custom_fields():
+	return {
+		**get_custom_fields_for_transaction_doctype("Quotation"),
 		"Project": [
 			{
 				"fieldname": "documents_tab",
