@@ -80,6 +80,27 @@ def get_custom_fields():
 				"label": "Documents",
 				"insert_after": "documents_tab",
 			},
+			{
+				"fieldname": "address",
+				"fieldtype": "Link",
+				"options": "Address",
+				"label": "Address",
+				"insert_after": "customer",
+			},
+			{
+				"fieldname": "address_display",
+				"fieldtype": "Small Text",
+				"read_only": 1,
+				"label": "Address Display",
+				"insert_after": "address",
+			},
+			{
+				"fieldname": "geolocation",
+				"fieldtype": "Geolocation",
+				"hidden": 1,
+				"insert_after": "address_display",
+				"fetch_from": "address.map_location"
+			},
 		],
 		"Task": [
 			{

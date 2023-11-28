@@ -31,7 +31,7 @@ app_include_js = "construction.bundle.js"
 doctype_js = {
 	"Quotation" : "public/js/quotation.js",
 	"Project" : "public/js/project.js",
-    "Task" : "public/js/task.js"
+	"Task" : "public/js/task.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
