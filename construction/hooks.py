@@ -29,9 +29,9 @@ app_include_js = "construction.bundle.js"
 
 # include js in doctype views
 doctype_js = {
-	"Quotation": "public/js/quotation.js",
-	"Project": "public/js/project.js",
-	"Task": "public/js/task.js",
+	"Quotation" : "public/js/quotation.js",
+	"Project" : "public/js/project.js",
+	"Task" : "public/js/task.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
