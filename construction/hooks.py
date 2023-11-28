@@ -4,7 +4,7 @@ app_publisher = "Dokos SAS"
 app_description = "Dokos application for the construction industry"
 app_email = "hello@dokos.io"
 app_license = "agpl-3.0"
-# required_apps = []
+required_apps = ["dokos/dokos"]
 
 # Includes in <head>
 # ------------------
@@ -73,6 +73,7 @@ doctype_js = {
 
 # before_install = "construction.install.before_install"
 after_install = "construction.install.after_install"
+after_migrate = "construction.install.after_migrate"
 
 # Uninstallation
 # ------------
