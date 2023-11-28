@@ -16,10 +16,10 @@ construction.item_builder = class ItemBuilder {
 		this.$header = $(`<div class="item-builder-header d-flex flex-row-reverse">
 			<button class="btn btn-default">${frappe.utils.icon('list', 'sm')}</button>
 		</div>`).appendTo(this.$wrapper)
-		this.$tree_wrapper = $(`<div id="item-builder-tree"><div class="tree"></div></div>`).appendTo(this.$wrapper)
+		this.$tree_wrapper = $(`<div class="item-builder-tree"><div class="tree"></div></div>`).appendTo(this.$wrapper)
 		console.log(this.$tree_wrapper)
 
-		this.$table_wrapper = $(`<div id="item-builder-table"><div class="tabulator-table"></div></div>`).appendTo(this.$wrapper)
+		this.$table_wrapper = $(`<div class="item-builder-table"><div class="tabulator-table"></div></div>`).appendTo(this.$wrapper)
 
 		this.make()
 
