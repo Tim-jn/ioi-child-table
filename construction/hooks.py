@@ -130,6 +130,9 @@ after_migrate = "construction.install.after_migrate"
 doc_events = {
 	"Quotation": {
 		"before_print": "construction.construction.print.before_print",
+	},
+	"Project": {
+		"on_update": "construction.utils.projects.on_update"
 	}
 }
 

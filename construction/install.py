@@ -1,5 +1,4 @@
 import click
-import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 
@@ -110,6 +109,7 @@ def get_custom_fields():
 				"options": "Address",
 				"label": "Address",
 				"insert_after": "customer",
+				"mandatory_depends_on": "tax_category"
 			},
 			{
 				"fieldname": "address_display",
@@ -124,6 +124,13 @@ def get_custom_fields():
 				"hidden": 1,
 				"insert_after": "address_display",
 				"fetch_from": "address.map_location",
+			},
+			{
+				"fieldname": "tax_category",
+				"fieldtype": "Link",
+				"insert_after": "company",
+				"options": "Tax Category",
+				"label": "Tax Category"
 			},
 		],
 		"Task": [
