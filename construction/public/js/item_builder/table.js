@@ -359,7 +359,7 @@ export default class ItemBuilderTable {
 		const input = document.createElement("input");
 		element.append(" ", input);
 		input.classList.add("btn-reset");
-		input.style.width = "70vw";
+		input.style.width = "40vw";
 		input.style.font = "inherit";
 
 		const KEY = "item_name";
@@ -371,7 +371,6 @@ export default class ItemBuilderTable {
 
 	rowFormatterForText(doc, row) {
 		const wrapper = this._buildWrapperInRow(row);
-		wrapper.style.maxWidth = "70vw";
 		const rowDt = this.form_wrapper.row_doctype;
 		const rowDf = frappe.meta.get_docfield(rowDt, "description");
 		const control = frappe.ui.form.make_control({
@@ -400,7 +399,7 @@ export default class ItemBuilderTable {
 		}
 		rowEl.appendChild(wrapper);
 		wrapper.classList.add("tabulator-cell");
-		wrapper.style.width = "70vw";
+		wrapper.style.width = "40vw";
 		return wrapper;
 	}
 
