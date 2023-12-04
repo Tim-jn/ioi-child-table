@@ -1,7 +1,7 @@
 import click
-
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
 
 def after_install():
 	add_custom_fields()
@@ -15,9 +15,6 @@ def add_custom_fields():
 	click.secho("* Adding Construction Custom Fields")
 	custom_fields = get_custom_fields()
 	create_custom_fields(custom_fields)
-
-	for dt in custom_fields:
-		frappe.clear_cache(doctype=dt)
 
 
 def get_custom_fields_for_transaction_doctype(dt: str):

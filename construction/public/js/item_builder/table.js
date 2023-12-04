@@ -54,9 +54,9 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 	});
 
 	return el;
-};
+}
 
-function frappeTabulatorCellFormatter (cell, formatterParams, onRendered) {
+function frappeTabulatorCellFormatter(cell, formatterParams, onRendered) {
 	const value = cell.getValue();
 	const doc = cell.getRow().getData();
 	const html = frappe.format(value, formatterParams.df, null, doc);
@@ -67,7 +67,7 @@ function frappeTabulatorCellFormatter (cell, formatterParams, onRendered) {
 		el.type = "span";
 	});
 	return parsed.body.innerHTML;
-};
+}
 
 
 class ItemBuilderForm {

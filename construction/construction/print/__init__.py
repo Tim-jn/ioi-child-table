@@ -72,15 +72,3 @@ def before_print(doc, method, settings, *args, **kwargs):
 	# Compute subtotals for each section
 	doc.print_chantier_sections, doc.print_chantier_section_ends = chantier_prepare_sections(doc)
 	doc.print_chantier_section_columns = item_sum_keys
-
-	print()
-	print()
-	print()
-	print()
-	print("SEC", doc.print_chantier_sections)
-	print("END", doc.print_chantier_section_ends)
-	print()
-	print()
-	print()
-	print()
-	print()
