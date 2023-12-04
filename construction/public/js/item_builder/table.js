@@ -301,6 +301,14 @@ export default class ItemBuilderTable {
 		}
 
 		this.tabulator = new Tabulator(this.$table_wrapper.find(".tabulator-table")[0], tabulator_options);
+
+		let lastScrollTop = 0;
+		this.tabulator.on("renderStarted", () => {
+			lastScrollTop = window.scrollY || lastScrollTop;
+		});
+		this.tabulator.on("renderComplete", () => {
+			window.scrollTo(0, lastScrollTop);
+		});
 	}
 
 	rowFormatter(row) {
@@ -444,6 +452,7 @@ export default class ItemBuilderTable {
 
 		this.$new_item_button.on("click", () => {
 			this.form_wrapper.append_row({});
+			window.scrollTo(0, document.body.scrollHeight);
 		})
 
 		this.$new_title_button.on("click", () => {
@@ -457,10 +466,12 @@ export default class ItemBuilderTable {
 			level = Math.min(level, 3);
 
 			this.append_text_row_no_dialog("title" + level, __("Heading " + level));
+			window.scrollTo(0, document.body.scrollHeight);
 		})
 
 		this.$new_text_button.on("click", () => {
 			this.append_text_row_no_dialog("text", "");
+			window.scrollTo(0, document.body.scrollHeight);
 		})
 
 		this.$delete_row_button.on("click", () => {
