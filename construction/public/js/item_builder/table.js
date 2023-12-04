@@ -46,7 +46,7 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 	});
 
 	// Call cancel() on blur
-	control.$input.on("blur", () => {
+	$(control.$input || control.input || control.input_area).on("focusout", () => {
 		cancel();
 	});
 
