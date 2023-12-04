@@ -17,7 +17,8 @@
 {% macro chantier_section_end(d, section, visible_columns) %}
 <tr class="chantier-section-end">
 	{% set tdfs = visible_columns | selectattr("fieldname", "in", doc.print_chantier_section_columns) | list %}
-	<td colspan="{{ (data|length) + with_numbers - 3 - (tdfs|length) }}">
+	{% set n_cols = with_numbers + (visible_columns | length) - ((print_settings.compact_item_print and doc.flags.compact_item_fields or []) | length) %}
+	<td colspan="{{ n_cols - (tdfs | length) }}">
 		<b>{{ _("Subtotal") }} ({{ section.counter }} {{ section.title }})</b>
 	</td>
 
@@ -57,7 +58,7 @@
 					{{ chantier_title(d, doc.print_chantier_sections[d.name]) }}
 				{% elif d.row_type == "text" %}
 					{{ chantier_comment(d) }}
-				{% else %}
+				{% elif d.row_print_style != "Hide Row" %}
 					{% if d.title or d.print_title %}
 					<tr>
 						{# <td class="table-sr"></td> #}
@@ -66,7 +67,7 @@
 					{% endif %}
 					<tr>
 						{# <td class="table-sr">{{ d.idx }}</td> #}
-						{% for tdf in visible_columns %}
+						{% for tdf in visible_columns if (not (tdf.fieldtype == "Currency" and d.row_print_style == "Hide Price")) %}
 						{% if not print_settings.compact_item_print or tdf.fieldname in doc.flags.compact_item_fields %}
 							<td class="{{ get_align_class(tdf) }}" {{ fieldmeta(df) }}>
 							{% if doc.child_print_templates %}

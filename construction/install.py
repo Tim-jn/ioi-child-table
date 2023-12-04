@@ -35,14 +35,35 @@ def get_custom_fields_for_transaction_doctype(dt: str):
 				"print_hide": 1,
 			},
 		],
-		dt + " Item": [
+		dt
+		+ " Item": [
 			{
 				"fieldname": "row_type",
 				"fieldtype": "Select",
 				"label": "Row Type",
-				# "hidden": 1,
-				"options": "\nitem\ntitle1\ntitle2\ntitle3\ntext",
+				"read_only": 0,
+				"hidden": 0,
 				"default": "",
+				"options": "\nitem\ntitle1\ntitle2\ntitle3\ntext",
+				"print_hide": 1,
+				"insert_after": "item_name",
+			},
+			{
+				"fieldname": "row_print_style",
+				"fieldtype": "Select",
+				"label": "Display",
+				"insert_after": "row_type",
+				"default": "",
+				"options": "\nHide Price\nHide Row",
+				"print_hide": 1,
+			},
+			{
+				"fieldname": "with_subtotal",
+				"fieldtype": "Check",
+				"label": "With Subtotal",
+				"default": 1,
+				"insert_after": "row_print_style",
+				"depends_on": "eval:doc.row_type?.startsWith?.('title')",
 				"print_hide": 1,
 			},
 			{
@@ -63,16 +84,9 @@ def get_custom_fields_for_transaction_doctype(dt: str):
 				"label": "Width",
 				"insert_after": "height",
 			},
-			{
-				"fieldname": "with_subtotal",
-				"fieldtype": "Check",
-				"label": "With Subtotal",
-				"insert_after": "page_break",
-				"depends_on": "eval:doc.row_type?.startsWith?.('title')",
-				"print_hide": 1,
-			},
 		],
 	}
+
 
 def get_custom_fields():
 	return {
@@ -109,7 +123,7 @@ def get_custom_fields():
 				"fieldtype": "Geolocation",
 				"hidden": 1,
 				"insert_after": "address_display",
-				"fetch_from": "address.map_location"
+				"fetch_from": "address.map_location",
 			},
 		],
 		"Task": [

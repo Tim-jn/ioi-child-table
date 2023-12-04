@@ -12,6 +12,7 @@ const TABLE_COLUMNS = [
 	"cost_price",
 	"rate",
 	"amount",
+	"row_print_style",
 ];
 
 function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorParams) {
