@@ -47,6 +47,7 @@ def get_custom_fields_for_transaction_doctype(dt: str):
 				"options": "\nitem\ntitle1\ntitle2\ntitle3\ntext",
 				"print_hide": 1,
 				"insert_after": "item_name",
+				"translatable": 0,
 			},
 			{
 				"fieldname": "row_print_style",
@@ -56,6 +57,7 @@ def get_custom_fields_for_transaction_doctype(dt: str):
 				"default": "",
 				"options": "\nHide Price\nHide Row",
 				"print_hide": 1,
+				"translatable": 0,
 			},
 			{
 				"fieldname": "with_subtotal",
@@ -65,25 +67,7 @@ def get_custom_fields_for_transaction_doctype(dt: str):
 				"insert_after": "row_print_style",
 				"depends_on": "eval:doc.row_type?.startsWith?.('title')",
 				"print_hide": 1,
-			},
-			{
-				"fieldname": "dimensions_section",
-				"fieldtype": "Section Break",
-				"label": "Dimensions",
-				"insert_after": "cost_price",
-			},
-			{
-				"fieldname": "height",
-				"fieldtype": "Int",
-				"label": "Height",
-				"insert_after": "dimensions_section",
-			},
-			{
-				"fieldname": "width",
-				"fieldtype": "Int",
-				"label": "Width",
-				"insert_after": "height",
-			},
+			}
 		],
 	}
 
@@ -117,6 +101,7 @@ def get_custom_fields():
 				"read_only": 1,
 				"label": "Address Display",
 				"insert_after": "address",
+				"translatable": 0,
 			},
 			{
 				"fieldname": "geolocation",
@@ -124,6 +109,7 @@ def get_custom_fields():
 				"hidden": 1,
 				"insert_after": "address_display",
 				"fetch_from": "address.map_location",
+				"translatable": 0,
 			},
 		],
 		"Task": [
