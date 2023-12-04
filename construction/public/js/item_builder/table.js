@@ -127,12 +127,14 @@ class ItemBuilderForm {
 				field: "row_type",
 				editor: false,
 				visible: false,
+				headerSort: false,
 			},
 			{
 				title: __("Row Name"),
 				field: "name",
 				editor: false,
 				visible: false,
+				headerSort: false,
 			},
 		];
 
@@ -142,6 +144,7 @@ class ItemBuilderForm {
 				title: __(df.label) || "",
 				field: df.fieldname,
 				editor: true,
+				headerSort: false,
 			}
 
 			if (df.fieldname == "description") {
