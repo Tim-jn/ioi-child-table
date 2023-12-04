@@ -83,7 +83,8 @@ class ItemBuilderForm {
 	}
 
 	get_rows() {
-		return JSON.parse(JSON.stringify(this.frm.doc.items));
+		return this.frm.doc.items;
+		// return JSON.parse(JSON.stringify(this.frm.doc.items));
 	}
 
 	get_columns() {
@@ -121,6 +122,43 @@ class ItemBuilderForm {
 				headerSort: false,
 				cellClick(e, cell) {
 					cell.getRow().toggleSelect()
+				},
+			},
+			{
+				title: __("Edit"),
+				field: "edit_btn",
+				editor: false,
+				headerSort: false,
+				formatter: (cell, formatterParams, onRendered) => {
+					const click = () => {
+						const row = cell.getRow();
+						const rowData = row.getData();
+						const doc = this.frm.doc.items.find(x => x.name === rowData.name);
+
+						const dialog = new frappe.ui.Dialog({
+							size: "large",
+							fields: frappe.get_meta("Quotation Item").fields,
+							frm: this.frm,
+							grid: this.frm.grids[0].grid,
+							title: __("Edit"),
+							primary_action_label: __("Close"),
+							primary_action: () => {
+								dialog.hide();
+							},
+							onhide: () => {
+								this.open_form = null;
+							},
+						});
+						dialog.refresh(doc);
+						dialog.show();
+						this.open_form = dialog;
+					}
+					const button = document.createElement("button");
+					button.classList.add("btn-reset");
+					button.innerHTML = frappe.utils.icon("edit", "sm");
+					button.ariaLabel = __("Edit");
+					button.addEventListener("click", click);
+					return button;
 				},
 			},
 			{
@@ -283,8 +321,15 @@ export default class ItemBuilderTable {
 
 	bind_form() {
 		this.form_wrapper.on_update(() => {
-			console.log("on_update");
 			this.tabulator.replaceData(this.form_wrapper.get_rows());
+
+			if (this.form_wrapper.open_form) {
+				const dialog = this.form_wrapper.open_form;
+				const item = this.frm.doc.items.find(x => x.name === dialog.doc.name)
+				if (item) {
+					dialog.refresh(item);
+				}
+			}
 		});
 	}
 
