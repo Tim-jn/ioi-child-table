@@ -310,28 +310,57 @@ export default class ItemBuilderTable {
 		}
 	}
 
+	makeCheckbox(doc, fieldname, label) {
+		const checkboxWrapper = document.createElement("label");
+		checkboxWrapper.classList.add("m-0");
+		checkboxWrapper.innerHTML = `<div class="switch"><input type="checkbox"><span class="slider round"></span></div>`;
+		const checkbox = checkboxWrapper.querySelector("input");
+		checkbox.type = "checkbox";
+		checkbox.checked = doc[fieldname];
+		checkbox.addEventListener("change", (e) => {
+			this.form_wrapper.update_row_value(doc, fieldname, e.target.checked);
+		});
+		checkboxWrapper.append("\xa0", label);
+		return checkboxWrapper;
+	}
+
+	/* makeSelect(doc, df) {
+		const selectWrapper = document.createElement("label");
+		selectWrapper.classList.add("m-0");
+		const control = frappe.ui.form.make_control({
+			df: {
+				...df,
+				input_class: "input-xs",
+				onchange: () => {
+					const value = control.get_value();
+					this.form_wrapper.update_row_value(doc, df.fieldname, value);
+				},
+			},
+			parent: selectWrapper,
+			render_input: true,
+			only_input: true,
+			value: doc[df.fieldname],
+		});
+		// selectWrapper.prepend(df.label, "\xa0");
+		return selectWrapper;
+	} */
+
 	rowFormatterForTitle(doc, row) {
 		const wrapper = this._buildWrapperInRow(row);
 
 		// Parse title level
 		const level = parseInt(doc.row_type.replace("title", ""));
 
-		const element = document.createElement(`h${level}`);
+		const element = document.createElement(`h${level + 1}`);
 		wrapper.appendChild(element);
 		element.classList.add("m-0", "chantier-heading", "chantier-heading-" + level);
 
 		// Add checkbox
-		const checkboxWrapper = document.createElement("label");
-		checkboxWrapper.classList.add("m-0");
-		checkboxWrapper.innerHTML = `<div class="switch"><input type="checkbox"><span class="slider round"></span></div>`;
-		const checkbox = checkboxWrapper.querySelector("input");
-		checkbox.type = "checkbox";
-		checkbox.checked = doc.with_subtotal;
-		checkbox.addEventListener("change", (e) => {
-			this.form_wrapper.update_row_value(doc, "with_subtotal", e.target.checked);
-		});
-		checkboxWrapper.append("\xa0", __("Compute Subtotal"));
-		wrapper.appendChild(checkboxWrapper);
+		wrapper.appendChild(this.makeCheckbox(doc, "with_subtotal", __("Compute Subtotal")));
+		// wrapper.appendChild(this.makeSelect(doc, {
+		// 	...frappe.get_meta(this.form_wrapper.row_doctype).fields.find(x => x.fieldname === "row_print_style"),
+		// 	label: __("Print Style"),
+		// }));
 
 		const counter = document.createElement("label");
 		element.appendChild(counter);
