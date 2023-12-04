@@ -268,9 +268,9 @@ export default class ItemBuilderTable {
 		this.build_table()
 
 		this.$table_footer = $(`<div class="item-table-footer d-flex flex-row-reverse">
-			<button class="btn btn-default new-text">${__("New comment")} ${frappe.utils.icon('add', 'sm')}</button>
-			<button class="btn btn-default new-title mr-2">${__("New title")} ${frappe.utils.icon('add', 'sm')}</button>
-			<button class="btn btn-primary new-item mr-2">${__("New item")} ${frappe.utils.icon('add', 'sm')}</button>
+			<button class="btn btn-default new-text">${__("Add Comment", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
+			<button class="btn btn-default new-title mr-2">${__("Add Title", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
+			<button class="btn btn-primary new-item mr-2">${__("Add Item", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
 			<button class="btn btn-danger delete-row mr-2" style="display: none;">${__("Delete")} ${frappe.utils.icon('remove', 'sm')}</button>
 		</div>`).appendTo(this.$table_wrapper)
 
