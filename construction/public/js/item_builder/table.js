@@ -149,7 +149,10 @@ class ItemBuilderForm {
 			}
 
 			if (df.fieldname == "description") {
-				col.editor = false;
+				col.editor = frappeTabulatorCellEditor;
+				col.editorParams = {
+					df: { ...df, theme: "bubble" },
+				};
 				col.formatter = "html";
 			} else {
 				if (!df.read_only) {
