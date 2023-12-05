@@ -31,7 +31,9 @@ app_include_js = "construction.bundle.js"
 doctype_js = {
 	"Quotation" : "public/js/quotation.js",
 	"Project" : "public/js/project.js",
-	"Task" : "public/js/task.js"
+	"Task" : "public/js/task.js",
+	"Sales Invoice": "public/js/sales_invoice.js",
+	"Sales Order": "public/js/sales_order.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -119,9 +121,9 @@ after_migrate = "construction.install.after_migrate"
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+	"Sales Invoice": "construction.utils.sales_invoices.ConstructionSalesInvoice"
+}
 
 # Document Events
 # ---------------
@@ -133,7 +135,7 @@ doc_events = {
 	},
 	"Project": {
 		"on_update": "construction.utils.projects.on_update"
-	}
+	},
 }
 
 # Scheduled Tasks
