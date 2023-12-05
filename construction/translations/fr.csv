@@ -1,5 +1,6 @@
 Add Comment,Ajouter un commentaire,Construction
 Add Heading,Ajouter un titre,Construction
+Add Heading,Ajouter un titre,
 Add Item,Ajouter un article,Construction
 Add Title,Ajouter un titre,Construction
 Compute Subtotal,Calculer le sous-total,
@@ -8,7 +9,10 @@ Hide Price,Masquer le prix,
 Hide Prices in Section,Masquer prix de la section,
 Hide Row,Masquer la ligne,
 Hide Rows in Section,Masquer lignes de la section,
+Is Progress Invoice,Est une facture de situation,
 No documents to show,Aucun document à afficher,
 Print Style,Style d'impression,Construction
+Progress Invoice,Facture de situation,
+Progress Percentage,Pourcentage d'avancement,
 Row Type,Type de ligne,
 With Subtotal,Avec sous-total,
