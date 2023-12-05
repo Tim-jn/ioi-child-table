@@ -34,6 +34,7 @@ Hide Rows in Section,Masquer lignes de la section,
 Markup by Project,Récapitulatif de marque par projet,
 Markup on quotation,Marque sur devis,Markup by Project
 Markup on quotation,Marque sur devis,
+Is Progress Invoice,Est une facture de situation,
 No documents to show,Aucun document à afficher,
 Percent Complete,Pourcentage d'avancement,Markup by Project
 Print Style,Style d'impression,Construction
@@ -50,6 +51,8 @@ Quotation Margin,Marge du devis,
 Quotation Markup %,Taux de marque %,
 Quotation Markup by Project,Récapitulatif de marque sur devis par projet,
 Quotation Selling Price,Prix de vente du devis,
+Progress Invoice,Facture de situation,
+Progress Percentage,Pourcentage d'avancement,
 Row Type,Type de ligne,
 Sales Invoice Cost Price,Prix de revient de la facture de vente,
 Sales Invoice Margin %,% de marge de la facture de vente,
