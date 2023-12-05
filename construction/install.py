@@ -191,6 +191,21 @@ def get_custom_fields():
 				"insert_after": "documents_tab",
 			},
 		],
+		"Sales Invoice": [
+			{
+				"fieldname": "is_progress_invoice",
+				"fieldtype": "Check",
+				"label": "Is Progress Invoice",
+				"insert_after": "is_down_payment_invoice",
+			},
+			{
+				"fieldname": "progress_percentage",
+				"fieldtype": "Percent",
+				"label": "Progress Percentage",
+				"insert_after": "is_progress_invoice",
+				"depends_on": "is_progress_invoice",
+			},
+		],
 	}
 
 
