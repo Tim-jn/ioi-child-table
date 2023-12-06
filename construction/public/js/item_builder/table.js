@@ -77,6 +77,46 @@ function frappeTabulatorCellFormatter(cell, formatterParams, onRendered) {
 	return parsed.body.innerHTML;
 }
 
+/** @this {ItemBuilderTable} */
+function formatEditButton(cell, formatterParams, onRendered) {
+	const el = document.createElement("div");
+
+	const click = () => {
+		const row = cell.getRow();
+		const rowData = row.getData();
+		const doc = this.frm.doc.items.find(x => x.name === rowData.name);
+
+		const dialog = new frappe.ui.Dialog({
+			size: "large",
+			fields: frappe.get_meta("Quotation Item").fields,
+			frm: this.frm,
+			grid: this.frm.grids[0].grid,
+			title: __("Edit"),
+			primary_action_label: __("Close"),
+			primary_action: () => {
+				dialog.hide();
+			},
+			onhide: () => {
+				this.open_form = null;
+			},
+		});
+		dialog.refresh(doc);
+		dialog.show();
+		this.open_form = dialog;
+	}
+
+	onRendered(() => {
+		const button = document.createElement("button");
+		button.classList.add("btn-reset");
+		button.innerHTML = frappe.utils.icon("edit", "sm");
+		button.ariaLabel = __("Edit");
+		button.addEventListener("click", click);
+		el.appendChild(button);
+	});
+
+	return el;
+}
+
 
 class ItemBuilderForm {
 	constructor(frm) {
@@ -136,37 +176,7 @@ class ItemBuilderForm {
 				field: "edit_btn",
 				editor: false,
 				headerSort: false,
-				formatter: (cell, formatterParams, onRendered) => {
-					const click = () => {
-						const row = cell.getRow();
-						const rowData = row.getData();
-						const doc = this.frm.doc.items.find(x => x.name === rowData.name);
-
-						const dialog = new frappe.ui.Dialog({
-							size: "large",
-							fields: frappe.get_meta("Quotation Item").fields,
-							frm: this.frm,
-							grid: this.frm.grids[0].grid,
-							title: __("Edit"),
-							primary_action_label: __("Close"),
-							primary_action: () => {
-								dialog.hide();
-							},
-							onhide: () => {
-								this.open_form = null;
-							},
-						});
-						dialog.refresh(doc);
-						dialog.show();
-						this.open_form = dialog;
-					}
-					const button = document.createElement("button");
-					button.classList.add("btn-reset");
-					button.innerHTML = frappe.utils.icon("edit", "sm");
-					button.ariaLabel = __("Edit");
-					button.addEventListener("click", click);
-					return button;
-				},
+				formatter: formatEditButton.bind(this),
 			},
 			{
 				title: __("Row Type"),
@@ -499,11 +509,24 @@ export default class ItemBuilderTable {
 		const wrapper = document.createElement("div");
 		const rowEl = row.getElement();
 		// Remove all children except the first two (drag handle and checkbox)
-		while (rowEl.children.length > 2) {
-			rowEl.removeChild(rowEl.lastChild);
+		for (const child of rowEl.children) {
+			if (child.classList.contains("tabulator-row-handle")) {
+				continue;
+			} else if (child.classList.contains("tabulator-col-resize-handle")) {
+				continue;
+			} else if (child.querySelector(":scope > [type='checkbox']")) {
+				continue;
+			} else if (child.getAttribute("tabulator-field") === "edit_btn") {
+				continue;
+			} else if (child.getAttribute("tabulator-field") === "_text_editor") {
+				// Always remove the old editor
+			}
+			child.style.display = "none";
 		}
 		rowEl.appendChild(wrapper);
 		wrapper.classList.add("tabulator-cell");
+		wrapper.setAttribute("tabulator-field", "_text_editor");
+		wrapper.style.overflow = "visible";
 		wrapper.style.width = "60vw";
 		return wrapper;
 	}
