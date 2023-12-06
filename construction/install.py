@@ -300,3 +300,16 @@ def add_property_setters():
 		validate_fields_for_doctype=False,
 		is_system_generated=True,
 	)
+
+	frappe.make_property_setter(
+		dict(
+			doctype="Sales Invoice",
+			doctype_or_field="DocField",
+			fieldname="update_stock",
+			property="hidden",
+			value=1,
+			property_type="Check",
+		),
+		validate_fields_for_doctype=False,
+		is_system_generated=True,
+	)
