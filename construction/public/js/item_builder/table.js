@@ -740,7 +740,7 @@ export default class ItemBuilderTable {
 					"mandatory_depends_on": "eval:doc.row_type == 'text'",
 				},
 			],
-			primary_action: () => {
+			primary_action: async () => {
 				const values = dialog.get_values()
 				const row_type = values.row_type;
 
@@ -769,7 +769,7 @@ export default class ItemBuilderTable {
 					"row_type": row_type,
 					"item_name": item_name,
 					"qty": 1,
-					"uom": "Unité",
+					"uom": await this.get_default_stock_uom() || __("Unit"),
 					"rate": 0,
 					"description": content,
 				})
