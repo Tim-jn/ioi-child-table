@@ -539,8 +539,7 @@ export default class ItemBuilderTable {
 
 		this.$new_item_button.on("click", () => {
 			this.form_wrapper.append_row({});
-			window.scrollTo(0, document.body.scrollHeight);
-		})
+		});
 
 		this.$new_title_button.on("click", () => {
 			let level = 1;
@@ -553,13 +552,11 @@ export default class ItemBuilderTable {
 			level = Math.min(level, 3);
 
 			this.append_text_row_no_dialog("title" + level, __("Heading " + level));
-			window.scrollTo(0, document.body.scrollHeight);
-		})
+		});
 
 		this.$new_text_button.on("click", () => {
 			this.append_text_row_no_dialog("text", "");
-			window.scrollTo(0, document.body.scrollHeight);
-		})
+		});
 
 		this.$delete_row_button.on("click", () => {
 			const selected_rows = this.tabulator.getSelectedRows()
@@ -599,6 +596,10 @@ export default class ItemBuilderTable {
 			const name = row.getData().name;
 			this.form_wrapper.move_rows([name], newIndex);
 		});
+	}
+
+	scrollToBottom() {
+		this.$table_footer.get(0).scrollIntoView({ block: "end" });
 	}
 
 	async append_text_row_no_dialog(row_type, text = "") {
