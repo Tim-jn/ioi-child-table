@@ -43,9 +43,18 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 		value: initialValue,
 	});
 
+	if (editorParams.df.fieldtype === "Text Editor") {
+		control.inside_change_event = true; // force ignore onchange event
+	}
+
 	// Call cancel() on blur
 	$(control.$input || control.input || control.input_area).on("focusout", () => {
-		cancel();
+		const value = control.get_value();
+		if (value !== updatedValue) {
+			success(value);
+		} else {
+			cancel();
+		}
 	});
 
 	onRendered(() => {
