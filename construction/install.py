@@ -20,10 +20,9 @@ def get_custom_fields_for_transaction_doctype(dt: str):
 	return {
 		dt: [
 			{
-				"fieldname": "construction_tab",
-				"fieldtype": "Tab Break",
-				"label": "Chantier",
-				"insert_after": "connections_tab",
+				"fieldname": "construction_items_section",
+				"fieldtype": "Section Break",
+				"insert_after": "items_section",
 				"print_hide": 1,
 			},
 			{

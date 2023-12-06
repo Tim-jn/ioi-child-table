@@ -11,6 +11,40 @@
 .item-builder-table,
 .item-builder-tree {
 	counter-reset: chantierheading1 0 chantierheading2 0 chantierheading3 0;
+
+	// TODO: Commonify style in Dodock
+	.tabulator-table {
+		border: 1px solid var(--table-border-color);
+		border-radius: var(--border-radius-md);
+		color: var(--text-color);
+	}
+
+	.tabulator-row-even {
+		background-color: #fff;
+	}
+
+	input:checked + .slider {
+		background-color: var(--blue-400);
+	}
+
+	.tabulator-header {
+		border-bottom: 1px solid var(--table-border-color);
+		border-top: none;
+
+		.tabulator-col {
+			color: var(--text-muted);
+			background-color: var(--subtle-fg);
+			font-size: var(--text-sm);
+			font-weight: var(--weight-regular);
+			letter-spacing: 0.02em;
+		}
+	}
+}
+
+.chantier-heading {
+	.btn-reset {
+		color: var(--text-color);
+	}
 }
 
 .chantier-heading-1 {

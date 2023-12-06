@@ -1,15 +1,13 @@
 import { TabulatorFull as Tabulator } from "tabulator-tables";
 
 const TABLE_COLUMNS = [
-	"qty",
 	"item_code",
 	"item_name",
+	"qty",
 	"description",
-	// "height",
-	// "width",
 	"uom",
-	"unit_cost_price",
-	"cost_price",
+	"last_purchase_rate",
+	"gross_profit_percentage",
 	"rate",
 	"amount",
 	"row_print_style",
@@ -125,7 +123,7 @@ class ItemBuilderForm {
 				},
 			},
 			{
-				title: __("Edit"),
+				title: "",
 				field: "edit_btn",
 				editor: false,
 				headerSort: false,
@@ -370,7 +368,7 @@ export default class ItemBuilderTable {
 	makeCheckbox(doc, fieldname, label) {
 		const checkboxWrapper = document.createElement("label");
 		checkboxWrapper.classList.add("m-0");
-		checkboxWrapper.innerHTML = `<div class="switch"><input type="checkbox"><span class="slider round"></span></div>`;
+		checkboxWrapper.innerHTML = `<div class="switch text-muted"><input type="checkbox"><span class="slider round"></span></div>`;
 		const checkbox = checkboxWrapper.querySelector("input");
 		checkbox.type = "checkbox";
 		checkbox.checked = doc[fieldname];
@@ -408,12 +406,15 @@ export default class ItemBuilderTable {
 		// Parse title level
 		const level = parseInt(doc.row_type.replace("title", ""));
 
+		const header_wrapper = document.createElement("div");
+		//header_wrapper.classList.add("d-flex");
 		const element = document.createElement(`h${level + 1}`);
-		wrapper.appendChild(element);
+		header_wrapper.appendChild(element);
+		wrapper.appendChild(header_wrapper);
 		element.classList.add("m-0", "chantier-heading", "chantier-heading-" + level);
 
 		// Add checkbox
-		wrapper.appendChild(this.makeCheckbox(doc, "with_subtotal", __("Compute Subtotal")));
+		header_wrapper.appendChild(this.makeCheckbox(doc, "with_subtotal", __("Compute Subtotal")));
 		// wrapper.appendChild(this.makeSelect(doc, {
 		// 	...frappe.get_meta(this.form_wrapper.row_doctype).fields.find(x => x.fieldname === "row_print_style"),
 		// 	label: __("Print Style"),
@@ -445,7 +446,7 @@ export default class ItemBuilderTable {
 		const input = document.createElement("input");
 		element.append(" ", input);
 		input.classList.add("btn-reset");
-		input.style.width = "40vw";
+		input.style.width = "60vw";
 		input.style.font = "inherit";
 
 		const KEY = "item_name";
@@ -485,7 +486,7 @@ export default class ItemBuilderTable {
 		}
 		rowEl.appendChild(wrapper);
 		wrapper.classList.add("tabulator-cell");
-		wrapper.style.width = "40vw";
+		wrapper.style.width = "60vw";
 		return wrapper;
 	}
 
