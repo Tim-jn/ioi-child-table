@@ -36,6 +36,13 @@
 			letter-spacing: 0.02em;
 		}
 	}
+
+	// Add space below to show the awesomplete of Link controls. Looks bad,
+	// but not many options, because of the impossibility of having both
+	// overflow-x: scroll and overflow-y: visible.
+	.tabulator-tableholder:focus-within {
+		margin-bottom: 300px;
+	}
 }
 
 .chantier-heading {
