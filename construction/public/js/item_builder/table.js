@@ -355,12 +355,26 @@ export default class ItemBuilderTable {
 
 		this.build_table()
 
-		this.$table_footer = $(`<div class="item-table-footer d-flex flex-row-reverse">
-			<button class="btn btn-default new-text">${__("Add Comment", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
-			<button class="btn btn-default new-title mr-2">${__("Add Title", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
-			<button class="btn btn-primary new-item mr-2">${__("Add Item", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
-			<button class="btn btn-danger delete-row mr-2" style="display: none;">${__("Delete")} ${frappe.utils.icon('remove', 'sm')}</button>
+		this.$table_footer = $(`<div class="item-table-footer d-flex flex-row flex-shrink-0 align-items-start">
+			<div class="mr-auto text-muted small item-table-footer-help"></div>
+			<div class="d-flex flex-row flex-shrink-0 align-items-start">
+				<button class="btn btn-xs btn-danger delete-row mr-2" style="display: none;">${__("Delete")} ${frappe.utils.icon('remove', 'sm')}</button>
+				<div class="btn-group flex-shrink-0 align-items-start">
+					<button class="btn btn-xs btn-primary new-item">${__("Add Item", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
+					<button class="btn btn-xs btn-default new-title">${__("Title", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
+					<button class="btn btn-xs btn-default new-text">${__("Comment", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
+				</div>
+			</div>
 		</div>`).appendTo(this.$table_wrapper)
+
+		const help = this.$table_footer.find(".item-table-footer-help");
+		help.html([
+			__("Drag and drop rows to reorder them."),
+			__("Click on a row to select it."),
+			__("Click on the <b>Delete</b> button to delete the selected rows."),
+			__("Click on the <b>Add Item</b> button to add a new item."),
+			__("Scroll horizontally using the mouse wheel while pressing ⇧."),
+		].join(" "));
 
 		this.bind_events()
 		this.bind_form()
