@@ -1,4 +1,5 @@
 import click
+import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 
@@ -12,8 +13,25 @@ def after_migrate():
 
 def add_custom_fields():
 	click.secho("* Adding Construction Custom Fields")
+	remove_custom_fields()
 	custom_fields = get_custom_fields()
 	create_custom_fields(custom_fields)
+
+
+def remove_custom_fields():
+	to_remove = set()
+	for dt, fields in get_custom_fields().items():
+		for field in fields:
+			to_remove.add((dt, field["fieldname"]))
+
+	to_remove.add(("Quotation", "construction_tab"))
+	to_remove.add(("Quotation Item", "subtotal"))
+	to_remove.add(("Quotation Item", "dimensions_section"))
+	to_remove.add(("Quotation Item", "height"))
+	to_remove.add(("Quotation Item", "width"))
+
+	for dt, fieldname in to_remove:
+		frappe.delete_doc("Custom Field", f"{dt}-{fieldname}", ignore_missing=True)
 
 
 def get_custom_fields_for_transaction_doctype(dt: str):
@@ -29,7 +47,7 @@ def get_custom_fields_for_transaction_doctype(dt: str):
 				"fieldname": "item_builder_html",
 				"fieldtype": "HTML",
 				"label": "Item Builder",
-				"insert_after": "construction_tab",
+				"insert_after": "construction_items_section",
 				"print_hide": 1,
 			},
 		],
@@ -65,7 +83,7 @@ def get_custom_fields_for_transaction_doctype(dt: str):
 				"insert_after": "row_print_style",
 				"depends_on": "eval:doc.row_type?.startsWith?.('title')",
 				"print_hide": 1,
-			}
+			},
 		],
 	}
 
@@ -92,7 +110,7 @@ def get_custom_fields():
 				"options": "Address",
 				"label": "Address",
 				"insert_after": "customer",
-				"mandatory_depends_on": "tax_category"
+				"mandatory_depends_on": "tax_category",
 			},
 			{
 				"fieldname": "address_display",
@@ -115,7 +133,7 @@ def get_custom_fields():
 				"fieldtype": "Link",
 				"insert_after": "company",
 				"options": "Tax Category",
-				"label": "Tax Category"
+				"label": "Tax Category",
 			},
 		],
 		"Task": [
