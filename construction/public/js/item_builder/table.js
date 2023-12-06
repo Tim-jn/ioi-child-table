@@ -49,7 +49,11 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 	}
 
 	// Call cancel() on blur
-	$(control.$input || control.input || control.input_area).on("focusout", () => {
+	const input = $(control.$input || control.input || control.input_area).get(0);
+	input.addEventListener("focusout", (e) => {
+		// Ignore focusout if the new focused element is a child of the editor
+		if (el.contains(e.relatedTarget)) return;
+
 		const value = control.get_value();
 		if (value !== updatedValue) {
 			success(value);
