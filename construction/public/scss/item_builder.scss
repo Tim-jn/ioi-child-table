@@ -1,15 +1,12 @@
-.item-builder-header {
-	margin-bottom: 1rem;
-}
-
 .item-table-footer {
-	margin-top: 2rem;
+	margin-top: 1rem;
 }
-
 
 // Counter
 .item-builder-table,
 .item-builder-tree {
+	padding: 1rem 0px;
+
 	counter-reset: chantierheading1 0 chantierheading2 0 chantierheading3 0;
 
 	// TODO: Commonify style in Dodock
