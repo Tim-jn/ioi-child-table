@@ -85,6 +85,8 @@ function frappeTabulatorCellFormatter(cell, formatterParams, onRendered) {
 		el.removeAttribute("target");
 		el.type = "span";
 	});
+	const cellElement = cell.getElement();
+	cellElement.style.overflow = "";
 	return parsed.body.innerHTML;
 }
 
