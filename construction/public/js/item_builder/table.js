@@ -334,6 +334,10 @@ class ItemBuilderForm {
 
 	get parent_doctype() { return this.frm.doctype; }
 	get row_doctype() { return frappe.meta.get_field(this.parent_doctype, "items").options; }
+
+	isRowEmpty(row) {
+		return !row.name || (!row.item_code && !row.item_name && !row.description);
+	}
 }
 
 export default class ItemBuilderTable {
@@ -356,27 +360,45 @@ export default class ItemBuilderTable {
 		this.bind_form()
 	}
 
+	async on_update() {
+		const newRows = this.form_wrapper.get_rows();
+		const oldRows = this.tabulator.getData();
+		const deletedRows = oldRows.filter(x => !newRows.find(y => y.name === x.name));
+
+		if (deletedRows.length) {
+			this.tabulator.deleteRow(deletedRows.map(x => x.name).filter(Boolean));
+		}
+		if (newRows.length) {
+			await this.tabulator.updateOrAddData(newRows);
+		}
+
+		this.after_update(newRows);
+	}
+
+	async after_update(newRows = null) {
+		const rows = newRows || this.tabulator.getData();
+		if (!rows?.length) {
+			// Last row deleted, do nothing
+		} else if (this.form_wrapper.isRowEmpty(rows[rows.length - 1])) {
+			// Last row is empty, do nothing
+		} else {
+			// Append empty row when the last row is not empty
+			await this.form_wrapper.append_row({});
+			return;
+		}
+
+		if (this.form_wrapper.open_form) {
+			const dialog = this.form_wrapper.open_form;
+			const item = this.frm.doc.items.find(x => x.name === dialog.doc.name)
+			if (item) {
+				dialog.refresh(item);
+			}
+		}
+	}
+
 	bind_form() {
-		this.form_wrapper.watch_update(async () => {
-			const newRows = this.form_wrapper.get_rows();
-			const oldRows = this.tabulator.getData();
-			const deletedRows = oldRows.filter(x => !newRows.find(y => y.name === x.name));
-
-			if (deletedRows.length) {
-				this.tabulator.deleteRow(deletedRows.map(x => x.name));
-			}
-			if (newRows.length) {
-				await this.tabulator.updateOrAddData(newRows);
-			}
-
-			if (this.form_wrapper.open_form) {
-				const dialog = this.form_wrapper.open_form;
-				const item = this.frm.doc.items.find(x => x.name === dialog.doc.name)
-				if (item) {
-					dialog.refresh(item);
-				}
-			}
-		});
+		this.form_wrapper.watch_update(this.on_update.bind(this));
+		this.after_update();
 	}
 
 	build_table() {
