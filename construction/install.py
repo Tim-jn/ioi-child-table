@@ -1,6 +1,7 @@
 import click
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 
 def after_install():
@@ -19,6 +20,7 @@ def add_custom_fields():
 	click.secho("* Adding Construction Custom Fields")
 	custom_fields = get_custom_fields()
 	create_custom_fields(custom_fields)
+	create_property_setters()
 
 
 def get_custom_fields_for_selling_doctype(dt: str):
