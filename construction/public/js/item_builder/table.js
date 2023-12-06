@@ -45,6 +45,7 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 
 	if (editorParams.df.fieldtype === "Text Editor") {
 		control.inside_change_event = true; // force ignore onchange event
+		setTextEditorStyle(control);
 	}
 
 	// Call cancel() on blur
@@ -62,6 +63,16 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 	});
 
 	return el;
+}
+
+function setTextEditorStyle(control) {
+	control.$wrapper.find(".ql-container").css({ "overflow": "visible" });
+	control.$wrapper.find(".ql-toolbar").css({ "overflow": "hidden" });
+	control.$wrapper.find(".ql-editor").css({
+		"min-height": "1em",
+		"max-height": "unset",
+		"padding": "12px",
+	});
 }
 
 function frappeTabulatorCellFormatter(cell, formatterParams, onRendered) {
@@ -206,9 +217,12 @@ class ItemBuilderForm {
 			if (df.fieldname == "description") {
 				col.editor = frappeTabulatorCellEditor;
 				col.editorParams = {
-					df: { ...df, theme: "bubble" },
+					df: { ...df, theme: "bubble", max_height: "unset", },
 				};
 				col.formatter = "html";
+				col.widthGrow = 0;
+				col.widthShrink = 0;
+				col.width = 300;
 			} else {
 				if (!df.read_only) {
 					col.editor = frappeTabulatorCellEditor;
@@ -362,8 +376,10 @@ export default class ItemBuilderTable {
 	build_table() {
 		const tabulator_options = {
 			data: this.form_wrapper.get_rows(),
+			index: "name",
 			columns: this.form_wrapper.get_columns(),
 			minHeight: 256,
+			maxHeight: "unset",
 			debugInvalidOptions: true,
 			resizableRows: false,
 			reactiveData: false,
@@ -492,7 +508,8 @@ export default class ItemBuilderTable {
 			df: {
 				...rowDf,
 				fieldtype: "Text Editor",
-				max_height: 150,
+				max_height: "unset",
+				theme: "bubble",
 				onchange: () => {
 					const value = control.get_value();
 					this.form_wrapper.update_row_value(doc, "description", value);
@@ -503,6 +520,7 @@ export default class ItemBuilderTable {
 			only_input: true,
 			value: doc.description,
 		});
+		setTextEditorStyle(control);
 	}
 
 	_buildWrapperInRow(row) {
