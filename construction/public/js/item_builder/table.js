@@ -266,13 +266,13 @@ class ItemBuilderForm {
 	}
 
 	can_skip_refresh(fieldname, value, rowDoc) {
-		if (value?.startsWith?.("<div class=\"ql-editor")) {
-			return true;
-		}
+		// if (value?.startsWith?.("<div class=\"ql-editor")) {
+		// 	return true;
+		// }
 	}
 
-	on_update(fn) {
-		const throttled = frappe.utils.throttle(fn, 50, { leading: true, trailing: true });
+	watch_update(fn) {
+		const throttled = frappe.utils.throttle(fn, 16, { leading: true, trailing: true });
 		// const watchModel = frappe.model.on.bind(frappe.model);
 		const watchModel = (dt, fi, fn) => {
 			frappe.model.on(dt, fi, (...args) => {
@@ -318,8 +318,17 @@ export default class ItemBuilderTable {
 	}
 
 	bind_form() {
-		this.form_wrapper.on_update(() => {
-			this.tabulator.replaceData(this.form_wrapper.get_rows());
+		this.form_wrapper.watch_update(async () => {
+			const newRows = this.form_wrapper.get_rows();
+			const oldRows = this.tabulator.getData();
+			const deletedRows = oldRows.filter(x => !newRows.find(y => y.name === x.name));
+
+			if (deletedRows.length) {
+				this.tabulator.deleteRow(deletedRows.map(x => x.name));
+			}
+			if (newRows.length) {
+				await this.tabulator.updateOrAddData(newRows);
+			}
 
 			if (this.form_wrapper.open_form) {
 				const dialog = this.form_wrapper.open_form;
