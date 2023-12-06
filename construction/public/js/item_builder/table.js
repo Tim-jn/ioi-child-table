@@ -13,6 +13,15 @@ const TABLE_COLUMNS = [
 	"row_print_style",
 ];
 
+function onControlBlur(control, callback) {
+	const input = $(control.$input || control.input || control.input_area).get(0);
+	input.addEventListener("focusout", (e) => {
+		// Ignore focusout if the new focused element is a child of the editor
+		if (control.parent.contains(e.relatedTarget)) return;
+		callback();
+	});
+}
+
 function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorParams) {
 	// cell - the cell component for the editable cell
 	// onRendered - function to call when the editor has been rendered
@@ -44,16 +53,11 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 	});
 
 	if (editorParams.df.fieldtype === "Text Editor") {
-		control.inside_change_event = true; // force ignore onchange event
 		setTextEditorStyle(control);
 	}
 
 	// Call cancel() on blur
-	const input = $(control.$input || control.input || control.input_area).get(0);
-	input.addEventListener("focusout", (e) => {
-		// Ignore focusout if the new focused element is a child of the editor
-		if (el.contains(e.relatedTarget)) return;
-
+	onControlBlur(control, () => {
 		const value = control.get_value();
 		if (value !== updatedValue) {
 			success(value);
@@ -77,6 +81,8 @@ function setTextEditorStyle(control) {
 		"max-height": "unset",
 		"padding": "12px",
 	});
+
+	control.inside_change_event = true; // force ignore onchange event
 }
 
 function frappeTabulatorCellFormatter(cell, formatterParams, onRendered) {
@@ -549,6 +555,10 @@ export default class ItemBuilderTable {
 			value: doc.description,
 		});
 		setTextEditorStyle(control);
+		onControlBlur(control, () => {
+			const value = control.get_value();
+			this.form_wrapper.update_row_value(doc, "description", value);
+		});
 	}
 
 	_buildWrapperInRow(row) {
