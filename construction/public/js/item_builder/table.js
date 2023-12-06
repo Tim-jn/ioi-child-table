@@ -13,6 +13,15 @@ const TABLE_COLUMNS = [
 	"row_print_style",
 ];
 
+function onControlBlur(control, callback) {
+	const input = $(control.$input || control.input || control.input_area).get(0);
+	input.addEventListener("focusout", (e) => {
+		// Ignore focusout if the new focused element is a child of the editor
+		if (control.parent.contains(e.relatedTarget)) return;
+		callback();
+	});
+}
+
 function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorParams) {
 	// cell - the cell component for the editable cell
 	// onRendered - function to call when the editor has been rendered
@@ -43,9 +52,18 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 		value: initialValue,
 	});
 
+	if (editorParams.df.fieldtype === "Text Editor") {
+		setTextEditorStyle(control);
+	}
+
 	// Call cancel() on blur
-	$(control.$input || control.input || control.input_area).on("focusout", () => {
-		cancel();
+	onControlBlur(control, () => {
+		const value = control.get_value();
+		if (value !== updatedValue) {
+			success(value);
+		} else {
+			cancel();
+		}
 	});
 
 	onRendered(() => {
@@ -53,6 +71,18 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 	});
 
 	return el;
+}
+
+function setTextEditorStyle(control) {
+	control.$wrapper.find(".ql-container").css({ "overflow": "visible" });
+	control.$wrapper.find(".ql-toolbar").css({ "overflow": "hidden" });
+	control.$wrapper.find(".ql-editor").css({
+		"min-height": "1em",
+		"max-height": "unset",
+		"padding": "12px",
+	});
+
+	control.inside_change_event = true; // force ignore onchange event
 }
 
 function frappeTabulatorCellFormatter(cell, formatterParams, onRendered) {
@@ -65,7 +95,49 @@ function frappeTabulatorCellFormatter(cell, formatterParams, onRendered) {
 		el.removeAttribute("target");
 		el.type = "span";
 	});
+	const cellElement = cell.getElement();
+	cellElement.style.overflow = "";
 	return parsed.body.innerHTML;
+}
+
+/** @this {ItemBuilderTable} */
+function formatEditButton(cell, formatterParams, onRendered) {
+	const el = document.createElement("div");
+
+	const click = () => {
+		const row = cell.getRow();
+		const rowData = row.getData();
+		const doc = this.frm.doc.items.find(x => x.name === rowData.name);
+
+		const dialog = new frappe.ui.Dialog({
+			size: "large",
+			fields: frappe.get_meta("Quotation Item").fields,
+			frm: this.frm,
+			grid: this.frm.grids[0].grid,
+			title: __("Edit"),
+			primary_action_label: __("Close"),
+			primary_action: () => {
+				dialog.hide();
+			},
+			onhide: () => {
+				this.open_form = null;
+			},
+		});
+		dialog.refresh(doc);
+		dialog.show();
+		this.open_form = dialog;
+	}
+
+	onRendered(() => {
+		const button = document.createElement("button");
+		button.classList.add("btn-reset");
+		button.innerHTML = frappe.utils.icon("edit", "sm");
+		button.ariaLabel = __("Edit");
+		button.addEventListener("click", click);
+		el.appendChild(button);
+	});
+
+	return el;
 }
 
 
@@ -127,37 +199,7 @@ class ItemBuilderForm {
 				field: "edit_btn",
 				editor: false,
 				headerSort: false,
-				formatter: (cell, formatterParams, onRendered) => {
-					const click = () => {
-						const row = cell.getRow();
-						const rowData = row.getData();
-						const doc = this.frm.doc.items.find(x => x.name === rowData.name);
-
-						const dialog = new frappe.ui.Dialog({
-							size: "large",
-							fields: frappe.get_meta("Quotation Item").fields,
-							frm: this.frm,
-							grid: this.frm.grids[0].grid,
-							title: __("Edit"),
-							primary_action_label: __("Close"),
-							primary_action: () => {
-								dialog.hide();
-							},
-							onhide: () => {
-								this.open_form = null;
-							},
-						});
-						dialog.refresh(doc);
-						dialog.show();
-						this.open_form = dialog;
-					}
-					const button = document.createElement("button");
-					button.classList.add("btn-reset");
-					button.innerHTML = frappe.utils.icon("edit", "sm");
-					button.ariaLabel = __("Edit");
-					button.addEventListener("click", click);
-					return button;
-				},
+				formatter: formatEditButton.bind(this),
 			},
 			{
 				title: __("Row Type"),
@@ -187,9 +229,12 @@ class ItemBuilderForm {
 			if (df.fieldname == "description") {
 				col.editor = frappeTabulatorCellEditor;
 				col.editorParams = {
-					df: { ...df, theme: "bubble" },
+					df: { ...df, theme: "bubble", max_height: "unset", },
 				};
 				col.formatter = "html";
+				col.widthGrow = 0;
+				col.widthShrink = 0;
+				col.width = 300;
 			} else {
 				if (!df.read_only) {
 					col.editor = frappeTabulatorCellEditor;
@@ -266,13 +311,13 @@ class ItemBuilderForm {
 	}
 
 	can_skip_refresh(fieldname, value, rowDoc) {
-		if (value?.startsWith?.("<div class=\"ql-editor")) {
-			return true;
-		}
+		// if (value?.startsWith?.("<div class=\"ql-editor")) {
+		// 	return true;
+		// }
 	}
 
-	on_update(fn) {
-		const throttled = frappe.utils.throttle(fn, 50, { leading: true, trailing: true });
+	watch_update(fn) {
+		const throttled = frappe.utils.throttle(fn, 16, { leading: true, trailing: true });
 		// const watchModel = frappe.model.on.bind(frappe.model);
 		const watchModel = (dt, fi, fn) => {
 			frappe.model.on(dt, fi, (...args) => {
@@ -295,6 +340,10 @@ class ItemBuilderForm {
 
 	get parent_doctype() { return this.frm.doctype; }
 	get row_doctype() { return frappe.meta.get_field(this.parent_doctype, "items").options; }
+
+	isRowEmpty(row) {
+		return !row.name || (!row.item_code && !row.item_name && !row.description);
+	}
 }
 
 export default class ItemBuilderTable {
@@ -306,36 +355,79 @@ export default class ItemBuilderTable {
 
 		this.build_table()
 
-		this.$table_footer = $(`<div class="item-table-footer d-flex flex-row-reverse">
-			<button class="btn btn-default new-text">${__("Add Comment", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
-			<button class="btn btn-default new-title mr-2">${__("Add Title", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
-			<button class="btn btn-primary new-item mr-2">${__("Add Item", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
-			<button class="btn btn-danger delete-row mr-2" style="display: none;">${__("Delete")} ${frappe.utils.icon('remove', 'sm')}</button>
+		this.$table_footer = $(`<div class="item-table-footer d-flex flex-row flex-shrink-0 align-items-start">
+			<div class="mr-auto text-muted small item-table-footer-help"></div>
+			<div class="d-flex flex-row flex-shrink-0 align-items-start">
+				<button class="btn btn-xs btn-danger delete-row mr-2" style="display: none;">${__("Delete")} ${frappe.utils.icon('remove', 'sm')}</button>
+				<div class="btn-group flex-shrink-0 align-items-start">
+					<button class="btn btn-xs btn-primary new-item">${__("Add Item", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
+					<button class="btn btn-xs btn-default new-title">${__("Title", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
+					<button class="btn btn-xs btn-default new-text">${__("Comment", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
+				</div>
+			</div>
 		</div>`).appendTo(this.$table_wrapper)
+
+		const help = this.$table_footer.find(".item-table-footer-help");
+		help.html([
+			__("Drag and drop rows to reorder them."),
+			__("Click on a row to select it."),
+			__("Click on the <b>Delete</b> button to delete the selected rows."),
+			__("Click on the <b>Add Item</b> button to add a new item."),
+			__("Scroll horizontally using the mouse wheel while pressing ⇧."),
+		].join(" "));
 
 		this.bind_events()
 		this.bind_form()
 	}
 
-	bind_form() {
-		this.form_wrapper.on_update(() => {
-			this.tabulator.replaceData(this.form_wrapper.get_rows());
+	async on_update() {
+		const newRows = this.form_wrapper.get_rows();
+		const oldRows = this.tabulator.getData();
+		const deletedRows = oldRows.filter(x => !newRows.find(y => y.name === x.name));
 
-			if (this.form_wrapper.open_form) {
-				const dialog = this.form_wrapper.open_form;
-				const item = this.frm.doc.items.find(x => x.name === dialog.doc.name)
-				if (item) {
-					dialog.refresh(item);
-				}
+		if (deletedRows.length) {
+			this.tabulator.deleteRow(deletedRows.map(x => x.name).filter(Boolean));
+		}
+		if (newRows.length) {
+			await this.tabulator.updateOrAddData(newRows);
+		}
+
+		this.after_update(newRows);
+	}
+
+	async after_update(newRows = null) {
+		const rows = newRows || this.tabulator.getData();
+		if (!rows?.length) {
+			// Last row deleted, do nothing
+		} else if (this.form_wrapper.isRowEmpty(rows[rows.length - 1])) {
+			// Last row is empty, do nothing
+		} else {
+			// Append empty row when the last row is not empty
+			await this.form_wrapper.append_row({});
+			return;
+		}
+
+		if (this.form_wrapper.open_form) {
+			const dialog = this.form_wrapper.open_form;
+			const item = this.frm.doc.items.find(x => x.name === dialog.doc.name)
+			if (item) {
+				dialog.refresh(item);
 			}
-		});
+		}
+	}
+
+	bind_form() {
+		this.form_wrapper.watch_update(this.on_update.bind(this));
+		this.after_update();
 	}
 
 	build_table() {
 		const tabulator_options = {
 			data: this.form_wrapper.get_rows(),
+			index: "name",
 			columns: this.form_wrapper.get_columns(),
 			minHeight: 256,
+			maxHeight: "unset",
 			debugInvalidOptions: true,
 			resizableRows: false,
 			reactiveData: false,
@@ -464,7 +556,8 @@ export default class ItemBuilderTable {
 			df: {
 				...rowDf,
 				fieldtype: "Text Editor",
-				max_height: 150,
+				max_height: "unset",
+				theme: "bubble",
 				onchange: () => {
 					const value = control.get_value();
 					this.form_wrapper.update_row_value(doc, "description", value);
@@ -475,17 +568,35 @@ export default class ItemBuilderTable {
 			only_input: true,
 			value: doc.description,
 		});
+		setTextEditorStyle(control);
+		onControlBlur(control, () => {
+			const value = control.get_value();
+			this.form_wrapper.update_row_value(doc, "description", value);
+		});
 	}
 
 	_buildWrapperInRow(row) {
 		const wrapper = document.createElement("div");
 		const rowEl = row.getElement();
 		// Remove all children except the first two (drag handle and checkbox)
-		while (rowEl.children.length > 2) {
-			rowEl.removeChild(rowEl.lastChild);
+		for (const child of rowEl.children) {
+			if (child.classList.contains("tabulator-row-handle")) {
+				continue;
+			} else if (child.classList.contains("tabulator-col-resize-handle")) {
+				continue;
+			} else if (child.querySelector(":scope > [type='checkbox']")) {
+				continue;
+			} else if (child.getAttribute("tabulator-field") === "edit_btn") {
+				continue;
+			} else if (child.getAttribute("tabulator-field") === "_text_editor") {
+				// Always remove the old editor
+			}
+			child.style.display = "none";
 		}
 		rowEl.appendChild(wrapper);
 		wrapper.classList.add("tabulator-cell");
+		wrapper.setAttribute("tabulator-field", "_text_editor");
+		wrapper.style.overflow = "visible";
 		wrapper.style.width = "60vw";
 		return wrapper;
 	}
@@ -498,8 +609,7 @@ export default class ItemBuilderTable {
 
 		this.$new_item_button.on("click", () => {
 			this.form_wrapper.append_row({});
-			window.scrollTo(0, document.body.scrollHeight);
-		})
+		});
 
 		this.$new_title_button.on("click", () => {
 			let level = 1;
@@ -512,13 +622,11 @@ export default class ItemBuilderTable {
 			level = Math.min(level, 3);
 
 			this.append_text_row_no_dialog("title" + level, __("Heading " + level));
-			window.scrollTo(0, document.body.scrollHeight);
-		})
+		});
 
 		this.$new_text_button.on("click", () => {
 			this.append_text_row_no_dialog("text", "");
-			window.scrollTo(0, document.body.scrollHeight);
-		})
+		});
 
 		this.$delete_row_button.on("click", () => {
 			const selected_rows = this.tabulator.getSelectedRows()
@@ -558,6 +666,10 @@ export default class ItemBuilderTable {
 			const name = row.getData().name;
 			this.form_wrapper.move_rows([name], newIndex);
 		});
+	}
+
+	scrollToBottom() {
+		this.$table_footer.get(0).scrollIntoView({ block: "end" });
 	}
 
 	async append_text_row_no_dialog(row_type, text = "") {
@@ -642,7 +754,7 @@ export default class ItemBuilderTable {
 					"mandatory_depends_on": "eval:doc.row_type == 'text'",
 				},
 			],
-			primary_action: () => {
+			primary_action: async () => {
 				const values = dialog.get_values()
 				const row_type = values.row_type;
 
@@ -671,7 +783,7 @@ export default class ItemBuilderTable {
 					"row_type": row_type,
 					"item_name": item_name,
 					"qty": 1,
-					"uom": "Unité",
+					"uom": await this.get_default_stock_uom() || __("Unit"),
 					"rate": 0,
 					"description": content,
 				})
