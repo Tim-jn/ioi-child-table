@@ -17,7 +17,7 @@
 {% macro chantier_section_end(d, section, visible_columns) %}
 <tr class="chantier-section-end">
 	{% set tdfs = visible_columns | selectattr("fieldname", "in", doc.print_chantier_section_columns) | list %}
-	{% set n_cols = with_numbers + (visible_columns | length) - ((print_settings.compact_item_print and doc.flags.compact_item_fields or []) | length) %}
+	{% set n_cols = with_numbers + ((doc.flags.compact_item_fields | length) if print_settings.compact_item_print else (visible_columns | length)) %}
 	<td colspan="{{ n_cols - (tdfs | length) }}">
 		<b>{{ _("Subtotal") }} ({{ section.counter }} {{ section.title }})</b>
 	</td>
