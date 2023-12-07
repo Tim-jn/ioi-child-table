@@ -1,6 +1,6 @@
 import { TabulatorFull as Tabulator } from "tabulator-tables";
 
-const TABLE_COLUMNS = [
+const DONOTUSE_DEFAULT_TABLE_COLUMNS = [
 	"item_code",
 	"item_name",
 	"qty",
@@ -146,6 +146,17 @@ class ItemBuilderForm {
 		this.frm = frm;
 	}
 
+	async setup() {
+		this.settings = await frappe.db.get_doc("Construction App Settings");
+	}
+
+	/** @type {string[]} @readonly */ get columns() {
+		if (this.settings?.quotation_builder_columns?.[0]?.fieldname) {
+			return this.settings.quotation_builder_columns.map(x => x.fieldname);
+		}
+		return DONOTUSE_DEFAULT_TABLE_COLUMNS;
+	}
+
 	assert(condition, message) {
 		if (!condition) {
 			throw message || "Assertion failed";
@@ -159,19 +170,13 @@ class ItemBuilderForm {
 
 	get_columns() {
 		const meta = frappe.get_meta(this.row_doctype);
-		const order = TABLE_COLUMNS.slice();
+		const order = this.columns.slice();
 
-		// Keep the fields that are in the TABLE_COLUMNS list, or those visible in the list view (-> grid).
-		const fields = meta.fields.filter(df => {
-			return order.includes(df.fieldname) || df.in_list_view
-		});
+		// Append required fields to the end of the list.
+		// order.push(...meta.fields.filter(df => (df.reqd && !df.default).map(df => df.fieldname)));
 
-		// Append unsorted fields to the end of the list.
-		fields.forEach((df) => {
-			if (!order.includes(df.fieldname)) {
-				order.push(df.fieldname);
-			}
-		});
+		// Grab the DocFields that are in the `order` list.
+		const fields = meta.fields.filter(df => order.includes(df.fieldname));
 
 		const sorter = (a, b) => order.indexOf(a.fieldname) - order.indexOf(b.fieldname);
 		fields.sort(sorter); // sort in place
@@ -349,11 +354,13 @@ class ItemBuilderForm {
 export default class ItemBuilderTable {
 	constructor(opts) {
 		Object.assign(this, opts)
-
 		this.frm = opts.frm;
 		this.form_wrapper = new ItemBuilderForm(this.frm);
+		this.make();
+	}
 
-		this.build_table()
+	async make() {
+		await this.build_table();
 
 		this.$table_footer = $(`<div class="item-table-footer d-flex flex-row flex-shrink-0 align-items-start">
 			<div class="mr-auto text-muted small item-table-footer-help"></div>
@@ -376,8 +383,8 @@ export default class ItemBuilderTable {
 			__("Scroll horizontally using the mouse wheel while pressing ⇧."),
 		].join(" "));
 
-		this.bind_events()
-		this.bind_form()
+		this.bind_events();
+		this.bind_form();
 	}
 
 	async on_update() {
@@ -421,7 +428,9 @@ export default class ItemBuilderTable {
 		this.after_update();
 	}
 
-	build_table() {
+	async build_table() {
+		await this.form_wrapper.setup();
+
 		const tabulator_options = {
 			data: this.form_wrapper.get_rows(),
 			index: "name",
@@ -691,7 +700,7 @@ export default class ItemBuilderTable {
 			"row_type": row_type,
 			"item_name": item_name,
 			"qty": 1,
-			"uom": await this.get_default_stock_uom() || __("Unit"),
+			"uom": (await this.get_default_stock_uom()) || __("Unit"),
 			"rate": 0,
 			"description": description,
 		})
@@ -783,7 +792,7 @@ export default class ItemBuilderTable {
 					"row_type": row_type,
 					"item_name": item_name,
 					"qty": 1,
-					"uom": await this.get_default_stock_uom() || __("Unit"),
+					"uom": (await this.get_default_stock_uom()) || __("Unit"),
 					"rate": 0,
 					"description": content,
 				})

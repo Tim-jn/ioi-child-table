@@ -1,0 +1,68 @@
+{
+ "actions": [
+  {
+   "action": "/app/projects-settings",
+   "action_type": "Route",
+   "label": "Project Settings"
+  }
+ ],
+ "creation": "2023-12-06 22:09:56.479726",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "quotation_section",
+  "quotation_builder_columns"
+ ],
+ "fields": [
+  {
+   "fieldname": "quotation_section",
+   "fieldtype": "Section Break",
+   "label": "Quotation"
+  },
+  {
+   "fieldname": "quotation_builder_columns",
+   "fieldtype": "Table",
+   "label": "Quotation Builder Columns",
+   "options": "Construction Quotation Builder Column"
+  }
+ ],
+ "icon": "uil uil-wrench",
+ "issingle": 1,
+ "links": [],
+ "modified": "2023-12-06 22:30:20.166296",
+ "modified_by": "Administrator",
+ "module": "Construction",
+ "name": "Construction App Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Desk User"
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

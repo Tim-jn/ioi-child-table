@@ -6,10 +6,12 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 
 def after_install():
 	add_custom_fields()
+	setup_default_quotation_builder_columns()
 
 
 def after_migrate():
 	add_custom_fields()
+	setup_default_quotation_builder_columns()
 
 
 def add_custom_fields():
@@ -169,7 +171,6 @@ def get_custom_fields():
 		],
 	}
 
-
 def create_property_setters():
 	make_property_setter(
 		"Sales Invoice",
@@ -179,3 +180,27 @@ def create_property_setters():
 		"Check",
 		validate_fields_for_doctype=False,
 	)
+
+def setup_default_quotation_builder_columns():
+	settings = frappe.get_single("Construction App Settings")
+	if not settings.quotation_builder_columns:
+		print("* Setting up default Quotation Builder columns")
+		settings.set(
+			"quotation_builder_columns",
+			map(
+				lambda x: {"fieldname": x},
+				[
+					"item_code",
+					"item_name",
+					"qty",
+					"description",
+					"uom",
+					"last_purchase_rate",
+					"gross_profit_percentage",
+					"rate",
+					"amount",
+					"row_print_style",
+				],
+			),
+		)
+		settings.save()
