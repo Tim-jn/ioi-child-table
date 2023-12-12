@@ -381,7 +381,7 @@ export default class ItemBuilderTable {
 			__("Click on the <b>Delete</b> button to delete the selected rows."),
 			__("Click on the <b>Add Item</b> button to add a new item."),
 			__("Scroll horizontally using the mouse wheel while pressing ⇧."),
-		].join(" "));
+		].join("<br>"));
 
 		this.bind_events();
 		this.bind_form();
