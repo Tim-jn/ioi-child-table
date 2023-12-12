@@ -77,6 +77,9 @@ doctype_js = {
 after_install = "construction.install.after_install"
 after_migrate = "construction.install.after_migrate"
 
+
+boot_session = "construction.boot.get_bootinfo"
+
 # Uninstallation
 # ------------
 
