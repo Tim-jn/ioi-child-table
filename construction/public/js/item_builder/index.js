@@ -8,7 +8,11 @@ construction.item_builder = class ItemBuilder {
 		Object.assign(this, opts)
 
 		this.current_view = "Table"
-		this.show()
+
+		if (frappe.boot.use_table_view) {
+			this.frm.set_df_property('items', 'hidden', 1);
+			this.show()
+		}
 	}
 
 	show() {

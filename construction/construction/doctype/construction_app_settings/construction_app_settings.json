@@ -11,6 +11,7 @@
  "engine": "InnoDB",
  "field_order": [
   "quotation_section",
+  "use_table_view",
   "quotation_builder_columns"
  ],
  "fields": [
@@ -20,16 +21,23 @@
    "label": "Quotation"
   },
   {
+   "depends_on": "eval:doc.use_table_view",
    "fieldname": "quotation_builder_columns",
    "fieldtype": "Table",
    "label": "Quotation Builder Columns",
    "options": "Construction Quotation Builder Column"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_table_view",
+   "fieldtype": "Check",
+   "label": "Use the dedicated table view"
   }
  ],
  "icon": "uil uil-wrench",
  "issingle": 1,
  "links": [],
- "modified": "2023-12-06 22:30:20.166296",
+ "modified": "2023-12-12 17:07:43.303967",
  "modified_by": "Administrator",
  "module": "Construction",
  "name": "Construction App Settings",
