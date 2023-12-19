@@ -37,6 +37,10 @@
 		}
 	}
 
+	.tabulator .tabulator-headers .tabulator-col.tabulator-frozen.tabulator-frozen-left {
+		margin-left: 1px;
+	}
+
 	// Add space below to show the awesomplete of Link controls. Looks bad,
 	// but not many options, because of the impossibility of having both
 	// overflow-x: scroll and overflow-y: visible.
