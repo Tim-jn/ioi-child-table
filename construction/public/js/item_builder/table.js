@@ -340,7 +340,7 @@ class ItemBuilderForm {
 		}
 
 		grid.refresh();
-		// this.frm.dirty();
+		this.frm.dirty();
 		this.frm.script_manager.trigger("items_delete", this.row_doctype);
 	}
 
