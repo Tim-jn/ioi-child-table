@@ -17,13 +17,15 @@
 
 	// TODO: Commonify style in Dodock
 	.tabulator-table {
-		border: 1px solid var(--table-border-color);
+		// Don't use border because of layout offset issues.
+		box-shadow: 0 0 0 1px var(--table-border-color);
 		border-radius: var(--border-radius-md);
 		color: var(--text-color);
 	}
+	// .tabulator .tabulator-headers .tabulator-col.tabulator-frozen.tabulator-frozen-left { margin-left: 1px; }
 
-	.tabulator-row-even {
-		background-color: #fff;
+	.tabulator-row {
+		transition: background-color 120ms ease;
 	}
 
 	input:checked + .slider {
@@ -43,8 +45,21 @@
 		}
 	}
 
-	.tabulator .tabulator-headers .tabulator-col.tabulator-frozen.tabulator-frozen-left {
-		margin-left: 1px;
+	.tabulator-tableholder {
+		overflow-y: hidden;
+	}
+
+	.tabulator-cell, .tabulator-col-title {
+		input[type="checkbox"] {
+			margin: 0 !important;
+			padding: 0 !important;
+		}
+	}
+
+	.item-builder-flex-center {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.ql-tooltip {
