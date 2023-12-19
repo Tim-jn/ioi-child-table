@@ -5,46 +5,62 @@ frappe.provide("construction")
 
 construction.item_builder = class ItemBuilder {
 	constructor(opts) {
-		Object.assign(this, opts)
-
-		this.current_view = "Table"
+		Object.assign(this, opts);
 
 		if (frappe.boot.use_table_view) {
-			this.frm.set_df_property('items', 'hidden', 1);
-			this.show()
+			this.set_current_view("Table");
+		} else {
+			this.set_current_view("None");
 		}
 	}
 
-	show() {
-		this.$wrapper.empty()
-		/*this.$header = $(`<div class="item-builder-header d-flex flex-row-reverse">
-			<button class="btn btn-default">${frappe.utils.icon('list', 'sm')}</button>
-		</div>`).appendTo(this.$wrapper)*/
-		this.$tree_wrapper = $(`<div class="item-builder-tree"><div class="tree"></div></div>`).appendTo(this.$wrapper)
-
-		this.$table_wrapper = $(`<div class="item-builder-table"><div class="tabulator-table"></div></div>`).appendTo(this.$wrapper)
-
-		this.make()
-
-		this.$tree_wrapper.hide()
+	set_current_view(view) {
+		this.current_view = view;
+		this.show();
 	}
 
-	make() {
-		this.tree = new ItemBuilderTree(this)
-		this.table = new ItemBuilderTable(this)
+	destroy() {
+		this.$wrapper.empty();
 
-		/*this.$header.find(".btn").on("click", () => {
-			if (this.current_view == "Table") {
-				this.$tree_wrapper.show()
-				this.$table_wrapper.hide()
-				this.$header.find(".btn").html(frappe.utils.icon('table', 'sm'))
-				this.current_view = "Tree"
-			} else {
-				this.$tree_wrapper.hide()
-				this.$table_wrapper.show()
-				this.$header.find(".btn").html(frappe.utils.icon('list', 'sm'))
-				this.current_view = "Table"
-			}
-		})*/
+		this.$table_wrapper?.remove();
+		this.$table_wrapper = null;
+		this.table?.destroy?.();
+		this.table = null;
+
+		this.$tree_wrapper?.remove();
+		this.$tree_wrapper = null;
+		this.tree?.destroy?.();
+		this.tree = null;
+	}
+
+	show() {
+		this.destroy();
+
+		this.$header = $(`<div class="item-builder-header d-flex flex-row-reverse">`).appendTo(this.$wrapper);
+
+		// this.$btn_switch_view = $(`<button class="btn btn-default">${frappe.utils.icon('list', 'sm')}</button>`).appendTo(this.$header);
+		// this.$btn_switch_view.on("click", () => {
+		// 	if (this.current_view == "Table") {
+		// 		this.set_current_view("Tree");
+		// 	} else {
+		// 		this.set_current_view("Table");
+		// 	}
+		// });
+
+		if (this.current_view == "Table") {
+			this.$table_wrapper = $(`<div class="item-builder-table"><div class="tabulator-table"></div></div>`).appendTo(this.$wrapper);
+			this.table = new ItemBuilderTable(this);
+			// this.$btn_switch_view.html(frappe.utils.icon('list', 'sm'));
+		} else if (this.current_view == "Tree") {
+			this.$tree_wrapper = $(`<div class="item-builder-tree"><div class="tree"></div></div>`).appendTo(this.$wrapper);
+			this.tree = new ItemBuilderTree(this);
+			// this.$btn_switch_view.html(frappe.utils.icon('table', 'sm'));
+		} else {
+			this.hide();
+		}
+	}
+
+	hide() {
+		this.$wrapper.empty();
 	}
 }
