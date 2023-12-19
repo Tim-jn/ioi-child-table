@@ -22,6 +22,28 @@ function onControlBlur(control, callback) {
 	});
 }
 
+function makeTextEditorDocField(df) {
+	return {
+		...df,
+		fieldtype: "Text Editor",
+		max_height: "unset",
+		theme: "bubble",
+		get_toolbar_options: () => {
+			return [
+				// [{ header: [1, 2, 3, false] }],
+				// [{ size: [10, 12, 14, 16, 20, 24, 32] }],
+				["bold", "italic", "underline", "strike", "clean"],
+				[{ color: [] }, { background: [] }],
+				["blockquote", "code-block"],
+				["link", "image"],
+				[{ list: "ordered" }, { list: "bullet" }, { list: "check" }],
+				[{ align: [] }],
+				[{ direction: "rtl" }],
+			];
+		},
+	};
+}
+
 function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorParams) {
 	// cell - the cell component for the editable cell
 	// onRendered - function to call when the editor has been rendered
@@ -35,16 +57,22 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 	const initialValue = cell.getValue();
 	let updatedValue = initialValue;
 
-	const control = frappe.ui.form.make_control({
-		df: {
-			...editorParams.df,
-			onchange: () => {
-				const value = control.get_value();
-				if (value !== updatedValue) {
-					success(value);
-				}
-			},
+	let df = {
+		...editorParams.df,
+		onchange: () => {
+			const value = control.get_value();
+			if (value !== updatedValue) {
+				success(value);
+			}
 		},
+	};
+
+	if (df.fieldtype === "Text Editor") {
+		df = makeTextEditorDocField(df);
+	}
+
+	const control = frappe.ui.form.make_control({
+		df: df,
 		parent: el,
 		render_input: true,
 		only_input: true,
@@ -52,8 +80,15 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 		value: initialValue,
 	});
 
-	if (editorParams.df.fieldtype === "Text Editor") {
+	if (df.fieldtype === "Text Editor") {
 		setTextEditorStyle(control);
+		control.quill.on(
+			"text-change",
+			() => {
+				// Resize row height
+				cell.getRow().normalizeHeight();
+			}
+		);
 	}
 
 	// Call cancel() on blur
@@ -228,7 +263,8 @@ class ItemBuilderForm {
 				col.editorParams = {
 					df: { ...df, theme: "bubble", max_height: "unset", },
 				};
-				col.formatter = "html";
+				col.formatter = frappeTabulatorCellFormatter;
+				col.formatterParams = { df };
 				col.widthGrow = 0;
 				col.widthShrink = 0;
 				col.width = 300;
@@ -554,16 +590,13 @@ export default class ItemBuilderTable {
 		const rowDt = this.form_wrapper.row_doctype;
 		const rowDf = frappe.meta.get_docfield(rowDt, "description");
 		const control = frappe.ui.form.make_control({
-			df: {
+			df: makeTextEditorDocField({
 				...rowDf,
-				fieldtype: "Text Editor",
-				max_height: "unset",
-				theme: "bubble",
 				onchange: () => {
 					const value = control.get_value();
 					this.form_wrapper.update_row_value(doc, "description", value);
 				},
-			},
+			}),
 			parent: wrapper,
 			render_input: true,
 			only_input: true,
