@@ -41,11 +41,23 @@
 		margin-left: 1px;
 	}
 
-	// Add space below to show the awesomplete of Link controls. Looks bad,
-	// but not many options, because of the impossibility of having both
-	// overflow-x: scroll and overflow-y: visible.
-	.tabulator-tableholder:focus-within {
-		margin-bottom: 300px;
+	.ql-tooltip {
+		z-index: 5;
+	}
+	.ql-container {
+		overflow: visible !important;
+	}
+	.ql-toolbar {
+		width: max-content;
+		overflow: visible;
+	}
+	.ql-editor {
+		min-height: 1em;
+		max-height: unset;
+		padding: 0px;
+	}
+	.tabulator-cell.tabulator-editing .ql-editor {
+		padding: 3px;
 	}
 }
 
