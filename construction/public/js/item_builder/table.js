@@ -59,6 +59,7 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 
 	let df = {
 		...editorParams.df,
+		input_class: "input-xs",
 		onchange: () => {
 			const value = control.get_value();
 			if (value !== updatedValue) {
@@ -219,27 +220,32 @@ class ItemBuilderForm {
 		const columns = [
 			{
 				rowHandle: true,
-				formatter: "handle",
 				headerSort: false,
 				frozen: true,
-				width: 30,
-				minWidth: 30,
+				cssClass: "item-builder-flex-center",
+				formatter: "handle",
+				minWidth: 16, // width and maxWidth feel useless
 			},
 			{
+				cssClass: "item-builder-flex-center",
 				formatter: "rowSelection",
 				titleFormatter: "rowSelection",
 				hozAlign: "center",
+				headerHozAlign: "center",
 				headerSort: false,
-				cellClick(e, cell) {
-					cell.getRow().toggleSelect()
-				},
+				cellClick(e, cell) { cell.getRow().toggleSelect() },
+				minWidth: 16, // width and maxWidth feel useless
 			},
 			{
 				title: "",
 				field: "edit_btn",
 				editor: false,
 				headerSort: false,
+				cssClass: "item-builder-flex-center",
 				formatter: formatEditButton.bind(this),
+				hozAlign: "center",
+				headerHozAlign: "center",
+				minWidth: 16, // width and maxWidth feel useless
 			},
 			{
 				title: __("Row Type"),
