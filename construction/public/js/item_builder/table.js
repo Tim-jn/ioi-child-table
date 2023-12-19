@@ -169,12 +169,20 @@ function formatEditButton(cell, formatterParams, onRendered) {
 
 
 class ItemBuilderForm {
-	constructor(frm) {
+	constructor({ frm, detach = false } = {}) {
 		this.frm = frm;
+		this.detach = detach;
 	}
 
 	async setup() {
 		this.settings = await frappe.db.get_doc("Construction App Settings");
+
+		if (this.detach) {
+			const field = this.frm.get_field("items");
+			/** @type {HTMLElement} */
+			const el = field.$wrapper.get(0);
+			el.style.display = "none";
+		}
 	}
 
 	/** @type {string[]} @readonly */ get columns() {
@@ -343,28 +351,16 @@ class ItemBuilderForm {
 		// $(this.frm.wrapper).trigger("grid-move-row", [this.frm, row]);
 	}
 
-	can_skip_refresh(fieldname, value, rowDoc) {
-		// if (value?.startsWith?.("<div class=\"ql-editor")) {
-		// 	return true;
-		// }
-	}
-
 	watch_update(fn) {
-		const throttled = frappe.utils.throttle(fn, 16, { leading: true, trailing: true });
-		// const watchModel = frappe.model.on.bind(frappe.model);
-		const watchModel = (dt, fi, fn) => {
-			frappe.model.on(dt, fi, (...args) => {
-				if (this.can_skip_refresh(...args)) return;
-				fn(...args);
-			});
-		}
+		const throttled = frappe.utils.throttle(fn, 16, { leading: false, trailing: true });
 
 		const parent = this.parent_doctype;
 		const child = this.row_doctype;
 
-		watchModel(parent, "refresh", throttled);
-		watchModel(child, "*", throttled);
-
+		// frappe.model.on(parent, "*", throttled);
+		frappe.model.on(child, "*", throttled);
+		frappe.ui.form.on(parent, "refresh", throttled);
+		frappe.ui.form.on(child, "*", throttled);
 		frappe.ui.form.on(child, "items_move", throttled);
 		frappe.ui.form.on(child, "items_add", throttled);
 		frappe.ui.form.on(child, "items_remove", throttled);
@@ -383,7 +379,7 @@ export default class ItemBuilderTable {
 	constructor(opts) {
 		Object.assign(this, opts)
 		this.frm = opts.frm;
-		this.form_wrapper = new ItemBuilderForm(this.frm);
+		this.form_wrapper = new ItemBuilderForm({ frm: this.frm, detach: true });
 		this.make();
 	}
 
