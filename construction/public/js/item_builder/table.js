@@ -433,8 +433,8 @@ export default class ItemBuilderTable {
 		} else if (this.form_wrapper.isRowEmpty(rows[rows.length - 1])) {
 			// Last row is empty, do nothing
 		} else {
-			// Append empty row when the last row is not empty
-			await this.form_wrapper.append_row({});
+			// ~~Append empty row when the last row is not empty~~
+			// await this.form_wrapper.append_row({});
 			return;
 		}
 
