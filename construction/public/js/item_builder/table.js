@@ -318,9 +318,24 @@ class ItemBuilderForm {
 		// this.frm.dirty();
 	}
 
-	remove_row(name) {
-		this.get_grid().get_row(String(name)).remove();
-		// this.frm.refresh();
+	remove_rows(names) {
+		const grid = this.get_grid();
+		const data = grid.get_data();
+
+		for (const name of names) {
+			const oldIndex = data.findIndex(row => row.name == name);
+			data.splice(oldIndex, 1);
+			// grid.grid_rows_by_docname[name]?.remove(); // NOTE: Don't do this.
+		}
+
+		// renum idx
+		for (let i = 0; i < data.length; i++) {
+			data[i].idx = i + 1;
+		}
+
+		grid.refresh();
+		// this.frm.dirty();
+		this.frm.script_manager.trigger("items_delete", this.row_doctype);
 	}
 
 	move_rows(/** @type {string[]} */ names, /** @type {number} */ targetIndex) {
@@ -413,18 +428,21 @@ export default class ItemBuilderTable {
 	}
 
 	async on_update() {
+		// console.time("update")
 		const newRows = this.form_wrapper.get_rows();
-		const oldRows = this.tabulator.getData();
-		const deletedRows = oldRows.filter(x => !newRows.find(y => y.name === x.name));
+		// const oldRows = this.tabulator.getData();
+		// const deletedRows = oldRows.filter(x => !newRows.find(y => y.name === x.name));
 
-		if (deletedRows.length) {
-			this.tabulator.deleteRow(deletedRows.map(x => x.name).filter(Boolean));
-		}
-		if (newRows.length) {
-			await this.tabulator.updateOrAddData(newRows);
-		}
+		// if (deletedRows.length) {
+		// 	this.tabulator.deleteRow(deletedRows.map(x => x.name).filter(Boolean));
+		// }
+		// if (newRows.length) {
+		// 	await this.tabulator.updateOrAddData(newRows);
+		// }
+		await this.tabulator.replaceData(newRows);
 
 		this.after_update(newRows);
+		// console.timeEnd("update")
 	}
 
 	async after_update(newRows = null) {
@@ -661,14 +679,12 @@ export default class ItemBuilderTable {
 
 		this.$delete_row_button.on("click", () => {
 			const selected_rows = this.tabulator.getSelectedRows()
-			selected_rows.forEach((row) => {
+
+			const names = selected_rows.map((row) => {
 				const rowData = row.getData();
-
-				if (rowData.name) {
-					this.form_wrapper.remove_row(rowData.name)
-				}
-			});
-
+				return rowData.name;
+			}).filter(Boolean);
+			this.form_wrapper.remove_rows(names)
 			this.tabulator.deselectRow();
 		})
 
