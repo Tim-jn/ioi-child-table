@@ -74,14 +74,6 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 }
 
 function setTextEditorStyle(control) {
-	control.$wrapper.find(".ql-container").css({ "overflow": "visible" });
-	control.$wrapper.find(".ql-toolbar").css({ "overflow": "hidden" });
-	control.$wrapper.find(".ql-editor").css({
-		"min-height": "1em",
-		"max-height": "unset",
-		"padding": "12px",
-	});
-
 	control.inside_change_event = true; // force ignore onchange event
 }
 
