@@ -417,19 +417,23 @@ class ItemBuilderForm {
 	}
 
 	watch_update(fn) {
-		const throttled = frappe.utils.throttle(fn, 16, { leading: false, trailing: true });
+		const _doRowUpdate = (...args) => fn("row", ...args);
+		const _doTableUpdate = (...args) => fn("table", ...args);
+
+		const doRowUpdate = _doRowUpdate;
+		const doTableUpdate = frappe.utils.throttle(_doTableUpdate, 16, { leading: false, trailing: true });
 
 		const parent = this.parent_doctype;
 		const child = this.row_doctype;
 
-		// frappe.model.on(parent, "*", throttled);
-		frappe.model.on(child, "*", throttled);
-		frappe.ui.form.on(parent, "refresh", throttled);
-		frappe.ui.form.on(child, "*", throttled);
-		frappe.ui.form.on(child, "items_move", throttled);
-		frappe.ui.form.on(child, "items_add", throttled);
-		frappe.ui.form.on(child, "items_remove", throttled);
-		frappe.ui.form.on(child, "items_delete", throttled);
+		// frappe.model.on(parent, "*", doTableUpdate);
+		frappe.model.on(child, "*", doRowUpdate);
+		frappe.ui.form.on(parent, "refresh", doTableUpdate);
+		frappe.ui.form.on(child, "*", doRowUpdate);
+		frappe.ui.form.on(child, "items_move", doTableUpdate);
+		frappe.ui.form.on(child, "items_add", doTableUpdate);
+		frappe.ui.form.on(child, "items_remove", doTableUpdate);
+		frappe.ui.form.on(child, "items_delete", doTableUpdate);
 	}
 
 	get parent_doctype() { return this.frm.doctype; }
@@ -477,36 +481,24 @@ export default class ItemBuilderTable {
 		this.bind_form();
 	}
 
-	async on_update() {
-		// console.time("update")
-		const newRows = this.form_wrapper.get_rows();
-		// const oldRows = this.tabulator.getData();
-		// const deletedRows = oldRows.filter(x => !newRows.find(y => y.name === x.name));
-
-		// if (deletedRows.length) {
-		// 	this.tabulator.deleteRow(deletedRows.map(x => x.name).filter(Boolean));
-		// }
-		// if (newRows.length) {
-		// 	await this.tabulator.updateOrAddData(newRows);
-		// }
-		await this.tabulator.replaceData(newRows);
-
-		this.after_update(newRows);
-		// console.timeEnd("update")
-	}
-
-	async after_update(newRows = null) {
-		const rows = newRows || this.tabulator.getData();
-		if (!rows?.length) {
-			// Last row deleted, do nothing
-		} else if (this.form_wrapper.isRowEmpty(rows[rows.length - 1])) {
-			// Last row is empty, do nothing
-		} else {
-			// ~~Append empty row when the last row is not empty~~
-			// await this.form_wrapper.append_row({});
-			return;
+	async on_update(what, ...args) {
+		if (what === "row" && typeof args[2]?.name === "string") {
+			// Is a single row update
+			const doc = args[2];
+			const row = this.tabulator.getRow(doc.name);
+			if (row) {
+				row.update(doc);
+				return this.after_update();
+			}
 		}
 
+		// Is a full table update
+		const newRows = this.form_wrapper.get_rows();
+		await this.tabulator.replaceData(newRows);
+		return this.after_update();
+	}
+
+	async after_update() {
 		if (this.form_wrapper.open_form) {
 			const dialog = this.form_wrapper.open_form;
 			const item = this.frm.doc.items.find(x => x.name === dialog.doc.name)
@@ -514,6 +506,16 @@ export default class ItemBuilderTable {
 				dialog.refresh(item);
 			}
 		}
+
+		/* const rows = this.tabulator.getData();
+		if (!rows?.length) {
+			// Last row deleted, do nothing
+		} else if (this.form_wrapper.isRowEmpty(rows[rows.length - 1])) {
+			// Last row is empty, do nothing
+		} else {
+			// Append empty row when the last row is not empty
+			return await this.form_wrapper.append_row({});
+		} */
 	}
 
 	bind_form() {
