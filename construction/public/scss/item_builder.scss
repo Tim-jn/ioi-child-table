@@ -80,6 +80,15 @@
 	.tabulator-cell.tabulator-editing .ql-editor {
 		padding: 3px;
 	}
+
+	.tabulator-row .tabulator-cell.tabulator-editing {
+		height: 29px !important;
+		vertical-align: top;
+	}
+
+	.tabulator-row .tabulator-cell.tabulator-editing :is(input, select) {
+		height: unset !important;
+	}
 }
 
 .chantier-heading {
