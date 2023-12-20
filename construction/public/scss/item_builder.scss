@@ -2,6 +2,12 @@
 	margin-top: 1rem;
 }
 
+.item-table-buttons {
+	margin-top: 1rem;
+	position: sticky;
+	bottom: 0.5rem;
+}
+
 // Counter
 .item-builder-table,
 .item-builder-tree {
@@ -11,13 +17,15 @@
 
 	// TODO: Commonify style in Dodock
 	.tabulator-table {
-		border: 1px solid var(--table-border-color);
+		// Don't use border because of layout offset issues.
+		box-shadow: 0 0 0 1px var(--table-border-color);
 		border-radius: var(--border-radius-md);
 		color: var(--text-color);
 	}
+	// .tabulator .tabulator-headers .tabulator-col.tabulator-frozen.tabulator-frozen-left { margin-left: 1px; }
 
-	.tabulator-row-even {
-		background-color: #fff;
+	.tabulator-row {
+		transition: background-color 120ms ease;
 	}
 
 	input:checked + .slider {
@@ -37,11 +45,49 @@
 		}
 	}
 
-	// Add space below to show the awesomplete of Link controls. Looks bad,
-	// but not many options, because of the impossibility of having both
-	// overflow-x: scroll and overflow-y: visible.
-	.tabulator-tableholder:focus-within {
-		margin-bottom: 300px;
+	.tabulator-tableholder {
+		overflow-y: hidden;
+	}
+
+	.tabulator-cell, .tabulator-col-title {
+		input[type="checkbox"] {
+			margin: 0 !important;
+			padding: 0 !important;
+		}
+	}
+
+	.item-builder-flex-center {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.ql-tooltip {
+		z-index: 5;
+	}
+	.ql-container {
+		overflow: visible !important;
+	}
+	.ql-toolbar {
+		width: max-content;
+		overflow: visible;
+	}
+	.ql-editor {
+		min-height: 1em;
+		max-height: unset;
+		padding: 0px;
+	}
+	.tabulator-cell.tabulator-editing .ql-editor {
+		padding: 3px;
+	}
+
+	.tabulator-row .tabulator-cell.tabulator-editing {
+		height: 29px !important;
+		vertical-align: top;
+	}
+
+	.tabulator-row .tabulator-cell.tabulator-editing :is(input, select) {
+		height: unset !important;
 	}
 }
 

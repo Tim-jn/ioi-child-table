@@ -22,6 +22,28 @@ function onControlBlur(control, callback) {
 	});
 }
 
+function makeTextEditorDocField(df) {
+	return {
+		...df,
+		fieldtype: "Text Editor",
+		max_height: "unset",
+		theme: "bubble",
+		get_toolbar_options: () => {
+			return [
+				// [{ header: [1, 2, 3, false] }],
+				// [{ size: [10, 12, 14, 16, 20, 24, 32] }],
+				["bold", "italic", "underline", "strike", "clean"],
+				[{ color: [] }, { background: [] }],
+				["blockquote", "code-block"],
+				["link", "image"],
+				[{ list: "ordered" }, { list: "bullet" }, { list: "check" }],
+				[{ align: [] }],
+				[{ direction: "rtl" }],
+			];
+		},
+	};
+}
+
 function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorParams) {
 	// cell - the cell component for the editable cell
 	// onRendered - function to call when the editor has been rendered
@@ -35,16 +57,23 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 	const initialValue = cell.getValue();
 	let updatedValue = initialValue;
 
-	const control = frappe.ui.form.make_control({
-		df: {
-			...editorParams.df,
-			onchange: () => {
-				const value = control.get_value();
-				if (value !== updatedValue) {
-					success(value);
-				}
-			},
+	let df = {
+		...editorParams.df,
+		input_class: "input-xs",
+		onchange: () => {
+			const value = control.get_value();
+			if (value !== updatedValue) {
+				success(value);
+			}
 		},
+	};
+
+	if (df.fieldtype === "Text Editor") {
+		df = makeTextEditorDocField(df);
+	}
+
+	const control = frappe.ui.form.make_control({
+		df: df,
 		parent: el,
 		render_input: true,
 		only_input: true,
@@ -52,8 +81,15 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 		value: initialValue,
 	});
 
-	if (editorParams.df.fieldtype === "Text Editor") {
+	if (df.fieldtype === "Text Editor") {
 		setTextEditorStyle(control);
+		control.quill.on(
+			"text-change",
+			() => {
+				// Resize row height
+				cell.getRow().normalizeHeight();
+			}
+		);
 	}
 
 	// Call cancel() on blur
@@ -73,15 +109,48 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 	return el;
 }
 
-function setTextEditorStyle(control) {
-	control.$wrapper.find(".ql-container").css({ "overflow": "visible" });
-	control.$wrapper.find(".ql-toolbar").css({ "overflow": "hidden" });
-	control.$wrapper.find(".ql-editor").css({
-		"min-height": "1em",
-		"max-height": "unset",
-		"padding": "12px",
-	});
+function withTabulatorLinkEditor_mut(col, df) {
+	col.editor = "list";
+	col.editorParams = {
+		// https://tabulator.info/docs/5.5/edit#editor-list
+		autocomplete: true,
+		placeholderLoading: __("Loading..."),
+		placeholderEmpty: __("No Result"),
+		valuesLookupField: "label", // search returns { value, label?, description? }
+		itemFormatter(label, value, item, element) {
+			let html = `<strong>${label}</strong>`;
+			if (item?.description) {
+				html += `<div style="line-height:1.1;font-size:var(--text-xs);">${item.description}</div>`;
+			}
+			return html;
+		},
+		async valuesLookup(cell, filterTerm) {
+			const args = {
+				txt: filterTerm,
+				doctype: df.options,
+				ignore_user_permissions: false,
+				reference_doctype: "Quotation",
+			};
+			const res = await frappe.call({
+				type: "POST",
+				method: "frappe.desk.search.search_link",
+				no_spinner: true,
+				args: args,
+			});
+			return res.message.map((o) => {
+				o.label ??= o.value;
+				return o;
+			})
+		},
+		filterRemote: true,
+		listOnEmpty: true,
+		allowEmpty: true,
+		clearable: true,
+	};
+	return col;
+}
 
+function setTextEditorStyle(control) {
 	control.inside_change_event = true; // force ignore onchange event
 }
 
@@ -142,12 +211,20 @@ function formatEditButton(cell, formatterParams, onRendered) {
 
 
 class ItemBuilderForm {
-	constructor(frm) {
+	constructor({ frm, detach = false } = {}) {
 		this.frm = frm;
+		this.detach = detach;
 	}
 
 	async setup() {
 		this.settings = await frappe.db.get_doc("Construction App Settings");
+
+		if (this.detach) {
+			const field = this.frm.get_field("items");
+			/** @type {HTMLElement} */
+			const el = field.$wrapper.get(0);
+			el.style.display = "none";
+		}
 	}
 
 	/** @type {string[]} @readonly */ get columns() {
@@ -184,27 +261,32 @@ class ItemBuilderForm {
 		const columns = [
 			{
 				rowHandle: true,
-				formatter: "handle",
 				headerSort: false,
 				frozen: true,
-				width: 30,
-				minWidth: 30,
+				cssClass: "item-builder-flex-center",
+				formatter: "handle",
+				minWidth: 16, // width and maxWidth feel useless
 			},
 			{
+				cssClass: "item-builder-flex-center",
 				formatter: "rowSelection",
 				titleFormatter: "rowSelection",
 				hozAlign: "center",
+				headerHozAlign: "center",
 				headerSort: false,
-				cellClick(e, cell) {
-					cell.getRow().toggleSelect()
-				},
+				cellClick(e, cell) { cell.getRow().toggleSelect() },
+				minWidth: 16, // width and maxWidth feel useless
 			},
 			{
 				title: "",
 				field: "edit_btn",
 				editor: false,
 				headerSort: false,
+				cssClass: "item-builder-flex-center",
 				formatter: formatEditButton.bind(this),
+				hozAlign: "center",
+				headerHozAlign: "center",
+				minWidth: 16, // width and maxWidth feel useless
 			},
 			{
 				title: __("Row Type"),
@@ -231,12 +313,16 @@ class ItemBuilderForm {
 				headerSort: false,
 			}
 
-			if (df.fieldname == "description") {
+			if (df.fieldtype === "Link") {
+				withTabulatorLinkEditor_mut(col, df);
+			}
+			else if (df.fieldname == "description") {
 				col.editor = frappeTabulatorCellEditor;
 				col.editorParams = {
 					df: { ...df, theme: "bubble", max_height: "unset", },
 				};
-				col.formatter = "html";
+				col.formatter = frappeTabulatorCellFormatter;
+				col.formatterParams = { df };
 				col.widthGrow = 0;
 				col.widthShrink = 0;
 				col.width = 300;
@@ -282,9 +368,24 @@ class ItemBuilderForm {
 		// this.frm.dirty();
 	}
 
-	remove_row(name) {
-		this.get_grid().get_row(String(name)).remove();
-		// this.frm.refresh();
+	remove_rows(names) {
+		const grid = this.get_grid();
+		const data = grid.get_data();
+
+		for (const name of names) {
+			const oldIndex = data.findIndex(row => row.name == name);
+			data.splice(oldIndex, 1);
+			// grid.grid_rows_by_docname[name]?.remove(); // NOTE: Don't do this.
+		}
+
+		// renum idx
+		for (let i = 0; i < data.length; i++) {
+			data[i].idx = i + 1;
+		}
+
+		grid.refresh();
+		this.frm.dirty();
+		this.frm.script_manager.trigger("items_delete", this.row_doctype);
 	}
 
 	move_rows(/** @type {string[]} */ names, /** @type {number} */ targetIndex) {
@@ -315,32 +416,24 @@ class ItemBuilderForm {
 		// $(this.frm.wrapper).trigger("grid-move-row", [this.frm, row]);
 	}
 
-	can_skip_refresh(fieldname, value, rowDoc) {
-		// if (value?.startsWith?.("<div class=\"ql-editor")) {
-		// 	return true;
-		// }
-	}
-
 	watch_update(fn) {
-		const throttled = frappe.utils.throttle(fn, 16, { leading: true, trailing: true });
-		// const watchModel = frappe.model.on.bind(frappe.model);
-		const watchModel = (dt, fi, fn) => {
-			frappe.model.on(dt, fi, (...args) => {
-				if (this.can_skip_refresh(...args)) return;
-				fn(...args);
-			});
-		}
+		const _doRowUpdate = (...args) => fn("row", ...args);
+		const _doTableUpdate = (...args) => fn("table", ...args);
+
+		const doRowUpdate = _doRowUpdate;
+		const doTableUpdate = frappe.utils.throttle(_doTableUpdate, 16, { leading: false, trailing: true });
 
 		const parent = this.parent_doctype;
 		const child = this.row_doctype;
 
-		watchModel(parent, "refresh", throttled);
-		watchModel(child, "*", throttled);
-
-		frappe.ui.form.on(child, "items_move", throttled);
-		frappe.ui.form.on(child, "items_add", throttled);
-		frappe.ui.form.on(child, "items_remove", throttled);
-		frappe.ui.form.on(child, "items_delete", throttled);
+		// frappe.model.on(parent, "*", doTableUpdate);
+		frappe.model.on(child, "*", doRowUpdate);
+		frappe.ui.form.on(parent, "refresh", doTableUpdate);
+		frappe.ui.form.on(child, "*", doRowUpdate);
+		frappe.ui.form.on(child, "items_move", doTableUpdate);
+		frappe.ui.form.on(child, "items_add", doTableUpdate);
+		frappe.ui.form.on(child, "items_remove", doTableUpdate);
+		frappe.ui.form.on(child, "items_delete", doTableUpdate);
 	}
 
 	get parent_doctype() { return this.frm.doctype; }
@@ -355,24 +448,25 @@ export default class ItemBuilderTable {
 	constructor(opts) {
 		Object.assign(this, opts)
 		this.frm = opts.frm;
-		this.form_wrapper = new ItemBuilderForm(this.frm);
+		this.form_wrapper = new ItemBuilderForm({ frm: this.frm, detach: true });
 		this.make();
 	}
 
 	async make() {
 		await this.build_table();
 
+		this.$table_buttons = $(`<div class="d-flex flex-row flex-shrink-0 align-items-start justify-content-end item-table-buttons">
+			<button class="btn btn-xs btn-danger delete-row mr-2" style="display: none;">${__("Delete")} ${frappe.utils.icon('remove', 'sm')}</button>
+			<div class="btn-group flex-shrink-0 align-items-start">
+				<button class="btn btn-xs btn-primary new-item">${__("Add Item", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
+				<button class="btn btn-xs btn-default new-title">${__("Title", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
+				<button class="btn btn-xs btn-default new-text">${__("Comment", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
+			</div>
+		</div>`).appendTo(this.$table_wrapper);
+
 		this.$table_footer = $(`<div class="item-table-footer d-flex flex-row flex-shrink-0 align-items-start">
 			<div class="mr-auto text-muted small item-table-footer-help"></div>
-			<div class="d-flex flex-row flex-shrink-0 align-items-start">
-				<button class="btn btn-xs btn-danger delete-row mr-2" style="display: none;">${__("Delete")} ${frappe.utils.icon('remove', 'sm')}</button>
-				<div class="btn-group flex-shrink-0 align-items-start">
-					<button class="btn btn-xs btn-primary new-item">${__("Add Item", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
-					<button class="btn btn-xs btn-default new-title">${__("Title", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
-					<button class="btn btn-xs btn-default new-text">${__("Comment", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
-				</div>
-			</div>
-		</div>`).appendTo(this.$table_wrapper)
+		</div>`).appendTo(this.$table_wrapper);
 
 		const help = this.$table_footer.find(".item-table-footer-help");
 		help.html([
@@ -387,33 +481,24 @@ export default class ItemBuilderTable {
 		this.bind_form();
 	}
 
-	async on_update() {
+	async on_update(what, ...args) {
+		if (what === "row" && typeof args[2]?.name === "string") {
+			// Is a single row update
+			const doc = args[2];
+			const row = this.tabulator.getRow(doc.name);
+			if (row) {
+				row.update(doc);
+				return this.after_update();
+			}
+		}
+
+		// Is a full table update
 		const newRows = this.form_wrapper.get_rows();
-		const oldRows = this.tabulator.getData();
-		const deletedRows = oldRows.filter(x => !newRows.find(y => y.name === x.name));
-
-		if (deletedRows.length) {
-			this.tabulator.deleteRow(deletedRows.map(x => x.name).filter(Boolean));
-		}
-		if (newRows.length) {
-			await this.tabulator.updateOrAddData(newRows);
-		}
-
-		this.after_update(newRows);
+		await this.tabulator.replaceData(newRows);
+		return this.after_update();
 	}
 
-	async after_update(newRows = null) {
-		const rows = newRows || this.tabulator.getData();
-		if (!rows?.length) {
-			// Last row deleted, do nothing
-		} else if (this.form_wrapper.isRowEmpty(rows[rows.length - 1])) {
-			// Last row is empty, do nothing
-		} else {
-			// Append empty row when the last row is not empty
-			await this.form_wrapper.append_row({});
-			return;
-		}
-
+	async after_update() {
 		if (this.form_wrapper.open_form) {
 			const dialog = this.form_wrapper.open_form;
 			const item = this.frm.doc.items.find(x => x.name === dialog.doc.name)
@@ -421,6 +506,16 @@ export default class ItemBuilderTable {
 				dialog.refresh(item);
 			}
 		}
+
+		/* const rows = this.tabulator.getData();
+		if (!rows?.length) {
+			// Last row deleted, do nothing
+		} else if (this.form_wrapper.isRowEmpty(rows[rows.length - 1])) {
+			// Last row is empty, do nothing
+		} else {
+			// Append empty row when the last row is not empty
+			return await this.form_wrapper.append_row({});
+		} */
 	}
 
 	bind_form() {
@@ -562,16 +657,13 @@ export default class ItemBuilderTable {
 		const rowDt = this.form_wrapper.row_doctype;
 		const rowDf = frappe.meta.get_docfield(rowDt, "description");
 		const control = frappe.ui.form.make_control({
-			df: {
+			df: makeTextEditorDocField({
 				...rowDf,
-				fieldtype: "Text Editor",
-				max_height: "unset",
-				theme: "bubble",
 				onchange: () => {
 					const value = control.get_value();
 					this.form_wrapper.update_row_value(doc, "description", value);
 				},
-			},
+			}),
 			parent: wrapper,
 			render_input: true,
 			only_input: true,
@@ -611,10 +703,10 @@ export default class ItemBuilderTable {
 	}
 
 	bind_events() {
-		this.$new_item_button = this.$table_footer.find(".new-item")
-		this.$delete_row_button = this.$table_footer.find(".delete-row")
-		this.$new_title_button = this.$table_footer.find(".new-title")
-		this.$new_text_button = this.$table_footer.find(".new-text")
+		this.$new_item_button = this.$table_buttons.find(".new-item")
+		this.$delete_row_button = this.$table_buttons.find(".delete-row")
+		this.$new_title_button = this.$table_buttons.find(".new-title")
+		this.$new_text_button = this.$table_buttons.find(".new-text")
 
 		this.$new_item_button.on("click", () => {
 			this.form_wrapper.append_row({});
@@ -639,14 +731,12 @@ export default class ItemBuilderTable {
 
 		this.$delete_row_button.on("click", () => {
 			const selected_rows = this.tabulator.getSelectedRows()
-			selected_rows.forEach((row) => {
+
+			const names = selected_rows.map((row) => {
 				const rowData = row.getData();
-
-				if (rowData.name) {
-					this.form_wrapper.remove_row(rowData.name)
-				}
-			});
-
+				return rowData.name;
+			}).filter(Boolean);
+			this.form_wrapper.remove_rows(names)
 			this.tabulator.deselectRow();
 		})
 
@@ -678,7 +768,7 @@ export default class ItemBuilderTable {
 	}
 
 	scrollToBottom() {
-		this.$table_footer.get(0).scrollIntoView({ block: "end" });
+		this.$table_buttons.get(0).scrollIntoView({ block: "end" });
 	}
 
 	async append_text_row_no_dialog(row_type, text = "") {
