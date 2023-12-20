@@ -109,6 +109,47 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 	return el;
 }
 
+function withTabulatorLinkEditor_mut(col, df) {
+	col.editor = "list";
+	col.editorParams = {
+		// https://tabulator.info/docs/5.5/edit#editor-list
+		autocomplete: true,
+		placeholderLoading: __("Loading..."),
+		placeholderEmpty: __("No Result"),
+		valuesLookupField: "label", // search returns { value, label?, description? }
+		itemFormatter(label, value, item, element) {
+			let html = `<strong>${label}</strong>`;
+			if (item?.description) {
+				html += `<div style="line-height:1.1;font-size:var(--text-xs);">${item.description}</div>`;
+			}
+			return html;
+		},
+		async valuesLookup(cell, filterTerm) {
+			const args = {
+				txt: filterTerm,
+				doctype: df.options,
+				ignore_user_permissions: false,
+				reference_doctype: "Quotation",
+			};
+			const res = await frappe.call({
+				type: "POST",
+				method: "frappe.desk.search.search_link",
+				no_spinner: true,
+				args: args,
+			});
+			return res.message.map((o) => {
+				o.label ??= o.value;
+				return o;
+			})
+		},
+		filterRemote: true,
+		listOnEmpty: true,
+		allowEmpty: true,
+		clearable: true,
+	};
+	return col;
+}
+
 function setTextEditorStyle(control) {
 	control.inside_change_event = true; // force ignore onchange event
 }
@@ -272,7 +313,10 @@ class ItemBuilderForm {
 				headerSort: false,
 			}
 
-			if (df.fieldname == "description") {
+			if (df.fieldtype === "Link") {
+				withTabulatorLinkEditor_mut(col, df);
+			}
+			else if (df.fieldname == "description") {
 				col.editor = frappeTabulatorCellEditor;
 				col.editorParams = {
 					df: { ...df, theme: "bubble", max_height: "unset", },
