@@ -86,7 +86,7 @@
 		vertical-align: top;
 	}
 
-	.tabulator-row .tabulator-cell.tabulator-editing :is(input, select) {
+	.tabulator-row .tabulator-cell.tabulator-editing :is(input) {
 		height: unset !important;
 	}
 }
