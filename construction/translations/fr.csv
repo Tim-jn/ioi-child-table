@@ -24,3 +24,6 @@ Additional Costs Amount,Montant charge,
 Gross Profit Percentage,% Marge brute,
 Base Unit Cost Price,PRU non chargé,
 Unit Cost Price,PRU,
+Display,Affichage,Quotation Item
+Display,Affichage,Sales Order Item
+Display,Affichage,Sales Invoice Item
