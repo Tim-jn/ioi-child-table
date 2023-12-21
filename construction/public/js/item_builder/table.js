@@ -307,10 +307,14 @@ class ItemBuilderForm {
 		// Then, append the sorted fields to the columns list.
 		for (const df of fields) {
 			const col = {
-				title: __(df.label) || "",
+				title: __(df.label, null, df.parent) || "",
 				field: df.fieldname,
 				editor: true,
 				headerSort: false,
+			}
+
+			if (df.fieldtype === "Select") {
+				col.minWidth = 120;
 			}
 
 			if (df.fieldtype === "Link") {
@@ -488,6 +492,7 @@ export default class ItemBuilderTable {
 			const row = this.tabulator.getRow(doc.name);
 			if (row) {
 				row.update(doc);
+				this.tabulator.redraw()
 				return this.after_update();
 			}
 		}
@@ -530,9 +535,8 @@ export default class ItemBuilderTable {
 			data: this.form_wrapper.get_rows(),
 			index: "name",
 			columns: this.form_wrapper.get_columns(),
-			minHeight: 256,
 			maxHeight: "unset",
-			debugInvalidOptions: true,
+			debugInvalidOptions: false,
 			resizableRows: false,
 			reactiveData: false,
 			movableRows: true,
