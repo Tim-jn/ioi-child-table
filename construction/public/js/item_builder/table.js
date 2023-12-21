@@ -530,9 +530,8 @@ export default class ItemBuilderTable {
 			data: this.form_wrapper.get_rows(),
 			index: "name",
 			columns: this.form_wrapper.get_columns(),
-			minHeight: 256,
 			maxHeight: "unset",
-			debugInvalidOptions: true,
+			debugInvalidOptions: false,
 			resizableRows: false,
 			reactiveData: false,
 			movableRows: true,
@@ -758,6 +757,7 @@ export default class ItemBuilderTable {
 
 		this.tabulator.on("cellEdited", (cell) => {
 			this.sync_item_cell(cell)
+			this.tabulator.redraw();
 		});
 
 		this.tabulator.on("rowMoved", (row) => {
