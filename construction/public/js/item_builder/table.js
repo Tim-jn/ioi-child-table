@@ -608,7 +608,7 @@ export default class ItemBuilderTable {
 
 		const header_wrapper = document.createElement("div");
 		//header_wrapper.classList.add("d-flex");
-		const element = document.createElement(`h${level + 1}`);
+		const element = document.createElement(`h${level + 2}`);
 		header_wrapper.appendChild(element);
 		wrapper.appendChild(header_wrapper);
 		element.classList.add("m-0", "chantier-heading", "chantier-heading-" + level);
