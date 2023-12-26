@@ -31,7 +31,9 @@ app_include_js = "construction.bundle.js"
 doctype_js = {
 	"Quotation" : "public/js/quotation.js",
 	"Project" : "public/js/project.js",
-	"Task" : "public/js/task.js"
+	"Task" : "public/js/task.js",
+	"Sales Order" : "public/js/sales_order.js",
+	"Sales Invoice" : "public/js/sales_invoice.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -122,9 +124,9 @@ boot_session = "construction.boot.get_bootinfo"
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+	"Sales Invoice": "construction.overrides.sales_invoice.ConstructionSalesInvoice"
+}
 
 # Document Events
 # ---------------
