@@ -5,11 +5,13 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 def after_install():
 	add_custom_fields()
+	add_property_setters()
 	setup_default_quotation_builder_columns()
 
 
 def after_migrate():
 	add_custom_fields()
+	add_property_setters()
 	setup_default_quotation_builder_columns()
 
 
@@ -93,6 +95,8 @@ def get_custom_fields_for_transaction_doctype(dt: str):
 def get_custom_fields():
 	return {
 		**get_custom_fields_for_transaction_doctype("Quotation"),
+		**get_custom_fields_for_transaction_doctype("Sales Order"),
+		**get_custom_fields_for_transaction_doctype("Sales Invoice"),
 		"Project": [
 			{
 				"fieldname": "documents_tab",
@@ -181,3 +185,31 @@ def setup_default_quotation_builder_columns():
 			),
 		)
 		settings.save()
+
+
+def add_property_setters():
+	frappe.make_property_setter(
+		dict(
+			doctype="Sales Invoice Item",
+			doctype_or_field="DocField",
+			fieldname="income_account",
+			property="reqd",
+			value=0,
+			property_type="Check",
+		),
+		validate_fields_for_doctype=False,
+		is_system_generated=True
+	)
+
+	frappe.make_property_setter(
+		dict(
+			doctype="Sales Invoice Item",
+			doctype_or_field="DocField",
+			fieldname="income_account",
+			property="mandatory_depends_on",
+			value="eval:['', 'item'].includes(doc.row_type)",
+			property_type="Text",
+		),
+		validate_fields_for_doctype=False,
+		is_system_generated=True
+	)
