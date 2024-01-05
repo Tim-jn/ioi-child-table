@@ -12,7 +12,9 @@ frappe.ui.form.on("Project", {
 			}
 		});
 
-		frm.trigger("show_linked_attachments");
+		if (!frm.is_new()) {
+			frm.trigger("show_linked_attachments");
+		}
 	},
 
 	show_linked_attachments: function(frm) {
@@ -22,10 +24,13 @@ frappe.ui.form.on("Project", {
 				project: frm.doc.name
 			}
 		}).then(r => {
-			new construction.document_grid({
-				data: r.message,
-				wrapper: frm.get_field("documents_html").$wrapper
-			})
+			if (Object.keys(r.message).length) {
+				frm.set_df_property("documents_section", "hidden", 0)
+				new construction.document_grid({
+					data: r.message,
+					wrapper: frm.get_field("documents_html").$wrapper
+				})
+			}
 		})
 	},
 
