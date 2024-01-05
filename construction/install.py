@@ -158,6 +158,12 @@ def get_custom_fields():
 				"insert_after": "template_task",
 			},
 			{
+				"fieldname": "documents_section",
+				"fieldtype": "Section Break",
+				"insert_after": "documents_tab",
+				"hidden": 1
+			},
+			{
 				"fieldname": "documents_html",
 				"fieldtype": "HTML",
 				"label": "Documents",
