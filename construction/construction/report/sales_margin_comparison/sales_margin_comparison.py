@@ -121,11 +121,12 @@ def get_data(filters):
 		.select(sales_invoice_item.project, sales_invoice_item.cost_center, sales_invoice.posting_date)
 		.select(sales_invoice_item.base_net_rate.as_("sales_invoice_base_net_rate"), sales_invoice_item.base_net_amount.as_("sales_invoice_base_net_amount"))
 		.select(purchase_invoice_item.base_net_rate.as_("purchase_invoice_base_net_rate"), purchase_invoice_item.base_net_amount.as_("purchase_invoice_base_net_amount"))
+		.where(quotation_item.row_type.isin("item", ""))
 	)
 
 	if filters.quotation:
 		query = query.where(quotation_item.parent == filters.quotation)
-	
+
 	transaction_data = query.run(as_dict=True)
 
 	result = []
