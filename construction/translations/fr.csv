@@ -3,7 +3,22 @@ Add Heading,Ajouter un titre,Construction
 Add Heading,Ajouter un titre,
 Add Item,Ajouter un article,Construction
 Add Title,Ajouter un titre,Construction
+Additional Costs Amount,Montant charge,
+Additional Costs Percentage,Coef. charge,
+Base Unit Cost Price,PRU non chargé,
+Click on a row to select it.,Cliquez sur une ligne pour la sélectionner,
+Click on the <b>Add Item</b> button to add a new item.,Cliquez sur <b>Ajouter un article</b> pour ajouter un nouvel article.,
+Click on the <b>Delete</b> button to delete the selected rows.,Cliquez sur <b>Supprimer</b> pour supprimer une ligne.,
+Comment,Commentaire,Construction
 Compute Subtotal,Calculer le sous-total,
+Construction App Settings,Paramètres de l'application Chantier,
+Construction Quotation Builder Column,Colonne de l'éditeur de devis de chantier,
+Construction,Chantier,
+Display,Affichage,Quotation Item
+Display,Affichage,Sales Invoice Item
+Display,Affichage,Sales Order Item
+Drag and drop rows to reorder them.,Glissez-déposez les lignes pour les ré-organiser.,
+Gross Profit Percentage,% Marge brute,
 Heading ,Titre,
 Hide Price,Masquer le prix,
 Hide Prices in Section,Masquer prix de la section,
@@ -16,14 +31,20 @@ Progress Invoice,Facture de situation,
 Progress Percentage,Pourcentage d'avancement,
 Row Type,Type de ligne,
 With Subtotal,Avec sous-total,
+Project Settings,Paramètres des projets,
 Quotation Builder Columns,Colonnes de l'éditeur de devis,
-Construction Quotation Builder Column,Colonne de l'éditeur de devis de chantier,
-Construction App Settings,Paramètres de l'application Chantier,
-Additional Costs Percentage,Coef. charge,
-Additional Costs Amount,Montant charge,
-Gross Profit Percentage,% Marge brute,
-Base Unit Cost Price,PRU non chargé,
+Quotation Cost Price,Prix de revient du devis,
+Quotation Margin %,% de marge du devis,
+Quotation Margin,Marge du devis,
+Quotation Selling Price,Prix de vente du devis,
+Row Type,Type de ligne,
+Sales Invoice Cost Price,Prix de revient de la facture de vente,
+Sales Invoice Margin %,% de marge de la facture de vente,
+Sales Invoice Margin,Marge de la facture de vente,
+Sales Invoice Selling Price,Prix de evnete de la facture de vente,
+Scroll horizontally using the mouse wheel while pressing \u21E7.,Faites défiler horizontalement en utilisant la molette de la souris tout en appuyant sur \u21E7.,
+Scroll horizontally using the mouse wheel while pressing ⇧.,Faites défiler horizontalement en utilisant la molette de la souris tout en appuyant sur ⇧.,
+Title,Titre,Construction
 Unit Cost Price,PRU,
-Display,Affichage,Quotation Item
-Display,Affichage,Sales Order Item
-Display,Affichage,Sales Invoice Item
+Use the dedicated table view,Utiliser la vue Table dédiée,
+With Subtotal,Avec sous-total,
