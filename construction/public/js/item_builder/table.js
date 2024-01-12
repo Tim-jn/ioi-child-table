@@ -266,6 +266,7 @@ class ItemBuilderForm {
 				cssClass: "item-builder-flex-center",
 				formatter: "handle",
 				minWidth: 16, // width and maxWidth feel useless
+				visible: this.frm.doc.docstatus == 0,
 			},
 			{
 				cssClass: "item-builder-flex-center",
@@ -310,6 +311,7 @@ class ItemBuilderForm {
 				title: __(df.label, null, df.parent) || "",
 				field: df.fieldname,
 				editor: true,
+				editable: this.frm.doc.docstatus == 0,
 				headerSort: false,
 			}
 
@@ -459,27 +461,30 @@ export default class ItemBuilderTable {
 	async make() {
 		await this.build_table();
 
-		this.$table_buttons = $(`<div class="d-flex flex-row flex-shrink-0 align-items-start justify-content-end item-table-buttons">
-			<button class="btn btn-xs btn-danger delete-row mr-2" style="display: none;">${__("Delete")} ${frappe.utils.icon('remove', 'sm')}</button>
-			<div class="btn-group flex-shrink-0 align-items-start">
-				<button class="btn btn-xs btn-primary new-item">${__("Add Item", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
-				<button class="btn btn-xs btn-default new-title">${__("Title", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
-				<button class="btn btn-xs btn-default new-text">${__("Comment", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
-			</div>
-		</div>`).appendTo(this.$table_wrapper);
+		if (this.frm.doc.docstatus == 0) {
+			this.$table_buttons = $(`<div class="d-flex flex-row flex-shrink-0 align-items-start justify-content-end item-table-buttons">
+				<button class="btn btn-xs btn-danger delete-row mr-2" style="display: none;">${__("Delete")} ${frappe.utils.icon('remove', 'sm')}</button>
+				<div class="btn-group flex-shrink-0 align-items-start">
+					<button class="btn btn-xs btn-primary new-item">${__("Add Item", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
+					<button class="btn btn-xs btn-default new-title">${__("Title", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
+					<button class="btn btn-xs btn-default new-text">${__("Comment", null, "Construction")} ${frappe.utils.icon('add', 'sm')}</button>
+				</div>
+			</div>`).appendTo(this.$table_wrapper);
 
-		this.$table_footer = $(`<div class="item-table-footer d-flex flex-row flex-shrink-0 align-items-start">
-			<div class="mr-auto text-muted small item-table-footer-help"></div>
-		</div>`).appendTo(this.$table_wrapper);
 
-		const help = this.$table_footer.find(".item-table-footer-help");
-		help.html([
-			__("Drag and drop rows to reorder them."),
-			__("Click on a row to select it."),
-			__("Click on the <b>Delete</b> button to delete the selected rows."),
-			__("Click on the <b>Add Item</b> button to add a new item."),
-			__("Scroll horizontally using the mouse wheel while pressing ⇧."),
-		].join("<br>"));
+			this.$table_footer = $(`<div class="item-table-footer d-flex flex-row flex-shrink-0 align-items-start">
+				<div class="mr-auto text-muted small item-table-footer-help"></div>
+			</div>`).appendTo(this.$table_wrapper);
+
+			const help = this.$table_footer.find(".item-table-footer-help");
+			help.html([
+				__("Drag and drop rows to reorder them."),
+				__("Click on a row to select it."),
+				__("Click on the <b>Delete</b> button to delete the selected rows."),
+				__("Click on the <b>Add Item</b> button to add a new item."),
+				__("Scroll horizontally using the mouse wheel while pressing ⇧."),
+			].join("<br>"));
+		}
 
 		this.bind_events();
 		this.bind_form();
@@ -572,9 +577,15 @@ export default class ItemBuilderTable {
 		const checkbox = checkboxWrapper.querySelector("input");
 		checkbox.type = "checkbox";
 		checkbox.checked = doc[fieldname];
-		checkbox.addEventListener("change", (e) => {
-			this.form_wrapper.update_row_value(doc, fieldname, e.target.checked);
-		});
+
+		if (doc.docstatus > 0) {
+			checkbox.disabled=true;
+		} else {
+			checkbox.addEventListener("change", (e) => {
+				this.form_wrapper.update_row_value(doc, fieldname, e.target.checked);
+			});
+		}
+
 		checkboxWrapper.append("\xa0", label);
 		return checkboxWrapper;
 	}
@@ -623,25 +634,30 @@ export default class ItemBuilderTable {
 		const counter = document.createElement("label");
 		element.appendChild(counter);
 		counter.classList.add("chantier-counter", "m-0");
-		const select = document.createElement("select");
-		for (let i = 1; i <= 3; i++) {
-			const option = document.createElement("option");
-			option.value = `title${i}`;
-			const txt = `Heading ${i}`;
-			option.text = __(txt) // "1.".repeat(i);
-			if (i == level) {
-				option.selected = true;
+
+		if (doc.docstatus == 0) {
+			const select = document.createElement("select");
+			for (let i = 1; i <= 3; i++) {
+				const option = document.createElement("option");
+				option.value = `title${i}`;
+				const txt = `Heading ${i}`;
+				option.text = __(txt) // "1.".repeat(i);
+				if (i == level) {
+					option.selected = true;
+				}
+				select.appendChild(option);
 			}
-			select.appendChild(option);
+			counter.appendChild(select);
+			select.classList.add("btn-reset");
+			select.addEventListener("change", () => {
+				this.form_wrapper.update_row_value(doc, "row_type", select.value);
+			});
+			const icon = document.createElement("span");
+			icon.innerHTML = frappe.utils.icon("es-line-select", "md");
+			counter.appendChild(icon);
+		} else {
+			element.disabled = true;
 		}
-		counter.appendChild(select);
-		select.classList.add("btn-reset");
-		select.addEventListener("change", () => {
-			this.form_wrapper.update_row_value(doc, "row_type", select.value);
-		});
-		const icon = document.createElement("span");
-		icon.innerHTML = frappe.utils.icon("es-line-select", "md");
-		counter.appendChild(icon);
 
 		const input = document.createElement("input");
 		element.append(" ", input);
@@ -651,15 +667,21 @@ export default class ItemBuilderTable {
 
 		const KEY = "item_name";
 		input.value = doc[KEY];
-		input.addEventListener("change", (e) => {
-			this.form_wrapper.update_row_value(doc, KEY, e.target.value);
-		});
+
+		if (doc.docstatus > 0) {
+			input.readOnly = true;
+		} else {
+			input.addEventListener("change", (e) => {
+				this.form_wrapper.update_row_value(doc, KEY, e.target.value);
+			});
+		}
 	}
 
 	rowFormatterForText(doc, row) {
 		const wrapper = this._buildWrapperInRow(row);
 		const rowDt = this.form_wrapper.row_doctype;
 		const rowDf = frappe.meta.get_docfield(rowDt, "description");
+
 		const control = frappe.ui.form.make_control({
 			df: makeTextEditorDocField({
 				...rowDf,
@@ -672,6 +694,7 @@ export default class ItemBuilderTable {
 			render_input: true,
 			only_input: true,
 			value: doc.description,
+			disabled: doc.docstatus > 0
 		});
 		setTextEditorStyle(control);
 		onControlBlur(control, () => {
@@ -707,6 +730,10 @@ export default class ItemBuilderTable {
 	}
 
 	bind_events() {
+		if (!this.$table_buttons) {
+			return;
+		}
+
 		this.$new_item_button = this.$table_buttons.find(".new-item")
 		this.$delete_row_button = this.$table_buttons.find(".delete-row")
 		this.$new_title_button = this.$table_buttons.find(".new-title")
