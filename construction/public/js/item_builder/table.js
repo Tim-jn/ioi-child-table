@@ -83,13 +83,6 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 
 	if (df.fieldtype === "Text Editor") {
 		setTextEditorStyle(control);
-		control.quill.on(
-			"text-change",
-			() => {
-				// Resize row height
-				cell.getRow().normalizeHeight();
-			}
-		);
 	}
 
 	// Call cancel() on blur
