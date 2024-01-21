@@ -58,6 +58,12 @@ def get_columns(filters=None):
 			"width": 180,
 		},
 		{
+			"label": _("Quotation Markup %"),
+			"fieldtype": "Percent",
+			"fieldname": "quotation_markup_percentage",
+			"width": 180,
+		},
+		{
 			"label": _("Quotation Margin"),
 			"fieldtype": "Currency",
 			"fieldname": "quotation_margin_amount",
@@ -117,11 +123,12 @@ def get_data(filters):
 		.on(purchase_order_item.name == purchase_invoice_item.po_detail)
 		.select(quotation_item.parent, quotation_item.item_code, quotation_item.item_name, quotation_item.qty.as_("quotation_qty"), quotation_item.gross_profit.as_("quotation_gross_profit"))
 		.select(quotation_item.unit_cost_price.as_("quotation_unit_cost_price"), quotation_item.base_net_rate.as_("quotation_base_net_rate"), quotation_item.base_net_amount.as_("quotation_base_net_amount"))
+		.select(quotation_item.gross_profit_percentage, quotation_item.markup_percentage)
 		.select(sales_invoice_item.name.as_("siname"), sales_invoice_item.qty.as_("sales_invoice_qty"))
 		.select(sales_invoice_item.project, sales_invoice_item.cost_center, sales_invoice.posting_date)
 		.select(sales_invoice_item.base_net_rate.as_("sales_invoice_base_net_rate"), sales_invoice_item.base_net_amount.as_("sales_invoice_base_net_amount"))
 		.select(purchase_invoice_item.base_net_rate.as_("purchase_invoice_base_net_rate"), purchase_invoice_item.base_net_amount.as_("purchase_invoice_base_net_amount"))
-		.where(quotation_item.row_type.isin("item", ""))
+		.where(quotation_item.row_type.isin(("item", "")))
 	)
 
 	if filters.quotation:
@@ -138,7 +145,8 @@ def get_data(filters):
 			"item_name": data.get("item_name"),
 			"quotation_cost_price": data.get("quotation_unit_cost_price"),
 			"quotation_selling_price": data.get("quotation_base_net_rate"),
-			"quotation_margin_percentage": (data.get("quotation_base_net_rate") or 0.0 - data.get("quotation_unit_cost_price") or 0.0) * 100 / data.get("quotation_unit_cost_price") if data.get("quotation_unit_cost_price") else 0.0,
+			"quotation_margin_percentage": data.get("gross_profit_percentage"),
+			"quotation_markup_percentage": data.get("markup_percentage"),
 			"quotation_margin_amount": data.get("quotation_gross_profit"),
 		})
 
