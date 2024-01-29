@@ -81,10 +81,11 @@
 		padding: 3px;
 	}
 
-	.tabulator-row .tabulator-cell.tabulator-editing {
-		height: 29px !important;
-		vertical-align: top;
-	}
+	// .tabulator-row .tabulator-cell.tabulator-editing {
+	// 	// Never happens in practice and breaks auto-resize of row height when editing text in Text Editor.
+	// 	height: 29px !important;
+	// 	vertical-align: top;
+	// }
 
 	.tabulator-row .tabulator-cell.tabulator-editing :is(input) {
 		height: unset !important;

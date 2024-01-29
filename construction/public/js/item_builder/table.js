@@ -22,10 +22,34 @@ function onControlBlur(control, callback) {
 	});
 }
 
-function makeTextEditorDocField(df) {
+frappe.ui.form.ControlTextEditorConstruction = class ControlTextEditorConstruction extends frappe.ui.form.ControlTextEditor {
+	is_quill_dirty(source) {
+		return false;
+	}
+	is_quill_dirty_original(source) {
+		return super.is_quill_dirty(source);
+	}
+	bind_events() {
+		super.bind_events();
+		this.quill.on(
+			"text-change",
+			frappe.utils.debounce((delta, oldDelta, source) => {
+				if (source === "api") return;
+				const input_value = this.get_input_value();
+				this.df?.onchange?.call(this, input_value);
+			}, 0)
+		);
+	}
+}
+
+function makeTextEditorDocField(df, row) {
 	return {
 		...df,
-		fieldtype: "Text Editor",
+		onchange() {
+			row.normalizeHeight();
+			row.getTable().redraw();
+		},
+		fieldtype: "Text Editor Construction",
 		max_height: "unset",
 		theme: "bubble",
 		get_toolbar_options: () => {
@@ -69,7 +93,7 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 	};
 
 	if (df.fieldtype === "Text Editor") {
-		df = makeTextEditorDocField(df);
+		df = makeTextEditorDocField(df, cell.getRow());
 	}
 
 	const control = frappe.ui.form.make_control({
@@ -316,6 +340,7 @@ class ItemBuilderForm {
 				withTabulatorLinkEditor_mut(col, df);
 			}
 			else if (df.fieldname == "description") {
+				col.variableHeight = true;
 				col.editor = frappeTabulatorCellEditor;
 				col.editorParams = {
 					df: { ...df, theme: "bubble", max_height: "unset", },
@@ -676,13 +701,7 @@ export default class ItemBuilderTable {
 		const rowDf = frappe.meta.get_docfield(rowDt, "description");
 
 		const control = frappe.ui.form.make_control({
-			df: makeTextEditorDocField({
-				...rowDf,
-				onchange: () => {
-					const value = control.get_value();
-					this.form_wrapper.update_row_value(doc, "description", value);
-				},
-			}),
+			df: makeTextEditorDocField(rowDf, row),
 			parent: wrapper,
 			render_input: true,
 			only_input: true,
