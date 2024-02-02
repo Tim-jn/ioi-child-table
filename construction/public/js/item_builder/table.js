@@ -126,7 +126,7 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 	return el;
 }
 
-function withTabulatorLinkEditor_mut(col, df) {
+function withTabulatorLinkEditor_mut(col, df, ref_dt) {
 	col.editor = "list";
 	col.editorParams = {
 		// https://tabulator.info/docs/5.5/edit#editor-list
@@ -146,7 +146,7 @@ function withTabulatorLinkEditor_mut(col, df) {
 				txt: filterTerm,
 				doctype: df.options,
 				ignore_user_permissions: false,
-				reference_doctype: "Quotation",
+				reference_doctype: ref_dt,
 			};
 			const res = await frappe.call({
 				type: "POST",
@@ -197,7 +197,7 @@ function formatEditButton(cell, formatterParams, onRendered) {
 
 		const dialog = new frappe.ui.Dialog({
 			size: "large",
-			fields: frappe.get_meta("Quotation Item").fields,
+			fields: frappe.get_meta(this.frm.doctype + " Item").fields,
 			frm: this.frm,
 			grid: this.frm.grids[0].grid,
 			title: __("Edit"),
@@ -337,7 +337,8 @@ class ItemBuilderForm {
 			}
 
 			if (df.fieldtype === "Link") {
-				withTabulatorLinkEditor_mut(col, df);
+				const ref_dt = this.parent_doctype;
+				withTabulatorLinkEditor_mut(col, df, ref_dt);
 			}
 			else if (df.fieldname == "description") {
 				col.variableHeight = true;
