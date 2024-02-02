@@ -473,7 +473,7 @@ export default class ItemBuilderTable {
 		Object.assign(this, opts)
 		this.frm = opts.frm;
 		this.form_wrapper = new ItemBuilderForm({ frm: this.frm, detach: true });
-		this.make();
+		this.ready_promise = this.make();
 	}
 
 	async make() {

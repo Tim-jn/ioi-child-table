@@ -1,7 +1,40 @@
 import ItemBuilderTable from "./table";
 import ItemBuilderTree from "./tree";
 
-frappe.provide("construction")
+frappe.provide("construction");
+
+construction.ItemCatalog = class ConstructionItemCatalog extends erpnext.ItemCatalog {
+	/**
+	 * @override
+	 * @returns {jQuery}
+	 */
+	async make_button() {
+		const item_builder = this.opts.item_builder;
+		if (item_builder) {
+			const $btn = $(`<button class="btn btn-default btn-xs mr-2">`);
+			$btn.html(frappe.utils.icon("es-line-table-view", "sm"));
+			$btn.append(" " + __("Catalog"));
+			$btn.on("click", () => this.show_catalog())
+
+			if (item_builder.table) {
+				await item_builder.table.ready_promise;
+				const del_btn = item_builder.table.$table_buttons.find(".btn").get(0);
+				$btn.insertAfter(del_btn);
+			} else {
+				item_builder.$header.append($btn);
+			}
+			this.$btn = $btn;
+		} else {
+			return super.make_button();
+		}
+	}
+
+	show_button() {
+		this.$btn?.remove();
+		this.$btn = null;
+		return super.show_button();
+	}
+}
 
 construction.item_builder = class ItemBuilder {
 	constructor(opts) {
@@ -14,9 +47,23 @@ construction.item_builder = class ItemBuilder {
 		}
 	}
 
+	async setup_item_catalog() {
+		const has_items_field = frappe.meta.get_docfield(this.frm.doc.doctype + " Item", "item_code");
+		const read_only = this.frm.read_only || this.frm.doc.docstatus > 0;
+		if (has_items_field && !read_only) {
+			if (!this.item_catalog) {
+				this.item_catalog = new construction.ItemCatalog({ frm: this.frm, item_builder: this });
+			}
+			await this.item_catalog.show_button();
+		} else {
+			await this.item_catalog?.hide_button();
+		}
+	}
+
 	set_current_view(view) {
 		this.current_view = view;
 		this.show();
+		this.setup_item_catalog();
 	}
 
 	destroy() {
