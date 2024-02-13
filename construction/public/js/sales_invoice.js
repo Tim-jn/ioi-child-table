@@ -1,4 +1,4 @@
-frappe.ui.form.on("Sales Invoices", {
+frappe.ui.form.on("Sales Invoice", {
 	refresh(frm) {
 		frm.item_builder = new construction.item_builder({
 			frm: frm,

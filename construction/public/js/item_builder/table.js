@@ -495,14 +495,14 @@ export default class ItemBuilderTable {
 				<div class="mr-auto text-muted small item-table-footer-help"></div>
 			</div>`).appendTo(this.$table_wrapper);
 
-			const help = this.$table_footer.find(".item-table-footer-help");
-			help.html([
-				__("Drag and drop rows to reorder them."),
-				__("Click on a row to select it."),
-				__("Click on the <b>Delete</b> button to delete the selected rows."),
-				__("Click on the <b>Add Item</b> button to add a new item."),
-				__("Scroll horizontally using the mouse wheel while pressing ⇧."),
-			].join("<br>"));
+			// const help = this.$table_footer.find(".item-table-footer-help");
+			// help.html([
+			// 	__("Drag and drop rows to reorder them."),
+			// 	__("Click on a row to select it."),
+			// 	__("Click on the <b>Delete</b> button to delete the selected rows."),
+			// 	__("Click on the <b>Add Item</b> button to add a new item."),
+			// 	__("Scroll horizontally using the mouse wheel while pressing ⇧."),
+			// ].join("<br>"));
 		}
 
 		this.bind_events();
