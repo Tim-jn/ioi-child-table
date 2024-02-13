@@ -17,25 +17,8 @@ def after_migrate():
 
 def add_custom_fields():
 	click.secho("* Adding Construction Custom Fields")
-	remove_custom_fields()
 	custom_fields = get_custom_fields()
 	create_custom_fields(custom_fields)
-
-
-def remove_custom_fields():
-	to_remove = set()
-	for dt, fields in get_custom_fields().items():
-		for field in fields:
-			to_remove.add((dt, field["fieldname"]))
-
-	to_remove.add(("Quotation", "construction_tab"))
-	to_remove.add(("Quotation Item", "subtotal"))
-	to_remove.add(("Quotation Item", "dimensions_section"))
-	to_remove.add(("Quotation Item", "height"))
-	to_remove.add(("Quotation Item", "width"))
-
-	for dt, fieldname in to_remove:
-		frappe.delete_doc("Custom Field", f"{dt}-{fieldname}", ignore_missing=True)
 
 
 def get_custom_fields_for_transaction_doctype(dt: str):
@@ -44,7 +27,7 @@ def get_custom_fields_for_transaction_doctype(dt: str):
 			{
 				"fieldname": "construction_items_section",
 				"fieldtype": "Section Break",
-				"insert_after": "items_section",
+				"insert_after": "items",
 				"print_hide": 1,
 			},
 			{
