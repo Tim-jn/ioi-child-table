@@ -199,6 +199,7 @@ function formatEditButton(cell, formatterParams, onRendered) {
 			size: "large",
 			fields: frappe.get_meta(this.frm.doctype + " Item").fields,
 			frm: this.frm,
+			doc: this.frm.doc,
 			grid: this.frm.grids[0].grid,
 			title: __("Edit"),
 			primary_action_label: __("Close"),
