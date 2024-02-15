@@ -136,6 +136,12 @@ doc_events = {
 	"Quotation": {
 		"before_print": "construction.construction.print.before_print",
 	},
+	"Sales Order": {
+		"before_print": "construction.construction.print.before_print",
+	},
+	"Sales Invoice": {
+		"before_print": "construction.construction.print.before_print",
+	},
 	"Project": {
 		"on_update": "construction.utils.projects.on_update"
 	},
