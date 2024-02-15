@@ -113,7 +113,9 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 	onControlBlur(control, () => {
 		const value = control.get_value();
 		if (value !== updatedValue) {
-			success(value);
+			if (!["Date", "Datetime", "Duration"].includes(df.fieldtype)) {
+				success(value);
+			}
 		} else {
 			cancel();
 		}
