@@ -208,3 +208,29 @@ def add_property_setters():
 		validate_fields_for_doctype=False,
 		is_system_generated=True
 	)
+
+	frappe.make_property_setter(
+		dict(
+			doctype="Sales Invoice Item",
+			doctype_or_field="DocField",
+			fieldname="cost_center",
+			property="reqd",
+			value=0,
+			property_type="Check",
+		),
+		validate_fields_for_doctype=False,
+		is_system_generated=True
+	)
+
+	frappe.make_property_setter(
+		dict(
+			doctype="Sales Invoice Item",
+			doctype_or_field="DocField",
+			fieldname="cost_center",
+			property="mandatory_depends_on",
+			value="eval:['', 'item'].includes(doc.row_type)",
+			property_type="Text",
+		),
+		validate_fields_for_doctype=False,
+		is_system_generated=True
+	)
