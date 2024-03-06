@@ -17,5 +17,15 @@ frappe.query_reports["Sales Margin Comparison"] = {
 			fieldtype: "Link",
 			options: "Quotation",
 		},
+		{
+			fieldname: "start_date",
+			label: __("Transaction Date After"),
+			fieldtype: "Date",
+		},
+		{
+			fieldname: "end_date",
+			label: __("Transaction Date Before"),
+			fieldtype: "Date",
+		},
 	]
 };
