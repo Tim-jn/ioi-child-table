@@ -102,6 +102,7 @@ def get_columns(filters=None):
 	return columns
 
 def get_data(filters):
+	quotation = frappe.qb.DocType("Quotation")
 	quotation_item = frappe.qb.DocType("Quotation Item")
 	sales_order_item = frappe.qb.DocType("Sales Order Item")
 	sales_invoice_item = frappe.qb.DocType("Sales Invoice Item")
@@ -113,6 +114,8 @@ def get_data(filters):
 		frappe.qb.from_(quotation_item)
 		.left_join(sales_order_item)
 		.on((quotation_item.name == sales_order_item.quotation_item) & (sales_order_item.docstatus == 1))
+		.left_join(quotation)
+		.on((quotation.name == quotation_item.parent))
 		.left_join(sales_invoice_item)
 		.on((sales_order_item.name == sales_invoice_item.so_detail) & (sales_invoice_item.docstatus == 1))
 		.left_join(sales_invoice)
@@ -133,6 +136,13 @@ def get_data(filters):
 
 	if filters.quotation:
 		query = query.where(quotation_item.parent == filters.quotation)
+
+
+	if filters.start_date and not filters.quotation:
+		query = query.where(quotation.transaction_date >= filters.start_date)
+
+	if filters.end_date and not filters.quotation:
+		query = query.where(quotation.transaction_date <= filters.end_date)
 
 	transaction_data = query.run(as_dict=True)
 
