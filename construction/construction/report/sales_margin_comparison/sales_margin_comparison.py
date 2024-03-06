@@ -102,6 +102,7 @@ def get_columns(filters=None):
 	return columns
 
 def get_data(filters):
+	quotation = frappe.qb.DocType("Quotation")
 	quotation_item = frappe.qb.DocType("Quotation Item")
 	sales_order_item = frappe.qb.DocType("Sales Order Item")
 	sales_invoice_item = frappe.qb.DocType("Sales Invoice Item")
@@ -112,15 +113,17 @@ def get_data(filters):
 	query = (
 		frappe.qb.from_(quotation_item)
 		.left_join(sales_order_item)
-		.on(quotation_item.name == sales_order_item.quotation_item)
+		.on((quotation_item.name == sales_order_item.quotation_item) & (sales_order_item.docstatus == 1))
+		.left_join(quotation)
+		.on((quotation.name == quotation_item.parent))
 		.left_join(sales_invoice_item)
-		.on(sales_order_item.name == sales_invoice_item.so_detail)
+		.on((sales_order_item.name == sales_invoice_item.so_detail) & (sales_invoice_item.docstatus == 1))
 		.left_join(sales_invoice)
-		.on(sales_invoice.name == sales_invoice_item.parent)
+		.on((sales_invoice.name == sales_invoice_item.parent) & (sales_invoice.docstatus == 1))
 		.left_join(purchase_order_item)
-		.on(sales_order_item.name == purchase_order_item.sales_order_item)
+		.on((sales_order_item.name == purchase_order_item.sales_order_item) & (purchase_order_item.docstatus == 1))
 		.left_join(purchase_invoice_item)
-		.on(purchase_order_item.name == purchase_invoice_item.po_detail)
+		.on((purchase_invoice_item.name == purchase_invoice_item.po_detail) & (purchase_invoice_item.docstatus == 1))
 		.select(quotation_item.parent, quotation_item.item_code, quotation_item.item_name, quotation_item.qty.as_("quotation_qty"), quotation_item.gross_profit.as_("quotation_gross_profit"))
 		.select(quotation_item.unit_cost_price.as_("quotation_unit_cost_price"), quotation_item.base_net_rate.as_("quotation_base_net_rate"), quotation_item.base_net_amount.as_("quotation_base_net_amount"))
 		.select(quotation_item.gross_profit_percentage, quotation_item.markup_percentage)
@@ -133,6 +136,13 @@ def get_data(filters):
 
 	if filters.quotation:
 		query = query.where(quotation_item.parent == filters.quotation)
+
+
+	if filters.start_date and not filters.quotation:
+		query = query.where(quotation.transaction_date >= filters.start_date)
+
+	if filters.end_date and not filters.quotation:
+		query = query.where(quotation.transaction_date <= filters.end_date)
 
 	transaction_data = query.run(as_dict=True)
 
