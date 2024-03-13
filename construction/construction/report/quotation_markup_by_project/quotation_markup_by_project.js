@@ -1,7 +1,7 @@
 // Copyright (c) 2024, Dokos SAS and contributors
 // For license information, please see license.txt
 
-frappe.query_reports["Markup by Project"] = {
+frappe.query_reports["Quotation Markup by Project"] = {
 	"filters": [
 		{
 			fieldname: "company",

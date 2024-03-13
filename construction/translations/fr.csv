@@ -1,4 +1,6 @@
+Actual Markup,Marque réelle,Markup by Project
 Actual Markup,Marque réelle,
+Actual Purchases,Achats réels,Markup by Project
 Actual Purchases,Achats réels,
 Add Comment,Ajouter un commentaire,Construction
 Add Heading,Ajouter un titre,Construction
@@ -21,24 +23,32 @@ Display,Affichage,Quotation Item
 Display,Affichage,Sales Invoice Item
 Display,Affichage,Sales Order Item
 Drag and drop rows to reorder them.,Glissez-déposez les lignes pour les ré-organiser.,
+Estimated Costing,Coût total estimé,Markup by Project
+Estimated Markup,Marque estimée,Markup by Project
 Gross Profit Percentage,% Marge brute,
 Heading ,Titre,
 Hide Price,Masquer le prix,
 Hide Prices in Section,Masquer prix de la section,
 Hide Row,Masquer la ligne,
 Hide Rows in Section,Masquer lignes de la section,
+Markup by Project,Récapitulatif de marque par projet,
+Markup on quotation,Marque sur devis,Markup by Project
 Markup on quotation,Marque sur devis,
 No documents to show,Aucun document à afficher,
+Percent Complete,Pourcentage d'avancement,Markup by Project
 Print Style,Style d'impression,Construction
 Project Settings,Paramètres des projets,
+Project,Projet,Markup by Project
 Projects expected to end after,Projets prévus après le,
 Projects expected to start after,Projets prévus avant le,
+Purchases on quotation,Achats sur devis,Markup by Project
 Purchases on quotation,Achats sur devis,
 Quotation Builder Columns,Colonnes de l'éditeur de devis,
 Quotation Cost Price,Prix de revient du devis,
 Quotation Margin %,% de marge du devis,
 Quotation Margin,Marge du devis,
 Quotation Markup %,Taux de marque %,
+Quotation Markup by Project,Récapitulatif de marque sur devis par projet,
 Quotation Selling Price,Prix de vente du devis,
 Row Type,Type de ligne,
 Sales Invoice Cost Price,Prix de revient de la facture de vente,
@@ -46,6 +56,7 @@ Sales Invoice Margin %,% de marge de la facture de vente,
 Sales Invoice Margin,Marge de la facture de vente,
 Sales Invoice Selling Price,Prix de vente de la facture de vente,
 Sales Margin Comparison,Comparatif de marge par devis,
+Sales on quotation,Ventes sur devis,Markup by Project
 Sales on quotation,Ventes sur devis,
 Scroll horizontally using the mouse wheel while pressing \u21E7.,Faites défiler horizontalement en utilisant la molette de la souris tout en appuyant sur \u21E7.,
 Scroll horizontally using the mouse wheel while pressing ⇧.,Faites défiler horizontalement en utilisant la molette de la souris tout en appuyant sur ⇧.,
@@ -55,4 +66,3 @@ Transaction Date Before,Transaction avant le,
 Unit Cost Price,PRU,
 Use the dedicated table view,Utiliser la vue Table dédiée,
 With Subtotal,Avec sous-total,
-Markup by Project,Récapitulatif de marque par projet,
