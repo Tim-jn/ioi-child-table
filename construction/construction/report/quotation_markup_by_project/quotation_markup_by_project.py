@@ -59,6 +59,19 @@ def get_columns(filters):
 			"fieldname": "actual_markup",
 			"width": 150,
 		},
+		{
+			"label": _("Estimated Costing", context="Markup by Project"),
+			"fieldtype": "Currency",
+			"fieldname": "estimated_costing",
+			"options": "Company:currency",
+			"width": 150,
+		},
+		{
+			"label": _("Estimated Markup", context="Markup by Project"),
+			"fieldtype": "Percent",
+			"fieldname": "estimated_markup",
+			"width": 150,
+		},
 	]
 
 
@@ -92,7 +105,7 @@ def get_data(filters):
 		.left_join(purchase_invoice_item)
 		.on((purchase_invoice_item.name == purchase_invoice_item.po_detail) & (purchase_invoice_item.docstatus == 1))
 		.select(quotation.name, quotation.markup_percentage, quotation.net_total)
-		.select(project.name, project.percent_complete)
+		.select(project.name, project.percent_complete, project.total_expense_claim, project.estimated_costing)
 		.select(Sum(quotation_item.unit_cost_price * quotation_item.qty).as_("unit_cost"))
 		.select(Sum(purchase_invoice_item.base_net_amount).as_("purchase_invoice_base_net_amount"))
 		.where(quotation_item.row_type.isin(("item", "")))
@@ -114,9 +127,10 @@ def get_data(filters):
 	for data in transaction_data:
 
 		quotation_net_total = data.get("net_total") or 0.0
-		actual_purchases = data.get("purchase_invoice_base_net_amount") or 0.0
+		actual_purchases = (data.get("purchase_invoice_base_net_amount") or 0.0) + (data.get("total_expense_claim") or 0.0)
 		percent_complete = data.get("percent_complete") or 0.0
 		quotation_unit_cost = data.get("unit_cost")
+		estimated_costing = data.get("estimated_costing") or 0.0
 
 		row = ({
 			"project": data.get("name"),
@@ -125,7 +139,9 @@ def get_data(filters):
 			"purchases_on_quotation": quotation_unit_cost,
 			"percent_complete": percent_complete,
 			"actual_purchases": actual_purchases,
-			"actual_markup": (quotation_net_total * percent_complete / 100 - actual_purchases) / (quotation_net_total * percent_complete / 100) * 100.0 if (quotation_unit_cost * percent_complete) else 0.0
+			"actual_markup": (quotation_net_total * percent_complete / 100 - actual_purchases) / (quotation_net_total * percent_complete / 100) * 100.0 if (quotation_unit_cost * percent_complete) else 0.0,
+			"estimated_costing": estimated_costing,
+			"estimated_markup": (quotation_net_total - estimated_costing) / quotation_net_total * 100.0 if quotation_unit_cost else 0.0,
 		})
 
 		result.append(row)

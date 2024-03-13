@@ -10,14 +10,14 @@
  "is_standard": "Yes",
  "letter_head": "Standard",
  "letterhead": null,
- "modified": "2024-03-06 13:57:28.026825",
+ "modified": "2024-03-12 13:57:28.026825",
  "modified_by": "Administrator",
  "module": "Construction",
- "name": "Markup by Project",
+ "name": "Quotation Markup by Project",
  "owner": "Administrator",
  "prepared_report": 0,
  "ref_doctype": "Project",
- "report_name": "Markup by Project",
+ "report_name": "Quotation Markup by Project",
  "report_type": "Script Report",
  "roles": [
   {
