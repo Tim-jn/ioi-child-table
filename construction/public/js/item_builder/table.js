@@ -1,4 +1,5 @@
 import { TabulatorFull as Tabulator } from "tabulator-tables";
+import { CQBTableEditRow, CQBTableToolbarRendered } from "./events";
 
 const DONOTUSE_DEFAULT_TABLE_COLUMNS = [
 	"item_code",
@@ -192,37 +193,14 @@ function frappeTabulatorCellFormatter(cell, formatterParams, onRendered) {
 function formatEditButton(cell, formatterParams, onRendered) {
 	const el = document.createElement("div");
 
-	const click = () => {
-		const row = cell.getRow();
-		const rowData = row.getData();
-		const doc = this.frm.doc.items.find(x => x.name === rowData.name);
-
-		const dialog = new frappe.ui.Dialog({
-			size: "large",
-			fields: frappe.get_meta(this.frm.doctype + " Item").fields,
-			frm: this.frm,
-			doc: this.frm.doc,
-			grid: this.frm.grids[0].grid,
-			title: __("Edit"),
-			primary_action_label: __("Close"),
-			primary_action: () => {
-				dialog.hide();
-			},
-			onhide: () => {
-				this.open_form = null;
-			},
-		});
-		dialog.refresh(doc);
-		dialog.show();
-		this.open_form = dialog;
-	}
-
 	onRendered(() => {
 		const button = document.createElement("button");
 		button.classList.add("btn-reset");
 		button.innerHTML = frappe.utils.icon("edit", "sm");
 		button.ariaLabel = __("Edit");
-		button.addEventListener("click", click);
+		button.addEventListener("click", () => {
+			document.dispatchEvent(new CQBTableEditRow(this, cell));
+		});
 		el.appendChild(button);
 	});
 
@@ -478,6 +456,17 @@ export default class ItemBuilderTable {
 		this.frm = opts.frm;
 		this.form_wrapper = new ItemBuilderForm({ frm: this.frm, detach: true });
 		this.ready_promise = this.make();
+		this.destroyed = false;
+	}
+
+	destroy() {
+		this.destroyed = true;
+		this.form_wrapper = null;
+		this.tabulator = null;
+		this.open_form = null;
+		if (this.show_row_form_in_dialog) {
+			document.removeEventListener(CQBTableEditRow.EVENT_NAME, this.show_row_form_in_dialog);
+		}
 	}
 
 	async make() {
@@ -493,6 +482,7 @@ export default class ItemBuilderTable {
 				</div>
 			</div>`).appendTo(this.$table_wrapper);
 
+			this.table_actions = this.$table_buttons.find(".btn-group")[0];
 
 			this.$table_footer = $(`<div class="item-table-footer d-flex flex-row flex-shrink-0 align-items-start">
 				<div class="mr-auto text-muted small item-table-footer-help"></div>
@@ -510,9 +500,48 @@ export default class ItemBuilderTable {
 
 		this.bind_events();
 		this.bind_form();
+		this.bind_edit();
+
+		document.dispatchEvent(new CQBTableToolbarRendered(this));
+	}
+
+	bind_edit() {
+		this.show_row_form_in_dialog = (/** @type {CQBTableEditRow} */ event) => {
+			if (this.destroyed) {
+				return;
+			}
+			const cell = event.detail.cell;
+			const row = cell.getRow();
+			const rowData = row.getData();
+			const doc = this.frm.doc.items.find(x => x.name === rowData.name);
+
+			const dialog = new frappe.ui.Dialog({
+				size: "large",
+				fields: frappe.get_meta(this.frm.doctype + " Item").fields,
+				frm: this.frm,
+				doc: this.frm.doc,
+				grid: this.frm.get_field("items").grid,
+				title: __("Edit"),
+				primary_action_label: __("Close"),
+				primary_action: () => {
+					dialog.hide();
+				},
+				onhide: () => {
+					this.open_form = null;
+				},
+			});
+			dialog.refresh(doc);
+			dialog.show();
+			this.open_form = dialog;
+		};
+		document.addEventListener(CQBTableEditRow.EVENT_NAME, this.show_row_form_in_dialog);
 	}
 
 	async on_update(what, ...args) {
+		if (this.destroyed) {
+			return;
+		}
+
 		if (what === "row" && typeof args[2]?.name === "string") {
 			// Is a single row update
 			const doc = args[2];
@@ -531,8 +560,8 @@ export default class ItemBuilderTable {
 	}
 
 	async after_update() {
-		if (this.form_wrapper.open_form) {
-			const dialog = this.form_wrapper.open_form;
+		if (this.open_form) {
+			const dialog = this.open_form;
 			const item = this.frm.doc.items.find(x => x.name === dialog.doc.name)
 			if (item) {
 				dialog.refresh(item);
