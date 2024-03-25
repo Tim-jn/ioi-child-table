@@ -111,3 +111,13 @@ construction.item_builder = class ItemBuilder {
 		this.$wrapper.empty();
 	}
 }
+
+construction.setup_quotation_builder = (frm) => {
+	const field = frm.get_field("item_builder_html");
+	const $wrapper = field?.$wrapper;
+	if (!$wrapper) {
+		return console.error("construction: Wrapper not found for item builder in form:", frm);
+	}
+	frm.item_builder?.destroy(); // cleanup from previous render
+	frm.item_builder = new construction.item_builder({ frm, $wrapper });
+};
