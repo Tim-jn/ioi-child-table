@@ -189,7 +189,7 @@ function frappeTabulatorCellFormatter(cell, formatterParams, onRendered) {
 	return parsed.body.innerHTML;
 }
 
-/** @this {ItemBuilderTable} */
+/** @this {ItemBuilderForm} */
 function formatEditButton(cell, formatterParams, onRendered) {
 	const el = document.createElement("div");
 
@@ -199,7 +199,7 @@ function formatEditButton(cell, formatterParams, onRendered) {
 		button.innerHTML = frappe.utils.icon("edit", "sm");
 		button.ariaLabel = __("Edit");
 		button.addEventListener("click", () => {
-			document.dispatchEvent(new CQBTableEditRow(this, cell));
+			document.dispatchEvent(new CQBTableEditRow(this.builder, cell));
 		});
 		el.appendChild(button);
 	});
@@ -209,9 +209,12 @@ function formatEditButton(cell, formatterParams, onRendered) {
 
 
 class ItemBuilderForm {
-	constructor({ frm, detach = false } = {}) {
+	constructor({ frm, detach = false, builder = null } = {}) {
 		this.frm = frm;
+		/** @type {boolean} */
 		this.detach = detach;
+		/** @type {ItemBuilderTable} */
+		this.builder = builder;
 	}
 
 	async setup() {
@@ -452,9 +455,9 @@ class ItemBuilderForm {
 
 export default class ItemBuilderTable {
 	constructor(opts) {
-		Object.assign(this, opts)
+		Object.assign(this, opts);
 		this.frm = opts.frm;
-		this.form_wrapper = new ItemBuilderForm({ frm: this.frm, detach: true });
+		this.form_wrapper = new ItemBuilderForm({ frm: this.frm, builder: this, detach: true });
 		this.ready_promise = this.make();
 		this.destroyed = false;
 	}
@@ -516,6 +519,9 @@ export default class ItemBuilderTable {
 
 	bind_edit() {
 		this.show_row_form_in_dialog = (/** @type {CQBTableEditRow} */ event) => {
+			if (event.detail.builder !== this) {
+				return;
+			}
 			if (this.destroyed) {
 				return;
 			}
