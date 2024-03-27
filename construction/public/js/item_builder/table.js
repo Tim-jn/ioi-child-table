@@ -16,11 +16,24 @@ const DONOTUSE_DEFAULT_TABLE_COLUMNS = [
 
 function onControlBlur(control, callback) {
 	const input = $(control.$input || control.input || control.input_area).get(0);
-	input.addEventListener("focusout", (e) => {
-		// Ignore focusout if the new focused element is a child of the editor
-		if (control.parent.contains(e.relatedTarget)) return;
-		callback();
-	});
+	if (["Date", "Datetime", "Duration"].includes(control.df.fieldtype)) {
+		input.addEventListener("change", callback);
+		input.addEventListener("focusout", (e) => {
+			// Ignore focusout if the new focused element is inside a datepicker
+			// if (e.relatedTarget?.closest(".datepickers-container")) return;
+			// non-focusable elements won't ever be the relatedTarget
+			if (control.datepicker?.inFocus) {
+				return; // the change event will handle success/cancel.
+			}
+			callback();
+		});
+	} else {
+		input.addEventListener("focusout", (e) => {
+			// Ignore focusout if the new focused element is a child of the editor
+			if (control.parent.contains(e.relatedTarget)) return;
+			callback();
+		});
+	}
 }
 
 frappe.ui.form.ControlTextEditorConstruction = class ControlTextEditorConstruction extends frappe.ui.form.ControlTextEditor {
@@ -114,9 +127,7 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 	onControlBlur(control, () => {
 		const value = control.get_value();
 		if (value !== updatedValue) {
-			if (!["Date", "Datetime", "Duration"].includes(df.fieldtype)) {
-				success(value);
-			}
+			success(value);
 		} else {
 			cancel();
 		}
@@ -645,7 +656,7 @@ export default class ItemBuilderTable {
 		checkbox.checked = doc[fieldname];
 
 		if (doc.docstatus > 0) {
-			checkbox.disabled=true;
+			checkbox.disabled = true;
 		} else {
 			checkbox.addEventListener("change", (e) => {
 				this.form_wrapper.update_row_value(doc, fieldname, e.target.checked);
