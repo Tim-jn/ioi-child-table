@@ -5,6 +5,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from frappe.query_builder.functions import Coalesce
+
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	columns, data = get_columns(filters), get_data(filters)
@@ -133,6 +135,12 @@ def get_data(filters):
 		.select(purchase_invoice_item.base_net_rate.as_("purchase_invoice_base_net_rate"), purchase_invoice_item.base_net_amount.as_("purchase_invoice_base_net_amount"))
 		.where(quotation_item.row_type.isin(("item", "")))
 	)
+
+	if filters.company:
+		query = query.where(quotation.company == filters.company)
+	else:
+		allowed_companies = frappe.get_list("Company", pluck="name") + [""]
+		query = query.where(Coalesce(quotation.company, "").isin(allowed_companies))
 
 	if filters.quotation:
 		query = query.where(quotation_item.parent == filters.quotation)

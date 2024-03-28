@@ -16,6 +16,14 @@ frappe.query_reports["Quotation Markup by Project"] = {
 			label: __("Project"),
 			fieldtype: "Link",
 			options: "Project",
+			get_query: () => {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					filters: {
+						'company': ["in", [company, ""]]
+					}
+				}
+			}
 		},
 		{
 			fieldname: "expected_start_date",
