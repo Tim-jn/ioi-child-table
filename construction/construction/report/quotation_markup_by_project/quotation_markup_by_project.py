@@ -4,7 +4,8 @@
 import frappe
 from frappe import _
 
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Sum, Coalesce
+
 
 def execute(filters=None):
 	columns, data = get_columns(filters), get_data(filters)
@@ -111,6 +112,12 @@ def get_data(filters):
 		.where(quotation_item.row_type.isin(("item", "")))
 		.groupby(project.name)
 	)
+
+	if filters.company:
+		query = query.where(project.company == filters.company)
+	else:
+		allowed_companies = frappe.get_list("Company", pluck="name") + [""]
+		query = query.where(Coalesce(project.company, "").isin(allowed_companies))
 
 	if filters.project:
 		query = query.where(project.name == filters.project)

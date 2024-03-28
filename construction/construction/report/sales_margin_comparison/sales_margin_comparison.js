@@ -16,6 +16,14 @@ frappe.query_reports["Sales Margin Comparison"] = {
 			label: __("Quotation"),
 			fieldtype: "Link",
 			options: "Quotation",
+			get_query: () => {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					filters: {
+						'company': company
+					}
+				}
+			}
 		},
 		{
 			fieldname: "start_date",
