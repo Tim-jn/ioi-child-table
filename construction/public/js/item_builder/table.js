@@ -263,7 +263,7 @@ class ItemBuilderForm {
 		const order = this.columns.slice();
 
 		// Append required fields to the end of the list.
-		// order.push(...meta.fields.filter(df => (df.reqd && !df.default).map(df => df.fieldname)));
+		order.push(...meta.fields.filter(df => (df.reqd && !df.read_only && !df.default)).map(df => df.fieldname));
 
 		// Grab the DocFields that are in the `order` list.
 		const fields = meta.fields.filter(df => order.includes(df.fieldname));
