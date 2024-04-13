@@ -110,13 +110,13 @@ def get_custom_fields():
 				"fieldname": "documents_tab",
 				"fieldtype": "Tab Break",
 				"label": "Documents",
-				"insert_after": "message"
+				"insert_after": "message",
 			},
 			{
 				"fieldname": "documents_section",
 				"fieldtype": "Section Break",
 				"insert_after": "documents_tab",
-				"hidden": 1
+				"hidden": 1,
 			},
 			{
 				"fieldname": "documents_html",
@@ -167,7 +167,7 @@ def get_custom_fields():
 				"fieldname": "documents_section",
 				"fieldtype": "Section Break",
 				"insert_after": "documents_tab",
-				"hidden": 1
+				"hidden": 1,
 			},
 			{
 				"fieldname": "documents_html",
@@ -242,7 +242,7 @@ def add_property_setters():
 			property_type="Check",
 		),
 		validate_fields_for_doctype=False,
-		is_system_generated=True
+		is_system_generated=True,
 	)
 
 	frappe.make_property_setter(
@@ -255,7 +255,7 @@ def add_property_setters():
 			property_type="Text",
 		),
 		validate_fields_for_doctype=False,
-		is_system_generated=True
+		is_system_generated=True,
 	)
 
 	frappe.make_property_setter(
@@ -268,7 +268,7 @@ def add_property_setters():
 			property_type="Check",
 		),
 		validate_fields_for_doctype=False,
-		is_system_generated=True
+		is_system_generated=True,
 	)
 
 	frappe.make_property_setter(
@@ -281,5 +281,5 @@ def add_property_setters():
 			property_type="Text",
 		),
 		validate_fields_for_doctype=False,
-		is_system_generated=True
+		is_system_generated=True,
 	)
