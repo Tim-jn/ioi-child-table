@@ -34,6 +34,8 @@ doctype_js = {
 	"Task": "public/js/overrides/task.js",
 	"Sales Order": "public/js/overrides/sales_order.js",
 	"Sales Invoice": "public/js/overrides/sales_invoice.js",
+	"Purchase Order": "public/js/overrides/purchase_order.js",
+	"Supplier Quotation": "public/js/overrides/supplier_quotation.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -233,3 +235,5 @@ doc_events = {
 # auth_hooks = [
 # 	"construction.auth.validate"
 # ]
+
+export_python_type_annotations = True

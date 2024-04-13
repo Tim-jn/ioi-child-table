@@ -1,4 +1,18 @@
+from typing import TYPE_CHECKING
+
 import frappe
 
+if TYPE_CHECKING:
+	from construction.construction.doctype.construction_app_settings.construction_app_settings import (
+		ConstructionAppSettings,
+	)
+
+
 def get_bootinfo(bootinfo):
-	bootinfo.use_table_view = frappe.db.get_single_value("Construction App Settings", "use_table_view")
+	settings: "ConstructionAppSettings" = frappe.get_single("Construction App Settings")  # type: ignore
+	bootinfo.use_table_view = settings.use_table_view  # DEPRECATED
+	bootinfo.construction_app_settings = {
+		"use_table_view": settings.use_table_view,
+		"allow_buying": settings.allow_buying,
+		"allow_selling": settings.allow_selling,
+	}

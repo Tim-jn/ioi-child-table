@@ -23,7 +23,8 @@ def add_custom_fields():
 	create_property_setters()
 
 
-def get_custom_fields_for_transaction_doctype(dt: str):
+def get_custom_fields_for_selling_doctype(dt: str):
+	child_dt = dt + " Item"
 	return {
 		dt: [
 			{
@@ -40,8 +41,7 @@ def get_custom_fields_for_transaction_doctype(dt: str):
 				"print_hide": 1,
 			},
 		],
-		dt
-		+ " Item": [
+		child_dt: [
 			{
 				"fieldname": "row_type",
 				"fieldtype": "Select",
@@ -77,11 +77,34 @@ def get_custom_fields_for_transaction_doctype(dt: str):
 	}
 
 
+def get_custom_fields_for_buying_doctype(dt: str):
+	return {
+		dt: [
+			{
+				"fieldname": "construction_items_section",
+				"fieldtype": "Section Break",
+				"insert_after": "items",
+				"print_hide": 1,
+			},
+			{
+				"fieldname": "item_builder_html",
+				"fieldtype": "HTML",
+				"label": "Item Builder",
+				"insert_after": "construction_items_section",
+				"print_hide": 1,
+			},
+		],
+	}
+
+
 def get_custom_fields():
 	return {
-		**get_custom_fields_for_transaction_doctype("Quotation"),
-		**get_custom_fields_for_transaction_doctype("Sales Order"),
-		**get_custom_fields_for_transaction_doctype("Sales Invoice"),
+		**get_custom_fields_for_selling_doctype("Quotation"),
+		**get_custom_fields_for_selling_doctype("Sales Order"),
+		**get_custom_fields_for_selling_doctype("Sales Invoice"),
+		**get_custom_fields_for_buying_doctype("Supplier Quotation"),
+		**get_custom_fields_for_buying_doctype("Purchase Order"),
+		# **get_custom_fields_for_buying_doctype("Purchase Invoice"),
 		"Project": [
 			{
 				"fieldname": "documents_tab",

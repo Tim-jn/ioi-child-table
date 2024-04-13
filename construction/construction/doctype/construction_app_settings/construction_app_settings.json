@@ -10,21 +10,20 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "quotation_section",
+  "section_break_xtmw",
+  "table_column",
   "use_table_view",
+  "allow_selling",
+  "allow_buying",
+  "column_break_mcdy",
   "quotation_builder_columns"
  ],
  "fields": [
   {
-   "fieldname": "quotation_section",
-   "fieldtype": "Section Break",
-   "label": "Quotation"
-  },
-  {
    "depends_on": "eval:doc.use_table_view",
    "fieldname": "quotation_builder_columns",
    "fieldtype": "Table",
-   "label": "Quotation Builder Columns",
+   "label": "Columns",
    "options": "Construction Quotation Builder Column"
   },
   {
@@ -32,12 +31,40 @@
    "fieldname": "use_table_view",
    "fieldtype": "Check",
    "label": "Use the dedicated table view"
+  },
+  {
+   "fieldname": "section_break_xtmw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "table_column",
+   "fieldtype": "Column Break",
+   "label": "Table"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.use_table_view",
+   "fieldname": "allow_selling",
+   "fieldtype": "Check",
+   "label": "Show for selling documents"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.use_table_view",
+   "fieldname": "allow_buying",
+   "fieldtype": "Check",
+   "label": "Show for buying documents"
+  },
+  {
+   "columns": 10,
+   "fieldname": "column_break_mcdy",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "uil uil-wrench",
  "issingle": 1,
  "links": [],
- "modified": "2023-12-12 17:07:43.303967",
+ "modified": "2024-04-11 15:52:55.603297",
  "modified_by": "Administrator",
  "module": "Construction",
  "name": "Construction App Settings",
