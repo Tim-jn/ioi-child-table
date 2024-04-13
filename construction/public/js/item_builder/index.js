@@ -1,5 +1,6 @@
 import ItemBuilderTable from "./table";
 import ItemBuilderTree from "./tree";
+import { is_buying_doctype } from "./utils";
 
 frappe.provide("construction");
 
@@ -39,12 +40,25 @@ construction.ItemCatalog = class ConstructionItemCatalog extends erpnext.ItemCat
 construction.item_builder = class ItemBuilder {
 	constructor(opts) {
 		Object.assign(this, opts);
+		this._set_view();
+	}
 
-		if (frappe.boot.use_table_view) {
-			this.set_current_view("Table");
-		} else {
-			this.set_current_view("None");
+	_set_view() {
+		if (frappe.boot.construction_app_settings?.use_table_view) {
+			const doctype = this.frm?.doctype;
+
+			const is_buying = is_buying_doctype(doctype);
+			if (is_buying && frappe.boot.construction_app_settings?.allow_buying) {
+				return this.set_current_view("Table");
+			}
+
+			const is_selling = !is_buying;
+			if (is_selling && frappe.boot.construction_app_settings?.allow_selling) {
+				return this.set_current_view("Table");
+			}
 		}
+
+		return this.set_current_view("None");
 	}
 
 	async setup_item_catalog() {
