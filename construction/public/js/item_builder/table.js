@@ -1,5 +1,6 @@
 import { TabulatorFull as Tabulator } from "tabulator-tables";
 import { CQBTableEditRow, CQBTableToolbarRendered } from "./events";
+import { is_buying_doctype } from "./utils";
 
 const DONOTUSE_DEFAULT_TABLE_COLUMNS = [
 	"item_code",
@@ -262,7 +263,7 @@ class ItemBuilderForm {
 		const order = this.columns.slice();
 
 		// Append required fields to the end of the list.
-		// order.push(...meta.fields.filter(df => (df.reqd && !df.default).map(df => df.fieldname)));
+		order.push(...meta.fields.filter(df => (df.reqd && !df.read_only && !df.default)).map(df => df.fieldname));
 
 		// Grab the DocFields that are in the `order` list.
 		const fields = meta.fields.filter(df => order.includes(df.fieldname));
@@ -483,25 +484,43 @@ export default class ItemBuilderTable {
 		}
 	}
 
+	get features() {
+		const write = this.frm.doc.docstatus == 0;
+		const is_buying = is_buying_doctype(this.frm.doctype);
+		return {
+			read: 1,
+			write: write,
+			add_item: write,
+			add_title: write && !is_buying,
+			add_comment: write && !is_buying,
+		}
+	}
+
 	async make() {
 		await this.build_table();
 
-		if (this.frm.doc.docstatus == 0) {
+		if (this.features.write) {
+			const add_item = `<button type="button" class="btn btn-xs btn-primary new-item">
+				${__("Add Item", null, "Construction")}
+				${frappe.utils.icon('add', 'sm')}
+			</button>`
+
+			const add_title = `<button type="button" class="btn btn-xs btn-default new-title">
+				${__("Title", null, "Construction")}
+				${frappe.utils.icon('add', 'sm')}
+			</button>`
+
+			const add_comment = `<button type="button" class="btn btn-xs btn-default new-text">
+				${__("Comment", null, "Construction")}
+				${frappe.utils.icon('add', 'sm')}
+			</button>`
+
 			this.$table_buttons = $(`<div class="d-flex flex-row flex-shrink-0 align-items-start justify-content-end item-table-buttons">
 				<button class="btn btn-xs btn-danger delete-row mr-2" style="display: none;">${__("Delete")} ${frappe.utils.icon('remove', 'sm')}</button>
 				<div class="btn-group flex-shrink-0 align-items-start">
-					<button type="button" class="btn btn-xs btn-primary new-item">
-						${__("Add Item", null, "Construction")}
-						${frappe.utils.icon('add', 'sm')}
-					</button>
-					<button type="button" class="btn btn-xs btn-default new-title">
-						${__("Title", null, "Construction")}
-						${frappe.utils.icon('add', 'sm')}
-					</button>
-					<button type="button" class="btn btn-xs btn-default new-text">
-						${__("Comment", null, "Construction")}
-						${frappe.utils.icon('add', 'sm')}
-					</button>
+					${this.features.add_item ? add_item : ""}
+					${this.features.add_title ? add_title : ""}
+					${this.features.add_comment ? add_comment : ""}
 				</div>
 			</div>`).appendTo(this.$table_wrapper);
 

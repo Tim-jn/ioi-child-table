@@ -29,11 +29,13 @@ app_include_js = "construction.bundle.js"
 
 # include js in doctype views
 doctype_js = {
-	"Quotation" : "public/js/quotation.js",
-	"Project" : "public/js/project.js",
-	"Task" : "public/js/task.js",
-	"Sales Order" : "public/js/sales_order.js",
-	"Sales Invoice" : "public/js/sales_invoice.js"
+	"Quotation": "public/js/overrides/quotation.js",
+	"Project": "public/js/overrides/project.js",
+	"Task": "public/js/overrides/task.js",
+	"Sales Order": "public/js/overrides/sales_order.js",
+	"Sales Invoice": "public/js/overrides/sales_invoice.js",
+	"Purchase Order": "public/js/overrides/purchase_order.js",
+	"Supplier Quotation": "public/js/overrides/supplier_quotation.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -142,9 +144,7 @@ doc_events = {
 	"Sales Invoice": {
 		"before_print": "construction.construction.print.before_print",
 	},
-	"Project": {
-		"on_update": "construction.utils.projects.on_update"
-	}
+	"Project": {"on_update": "construction.utils.projects.on_update"},
 }
 
 # Scheduled Tasks
@@ -235,3 +235,5 @@ doc_events = {
 # auth_hooks = [
 # 	"construction.auth.validate"
 # ]
+
+export_python_type_annotations = True
