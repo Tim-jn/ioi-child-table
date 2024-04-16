@@ -65,8 +65,9 @@ def chantier_prepare_sections(doc):
 
 
 def before_print(doc, method, settings, *args, **kwargs):
-	if doc.doctype not in ("Quotation", "Sales Order"):
+	if doc.doctype not in ("Quotation", "Sales Order", "Sales Invoice"):
 		return
+
 	doc.print_templates["items"] = "construction/print/items.html"
 
 	# Compute subtotals for each section
