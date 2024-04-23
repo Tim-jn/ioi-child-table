@@ -20,6 +20,7 @@ class ConstructionAppSettings(Document):
 
 		allow_buying: DF.Check
 		allow_selling: DF.Check
+		default_table_page_size: DF.Literal["20", "100", "All"]
 		quotation_builder_columns: DF.Table[ConstructionQuotationBuilderColumn]
 		use_table_view: DF.Check
 	# end: auto-generated types

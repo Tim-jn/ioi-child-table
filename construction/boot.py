@@ -15,4 +15,5 @@ def get_bootinfo(bootinfo):
 		"use_table_view": settings.use_table_view,
 		"allow_buying": settings.allow_buying,
 		"allow_selling": settings.allow_selling,
+		"default_table_page_size": settings.default_table_page_size,
 	}
