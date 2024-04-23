@@ -666,14 +666,8 @@ export default class ItemBuilderTable {
 					},
 				}
 			},
+			...this._get_pagination_config(),
 		}
-
-		// Add pagination
-		tabulator_options.pagination = "local";
-		tabulator_options.paginationCounter = "rows";
-		tabulator_options.paginationSize = 20;
-		tabulator_options.paginationSizeSelector = [20, 100, true];
-
 		this.tabulator = new Tabulator(this.$table_wrapper.find(".tabulator-table")[0], tabulator_options);
 
 		let lastScrollTop = 0;
@@ -683,6 +677,27 @@ export default class ItemBuilderTable {
 		this.tabulator.on("renderComplete", () => {
 			window.scrollTo(0, lastScrollTop);
 		});
+	}
+
+	_get_pagination_config() {
+		let default_page_size = frappe.boot?.construction_app_settings?.default_table_page_size;
+		if (default_page_size === "All") {
+			default_page_size = true;
+		} else if (default_page_size) {
+			default_page_size = parseInt(default_page_size);
+		} else {
+			default_page_size = 0;
+		}
+
+		if (default_page_size) {
+			return {
+				pagination: "local",
+				paginationCounter: "rows",
+				paginationSize: default_page_size,
+				paginationSizeSelector: [20, 100, true],
+			}
+		}
+		return {};
 	}
 
 	rowFormatter(row) {
