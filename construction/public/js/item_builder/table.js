@@ -642,7 +642,37 @@ export default class ItemBuilderTable {
 			reactiveData: false,
 			movableRows: true,
 			rowFormatter: this.rowFormatter.bind(this),
+
+			langs: {
+				"default": {
+					"pagination": {
+						"page_size": __("Page Size"),
+						"page_title": __("Show Page"),
+						"first": __("First"),
+						"first_title": __("First Page"),
+						"last": __("Last"),
+						"last_title": __("Last Page"),
+						"prev": __("Prev"),
+						"prev_title": __("Prev Page"),
+						"next": __("Next"),
+						"next_title": __("Next Page"),
+						"all": __("All"),
+						"counter": {
+							"showing": __("Showing"),
+							"of": __("of"),
+							"rows": __("rows"),
+							"pages": __("pages"),
+						}
+					},
+				}
+			},
 		}
+
+		// Add pagination
+		tabulator_options.pagination = "local";
+		tabulator_options.paginationCounter = "rows";
+		tabulator_options.paginationSize = 20;
+		tabulator_options.paginationSizeSelector = [20, 100, true];
 
 		this.tabulator = new Tabulator(this.$table_wrapper.find(".tabulator-table")[0], tabulator_options);
 
