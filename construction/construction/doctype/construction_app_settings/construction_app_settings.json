@@ -62,16 +62,17 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "None",
    "fieldname": "default_table_page_size",
    "fieldtype": "Select",
    "label": "Default page size",
-   "options": "20\n100\nAll"
+   "options": "None\n20\n100\nAll"
   }
  ],
  "icon": "uil uil-wrench",
  "issingle": 1,
  "links": [],
- "modified": "2024-04-23 18:38:12.103719",
+ "modified": "2024-04-23 18:46:21.855079",
  "modified_by": "Administrator",
  "module": "Construction",
  "name": "Construction App Settings",

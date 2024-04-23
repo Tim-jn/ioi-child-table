@@ -744,6 +744,8 @@ export default class ItemBuilderTable {
 		let default_page_size = frappe.boot?.construction_app_settings?.default_table_page_size;
 		if (default_page_size === "All") {
 			default_page_size = true;
+		} else if (default_page_size === "None") {
+			default_page_size = false;
 		} else if (default_page_size) {
 			default_page_size = parseInt(default_page_size);
 		} else {
