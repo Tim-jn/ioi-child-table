@@ -697,8 +697,32 @@ export default class ItemBuilderTable {
 			reactiveData: false,
 			movableRows: true,
 			rowFormatter: this.rowFormatter.bind(this),
-		}
 
+			langs: {
+				"default": {
+					"pagination": {
+						"page_size": __("Page Size"),
+						"page_title": __("Show Page"),
+						"first": __("First"),
+						"first_title": __("First Page"),
+						"last": __("Last"),
+						"last_title": __("Last Page"),
+						"prev": __("Prev"),
+						"prev_title": __("Prev Page"),
+						"next": __("Next"),
+						"next_title": __("Next Page"),
+						"all": __("All"),
+						"counter": {
+							"showing": __("Showing"),
+							"of": __("of"),
+							"rows": __("rows"),
+							"pages": __("pages"),
+						}
+					},
+				}
+			},
+			...this._get_pagination_config(),
+		}
 		this.tabulator = new Tabulator(this.$table_wrapper.find(".tabulator-table")[0], tabulator_options);
 
 		await new Promise((resolve) => {
@@ -714,6 +738,29 @@ export default class ItemBuilderTable {
 		// this.tabulator.on("renderComplete", () => {
 		// 	window.scrollTo(0, lastScrollTop);
 		// });
+	}
+
+	_get_pagination_config() {
+		let default_page_size = frappe.boot?.construction_app_settings?.default_table_page_size;
+		if (default_page_size === "All") {
+			default_page_size = true;
+		} else if (default_page_size === "None") {
+			default_page_size = false;
+		} else if (default_page_size) {
+			default_page_size = parseInt(default_page_size);
+		} else {
+			default_page_size = 0;
+		}
+
+		if (default_page_size) {
+			return {
+				pagination: "local",
+				paginationCounter: "rows",
+				paginationSize: default_page_size,
+				paginationSizeSelector: [20, 100, true],
+			}
+		}
+		return {};
 	}
 
 	rowFormatter(row) {
