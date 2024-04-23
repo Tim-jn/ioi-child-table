@@ -324,7 +324,7 @@ class ItemBuilderForm {
 				title: __(df.label, null, df.parent) || "",
 				field: df.fieldname,
 				editor: true,
-				editable: this.frm.doc.docstatus == 0,
+				editable: () => this.frm.doc.docstatus == 0,
 				headerSort: false,
 			}
 
@@ -498,6 +498,19 @@ export default class ItemBuilderTable {
 
 	async make() {
 		await this.build_table();
+		await this.refresh();
+		this.bind();
+	}
+
+	async refresh() {
+		this.refresh_buttons();
+		const newRows = this.form_wrapper.get_rows();
+		await this.tabulator.replaceData(newRows);
+	}
+
+	refresh_buttons() {
+		this.$table_buttons?.remove();
+		this.$table_footer?.remove();
 
 		if (this.features.write) {
 			const add_item = `<button type="button" class="btn btn-xs btn-primary new-item">
@@ -538,13 +551,55 @@ export default class ItemBuilderTable {
 			// 	__("Click on the <b>Add Item</b> button to add a new item."),
 			// 	__("Scroll horizontally using the mouse wheel while pressing ⇧."),
 			// ].join("<br>"));
+		} else {
+			this.$table_buttons = $("<div>");
+			this.$table_footer = $("<div>");
 		}
 
+		this.$new_item_button = this.$table_buttons.find(".new-item");
+		this.$delete_row_button = this.$table_buttons.find(".delete-row");
+		this.$new_title_button = this.$table_buttons.find(".new-title");
+		this.$new_text_button = this.$table_buttons.find(".new-text");
+
+		this.$new_item_button.on("click", () => {
+			this.form_wrapper.append_row({});
+		});
+
+		this.$new_title_button.on("click", () => {
+			let level = 1;
+
+			const rows = this.form_wrapper.get_rows()
+			const lastRow = rows.length ? rows[rows.length - 1] : null;
+			if (lastRow?.row_type?.startsWith?.("title")) {
+				level = parseInt(lastRow.row_type.replace("title", "")) + 1;
+			}
+			level = Math.min(level, 3);
+
+			this.append_text_row_no_dialog("title" + level, __("Heading " + level));
+		});
+
+		this.$new_text_button.on("click", () => {
+			this.append_text_row_no_dialog("text", "");
+		});
+
+		this.$delete_row_button.on("click", () => {
+			const selected_rows = this.tabulator.getSelectedRows()
+
+			const names = selected_rows.map((row) => {
+				const rowData = row.getData();
+				return rowData.name;
+			}).filter(Boolean);
+			this.form_wrapper.remove_rows(names)
+			this.tabulator.deselectRow();
+		})
+
+		document.dispatchEvent(new CQBTableToolbarRendered(this));
+	}
+
+	bind() {
 		this.bind_events();
 		this.bind_form();
 		this.bind_edit();
-
-		document.dispatchEvent(new CQBTableToolbarRendered(this));
 	}
 
 	bind_edit() {
@@ -633,7 +688,7 @@ export default class ItemBuilderTable {
 		await this.form_wrapper.setup();
 
 		const tabulator_options = {
-			data: this.form_wrapper.get_rows(),
+			data: [],
 			index: "name",
 			columns: this.form_wrapper.get_columns(),
 			maxHeight: "unset",
@@ -646,13 +701,19 @@ export default class ItemBuilderTable {
 
 		this.tabulator = new Tabulator(this.$table_wrapper.find(".tabulator-table")[0], tabulator_options);
 
-		let lastScrollTop = 0;
-		this.tabulator.on("renderStarted", () => {
-			lastScrollTop = window.scrollY || lastScrollTop;
+		await new Promise((resolve) => {
+			this.tabulator.on("tableBuilt", () => {
+				resolve();
+			});
 		});
-		this.tabulator.on("renderComplete", () => {
-			window.scrollTo(0, lastScrollTop);
-		});
+
+		// let lastScrollTop = 0;
+		// this.tabulator.on("renderStarted", () => {
+		// 	lastScrollTop = window.scrollY || lastScrollTop;
+		// });
+		// this.tabulator.on("renderComplete", () => {
+		// 	window.scrollTo(0, lastScrollTop);
+		// });
 	}
 
 	rowFormatter(row) {
@@ -824,43 +885,6 @@ export default class ItemBuilderTable {
 			return;
 		}
 
-		this.$new_item_button = this.$table_buttons.find(".new-item")
-		this.$delete_row_button = this.$table_buttons.find(".delete-row")
-		this.$new_title_button = this.$table_buttons.find(".new-title")
-		this.$new_text_button = this.$table_buttons.find(".new-text")
-
-		this.$new_item_button.on("click", () => {
-			this.form_wrapper.append_row({});
-		});
-
-		this.$new_title_button.on("click", () => {
-			let level = 1;
-
-			const rows = this.form_wrapper.get_rows()
-			const lastRow = rows.length ? rows[rows.length - 1] : null;
-			if (lastRow?.row_type?.startsWith?.("title")) {
-				level = parseInt(lastRow.row_type.replace("title", "")) + 1;
-			}
-			level = Math.min(level, 3);
-
-			this.append_text_row_no_dialog("title" + level, __("Heading " + level));
-		});
-
-		this.$new_text_button.on("click", () => {
-			this.append_text_row_no_dialog("text", "");
-		});
-
-		this.$delete_row_button.on("click", () => {
-			const selected_rows = this.tabulator.getSelectedRows()
-
-			const names = selected_rows.map((row) => {
-				const rowData = row.getData();
-				return rowData.name;
-			}).filter(Boolean);
-			this.form_wrapper.remove_rows(names)
-			this.tabulator.deselectRow();
-		})
-
 		const toggle_delete_row_button = () => {
 			if (this.tabulator.getSelectedRows().length) {
 				this.$delete_row_button.show()
@@ -868,11 +892,9 @@ export default class ItemBuilderTable {
 				this.$delete_row_button.hide()
 			}
 		}
-
 		this.tabulator.on("rowSelected", () => {
 			toggle_delete_row_button()
 		});
-
 		this.tabulator.on("rowDeselected", () => {
 			toggle_delete_row_button()
 		});

@@ -74,10 +74,10 @@ construction.item_builder = class ItemBuilder {
 		}
 	}
 
-	set_current_view(view) {
+	async set_current_view(view) {
 		this.current_view = view;
-		this.show();
-		this.setup_item_catalog();
+		await this.show();
+		await this.refresh();
 	}
 
 	destroy() {
@@ -94,7 +94,13 @@ construction.item_builder = class ItemBuilder {
 		this.tree = null;
 	}
 
-	show() {
+	async refresh() {
+		await this.table?.refresh?.();
+		await this.tree?.refresh?.();
+		await this.setup_item_catalog();
+	}
+
+	async show() {
 		this.destroy();
 
 		this.$header = $(`<div class="item-builder-header d-flex flex-row-reverse">`).appendTo(this.$wrapper);
@@ -111,6 +117,7 @@ construction.item_builder = class ItemBuilder {
 		if (this.current_view == "Table") {
 			this.$table_wrapper = $(`<div class="item-builder-table"><div class="tabulator-table"></div></div>`).appendTo(this.$wrapper);
 			this.table = new ItemBuilderTable(this);
+			await this.table.ready_promise;
 			// this.$btn_switch_view.html(frappe.utils.icon('list', 'sm'));
 		} else if (this.current_view == "Tree") {
 			this.$tree_wrapper = $(`<div class="item-builder-tree"><div class="tree"></div></div>`).appendTo(this.$wrapper);
@@ -132,6 +139,10 @@ construction.setup_quotation_builder = (frm) => {
 	if (!$wrapper) {
 		return console.error("construction: Wrapper not found for item builder in form:", frm);
 	}
-	frm.item_builder?.destroy(); // cleanup from previous render
-	frm.item_builder = new construction.item_builder({ frm, $wrapper });
+	if (frm.item_builder) {
+		frm.item_builder?.refresh();
+	} else {
+		frm.item_builder?.destroy(); // cleanup from previous render
+		frm.item_builder = new construction.item_builder({ frm, $wrapper });
+	}
 };
