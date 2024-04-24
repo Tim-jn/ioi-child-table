@@ -207,6 +207,7 @@ function formatEditButton(cell, formatterParams, onRendered) {
 
 	onRendered(() => {
 		const button = document.createElement("button");
+		button.type = "button";
 		button.classList.add("btn-reset");
 		button.innerHTML = frappe.utils.icon("edit", "sm");
 		button.ariaLabel = __("Edit");
