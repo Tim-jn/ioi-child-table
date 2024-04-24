@@ -741,6 +741,10 @@ export default class ItemBuilderTable {
 	}
 
 	_get_pagination_config() {
+		if (frappe.is_mobile()) {
+			return {}; // Hide pagination on mobile, until we make it responsive
+		}
+
 		let default_page_size = frappe.boot?.construction_app_settings?.default_table_page_size;
 		if (default_page_size === "All") {
 			default_page_size = true;
