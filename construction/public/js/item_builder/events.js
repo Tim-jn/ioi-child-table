@@ -9,7 +9,6 @@ export class CQBTableToolbarRendered extends CustomEvent {
 		});
 		this._detail = { builder };
 	}
-
 	get detail() {
 		return this._detail;
 	}
@@ -29,7 +28,25 @@ export class CQBTableEditRow extends CustomEvent {
 		});
 		this._detail = { builder, cell };
 	}
+	get detail() {
+		return this._detail;
+	}
+}
 
+export class CQBTableRenderedComment extends CustomEvent {
+	static get EVENT_NAME() {
+		return "quotationbuildertable-comment-rendered";
+	}
+	constructor(
+		/** @type {import("./table").default} */ builder,
+		control, doc, row
+	) {
+		super(CQBTableRenderedComment.EVENT_NAME, {
+			bubbles: true,
+			cancelable: true,
+		});
+		this._detail = { builder, control, doc, row };
+	}
 	get detail() {
 		return this._detail;
 	}
