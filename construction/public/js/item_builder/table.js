@@ -1,5 +1,5 @@
 import { TabulatorFull as Tabulator } from "tabulator-tables";
-import { CQBTableEditRow, CQBTableToolbarRendered } from "./events";
+import { CQBTableEditRow, CQBTableRenderedComment, CQBTableToolbarRendered } from "./events";
 import { is_buying_doctype } from "./utils";
 
 const DONOTUSE_DEFAULT_TABLE_COLUMNS = [
@@ -904,6 +904,8 @@ export default class ItemBuilderTable {
 			const value = control.get_value();
 			this.form_wrapper.update_row_value(doc, "description", value);
 		});
+
+		document.dispatchEvent(new CQBTableRenderedComment(this, control, doc, row));
 	}
 
 	_buildWrapperInRow(row) {
