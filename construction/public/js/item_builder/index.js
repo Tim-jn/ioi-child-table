@@ -95,7 +95,7 @@ construction.item_builder = class ItemBuilder {
 	}
 
 	async refresh() {
-		await this.table?.refresh?.();
+		await this.table?.make?.();
 		await this.tree?.refresh?.();
 		await this.setup_item_catalog();
 	}
