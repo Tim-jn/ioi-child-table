@@ -231,7 +231,7 @@ class ItemBuilderForm {
 	}
 
 	async setup() {
-		this.settings = await frappe.db.get_doc("Construction App Settings");
+		this.settings ??= await frappe.db.get_doc("Construction App Settings");
 
 		if (this.detach) {
 			const field = this.frm.get_field("items");
@@ -272,6 +272,7 @@ class ItemBuilderForm {
 		const sorter = (a, b) => order.indexOf(a.fieldname) - order.indexOf(b.fieldname);
 		fields.sort(sorter); // sort in place
 
+		const me = this;
 		const columns = [
 			{
 				rowHandle: true,
@@ -280,7 +281,7 @@ class ItemBuilderForm {
 				cssClass: "item-builder-flex-center",
 				formatter: "handle",
 				minWidth: 16, // width and maxWidth feel useless
-				visible: this.frm.doc.docstatus == 0,
+				get visible() { return me.frm.doc.docstatus == 0 },
 			},
 			{
 				cssClass: "item-builder-flex-center",
@@ -499,14 +500,19 @@ export default class ItemBuilderTable {
 
 	async make() {
 		await this.build_table();
-		await this.refresh();
+		this.refresh_buttons();
 		this.bind();
 	}
 
 	async refresh() {
+		this.refresh_columns();
 		this.refresh_buttons();
 		const newRows = this.form_wrapper.get_rows();
 		await this.tabulator.replaceData(newRows);
+	}
+
+	refresh_columns() {
+		this.tabulator.setColumns(this.form_wrapper.get_columns());
 	}
 
 	refresh_buttons() {
