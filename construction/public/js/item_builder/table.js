@@ -326,7 +326,10 @@ class ItemBuilderForm {
 				title: __(df.label, null, df.parent) || "",
 				field: df.fieldname,
 				editor: true,
-				editable: () => this.frm.doc.docstatus == 0,
+				editable: () => {
+					const displayStatus = frappe.perm.get_field_display_status(df, this.frm.doc);
+					return displayStatus === "Write";
+				},
 				headerSort: false,
 			}
 
