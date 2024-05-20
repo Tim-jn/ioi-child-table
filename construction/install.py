@@ -100,6 +100,7 @@ def get_custom_fields():
 		**get_custom_fields_for_selling_doctype("Quotation"),
 		**get_custom_fields_for_selling_doctype("Sales Order"),
 		**get_custom_fields_for_selling_doctype("Sales Invoice"),
+		**get_custom_fields_for_selling_doctype("Delivery Note"),
 		**get_custom_fields_for_buying_doctype("Supplier Quotation"),
 		**get_custom_fields_for_buying_doctype("Purchase Order"),
 		# **get_custom_fields_for_buying_doctype("Purchase Invoice"),

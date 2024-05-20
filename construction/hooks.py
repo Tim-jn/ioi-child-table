@@ -36,6 +36,7 @@ doctype_js = {
 	"Sales Invoice": "public/js/overrides/sales_invoice.js",
 	"Purchase Order": "public/js/overrides/purchase_order.js",
 	"Supplier Quotation": "public/js/overrides/supplier_quotation.js",
+	"Delivery Note": "public/js/overrides/delivery_note.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -142,6 +143,15 @@ doc_events = {
 		"before_print": "construction.construction.print.before_print",
 	},
 	"Sales Invoice": {
+		"before_print": "construction.construction.print.before_print",
+	},
+	"Delivery Note": {
+		"before_print": "construction.construction.print.before_print",
+	},
+	"Purchase Order": {
+		"before_print": "construction.construction.print.before_print",
+	},
+	"Supplier Quotation": {
 		"before_print": "construction.construction.print.before_print",
 	},
 	"Project": {"on_update": "construction.utils.projects.on_update"},
