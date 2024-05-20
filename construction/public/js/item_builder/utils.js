@@ -3,7 +3,7 @@ export const BUYING_DOCTYPES = [
 	"Purchase Order",
 	"Supplier Quotation",
 	// "Material Request",
-	// "Delivery Note",
+	// "Purchase Receipt",
 ];
 
 export function is_buying_doctype(doctype) {
