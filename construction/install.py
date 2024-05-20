@@ -53,6 +53,7 @@ def get_custom_fields_for_selling_doctype(dt: str):
 				"print_hide": 1,
 				"insert_after": "item_name",
 				"translatable": 0,
+				"allow_on_submit": 1,
 			},
 			{
 				"fieldname": "row_print_style",
@@ -63,6 +64,7 @@ def get_custom_fields_for_selling_doctype(dt: str):
 				"options": "\nHide Price\nHide Row",
 				"print_hide": 1,
 				"translatable": 0,
+				"allow_on_submit": 1,
 			},
 			{
 				"fieldname": "with_subtotal",
@@ -72,6 +74,7 @@ def get_custom_fields_for_selling_doctype(dt: str):
 				"insert_after": "row_print_style",
 				"depends_on": "eval:doc.row_type?.startsWith?.('title')",
 				"print_hide": 1,
+				"allow_on_submit": 1,
 			},
 		],
 	}
