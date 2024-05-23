@@ -282,8 +282,10 @@ class ItemBuilderForm {
 				formatter: "handle",
 				minWidth: 16, // width and maxWidth feel useless
 				get visible() { return me.frm.doc.docstatus == 0 },
+				resizable: false,
 			},
 			{
+				rowHandle: true,
 				cssClass: "item-builder-flex-center",
 				formatter: "rowSelection",
 				titleFormatter: "rowSelection",
@@ -292,8 +294,19 @@ class ItemBuilderForm {
 				headerSort: false,
 				cellClick(e, cell) { cell.getRow().toggleSelect() },
 				minWidth: 16, // width and maxWidth feel useless
+				resizable: false,
 			},
 			{
+				rowHandle: true,
+				title: __("Sr"),
+				cssClass: "item-builder-flex-center",
+				formatter: "rownum",
+				headerSort: false,
+				minWidth: 16, // width and maxWidth feel useless
+				resizable: false,
+			},
+			{
+				rowHandle: true,
 				title: "",
 				field: "edit_btn",
 				editor: false,
@@ -303,6 +316,7 @@ class ItemBuilderForm {
 				hozAlign: "center",
 				headerHozAlign: "center",
 				minWidth: 16, // width and maxWidth feel useless
+				resizable: false,
 			},
 			{
 				title: __("Row Type"),
