@@ -97,6 +97,19 @@ def get_custom_fields_for_buying_doctype(dt: str):
 				"print_hide": 1,
 			},
 		],
+		(dt + " Item"): [
+			{
+				"fieldname": "row_print_style",
+				"fieldtype": "Select",
+				"label": "Display",
+				"insert_after": "row_type",
+				"default": "",
+				"options": "\nHide Price\nHide Row",
+				"print_hide": 1,
+				"translatable": 0,
+				"allow_on_submit": 1,
+			},
+		],
 	}
 
 
