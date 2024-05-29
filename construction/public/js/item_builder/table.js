@@ -498,6 +498,10 @@ export default class ItemBuilderTable {
 		this.form_wrapper = null;
 		this.tabulator = null;
 		this.open_form = null;
+
+		this.observer?.disconnect();
+		this.observer = null;
+
 		if (this.show_row_form_in_dialog) {
 			document.removeEventListener(CQBTableEditRow.EVENT_NAME, this.show_row_form_in_dialog);
 		}
@@ -624,6 +628,7 @@ export default class ItemBuilderTable {
 		this.bind_events();
 		this.bind_form();
 		this.bind_edit();
+		this.bind_observer();
 	}
 
 	bind_edit() {
@@ -661,6 +666,35 @@ export default class ItemBuilderTable {
 		document.addEventListener(CQBTableEditRow.EVENT_NAME, this.show_row_form_in_dialog);
 	}
 
+	bind_observer() {
+		const do_later = requestIdleCallback || setTimeout;
+
+		/** @type {IntersectionObserverCallback} */
+		const callback = (entries, observer) => {
+			if (!entries[0]?.isIntersecting) {
+				return; // Not visible
+			}
+
+			const height = entries[0].boundingClientRect.height;
+			if (height > 120) {
+				return; // The table is big enough, thus it has some rows = it has been drawn.
+			}
+			// Implicit else case: It's acceptable to redraw the table even if it has visible rows when it is small.
+
+			do_later(() => {
+				// We force the redraw because the table was not visible (maybe), thus its rows were not drawn.
+				// We add the `true` parameter to force the redraw because, on refresh, the data has changed,
+				// and has been redrawn while the table was not visible.
+				this.tabulator.redraw(true);
+			});
+		}
+
+		// Using default values for IntersectionObserver options
+		// https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
+		this.observer = new IntersectionObserver(callback, {});
+		this.observer.observe(this.tabulator_wrapper);
+	}
+
 	async on_update(what, ...args) {
 		if (this.destroyed) {
 			return;
@@ -672,7 +706,7 @@ export default class ItemBuilderTable {
 			const row = this.tabulator.getRow(doc.name);
 			if (row) {
 				row.update(doc);
-				this.tabulator.redraw()
+				this.tabulator.redraw();
 				return this.after_update();
 			}
 		}
@@ -747,7 +781,7 @@ export default class ItemBuilderTable {
 			},
 			...this._get_pagination_config(),
 		}
-		this.tabulator = new Tabulator(this.$table_wrapper.find(".tabulator-table")[0], tabulator_options);
+		this.tabulator = new Tabulator(this.tabulator_wrapper, tabulator_options);
 
 		await new Promise((resolve) => {
 			this.tabulator.on("tableBuilt", () => {
@@ -762,6 +796,10 @@ export default class ItemBuilderTable {
 		// this.tabulator.on("renderComplete", () => {
 		// 	window.scrollTo(0, lastScrollTop);
 		// });
+	}
+
+	get tabulator_wrapper() {
+		return this.$table_wrapper.find(".tabulator-table")[0];
 	}
 
 	_get_pagination_config() {
