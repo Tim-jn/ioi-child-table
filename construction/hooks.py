@@ -128,7 +128,10 @@ boot_session = "construction.boot.get_bootinfo"
 # Override standard doctype classes
 
 override_doctype_class = {
-	"Sales Invoice": "construction.overrides.sales_invoice.ConstructionSalesInvoice"
+	"Sales Invoice": "construction.overrides.sales_invoice.ConstructionSalesInvoice",
+	"Delivery Note": "construction.overrides.delivery_note.ConstructionDeliveryNote",
+	"Purchase Receipt": "construction.overrides.purchase_receipt.ConstructionPurchaseReceipt",
+	"Purchase Order": "construction.overrides.purchase_order.ConstructionPurchaseOrder"
 }
 
 # Document Events
