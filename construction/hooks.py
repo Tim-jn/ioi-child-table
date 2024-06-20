@@ -131,7 +131,8 @@ override_doctype_class = {
 	"Sales Invoice": "construction.overrides.sales_invoice.ConstructionSalesInvoice",
 	"Delivery Note": "construction.overrides.delivery_note.ConstructionDeliveryNote",
 	"Purchase Receipt": "construction.overrides.purchase_receipt.ConstructionPurchaseReceipt",
-	"Purchase Order": "construction.overrides.purchase_order.ConstructionPurchaseOrder"
+	"Purchase Order": "construction.overrides.purchase_order.ConstructionPurchaseOrder",
+	"Quotation": "construction.overrides.quotation.ConstructionQuotation",
 }
 
 # Document Events
