@@ -4,16 +4,66 @@ frappe.ui.form.on("Sales Invoice", {
 	},
 
 	progress_percentage(frm) {
-		frm.doc.items.forEach(row => {
-			calculate_progress(row, frm.doc.progress_percentage)
-		})
+		if (!frm.calculate_progress) {
+			frm.doc.items.forEach(row => {
+				calculate_progress(frm, row, frm.doc.progress_percentage)
+			})
+		}
 	},
 })
 
-const calculate_progress = async(line, progress) => {
-	if (line.sales_order && line.so_detail) {
-		const so = await frappe.db.get_value("Sales Order", line.sales_order, "per_billed")
-		const soi = await frappe.db.get_value("Sales Order Item", line.so_detail, "qty", null, "Sales Order")
-		frappe.model.set_value(line.doctype, line.name, "qty", (flt(progress) - flt(so.message.per_billed)) / 100.0 * flt(soi.message.qty))
+frappe.ui.form.on("Sales Invoice Item", {
+	progress_percentage(frm, cdt, cdn) {
+		const row = locals[cdt][cdn]
+		if (!frm.calculate_progress) {
+			frm.calculate_progress = true;
+			calculate_progress(frm, row, row.progress_percentage)
+		}
+
+		calculate_total_progress(frm);
+	},
+})
+
+
+const calculate_progress = async(frm, line, progress) => {
+	if (line.sales_order && line.so_detail && ["item", ""].includes(line.row_type)) {
+
+		if (progress != line.progress_percentage) {
+			frappe.model.set_value(line.doctype, line.name, "progress_percentage", progress)
+		}
+
+
+		const soi = await frappe.db.get_value("Sales Order Item", line.so_detail, ["qty", "base_net_amount", "billed_amt"], null, "Sales Order")
+		const already_billed = flt(soi.message.billed_amt) / flt(soi.message.base_net_amount) * 100.0
+		const calculated_qty = (flt(progress) - flt(already_billed)) / 100.0 * flt(soi.message.qty)
+
+		if (calculated_qty != line.qty) {
+			frappe.model.set_value(line.doctype, line.name, "qty", calculated_qty)
+		}
+
+		frm.cscript.calculate_taxes_and_totals();
+		frm.calculate_progress = false;
+	}
+}
+
+const calculate_total_progress = async(frm) => {
+	if (!frm.doc.calculate_progress_globally) {
+
+		let base_net_amount = 0.0
+		let billed_amt = 0.0
+		for await (const result of frm.doc.items.map(async item => {
+			const soi = await frappe.db.get_value("Sales Order Item", item.so_detail, ["base_net_amount", "billed_amt"], null, "Sales Order")
+			return soi.message
+		})) {
+			base_net_amount += result.base_net_amount
+			billed_amt += result.billed_amt
+		}
+
+		const progress_prct = (flt(frm.doc.base_net_total) + billed_amt) / base_net_amount * 100.0
+		if (flt(progress_prct) != flt(frm.doc.progress_percentage)) {
+			frm.set_value("progress_percentage", progress_prct)
+		}
+
+		frm.calculate_progress = false;
 	}
 }

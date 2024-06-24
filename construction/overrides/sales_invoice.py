@@ -1,5 +1,6 @@
-
+import frappe
 from frappe import _
+from frappe.utils import flt
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.controllers.accounts_controller import validate_account_head
@@ -23,3 +24,26 @@ class ConstructionSalesInvoice(SalesInvoice):
 	def validate_uom_is_integer(self, uom_field, qty_fields):
 		if not self.is_progress_invoice:
 			super(ConstructionSalesInvoice, self).validate_uom_is_integer(uom_field, qty_fields)
+
+	def validate(self):
+		super().validate()
+		self.calculate_progress()
+
+	def calculate_progress(self):
+		if not self.is_progress_invoice:
+			return
+
+		items = [item for item in self.items if item.row_type in ("Item", "")]
+
+		total_billed = 0.0
+		for item in items:
+			base_net_amount, qty, billed_amt = frappe.db.get_value("Sales Order Item", item.so_detail, ["base_net_amount", "qty", "billed_amt"])
+			item.set("so_amount", base_net_amount)
+			total_billed += flt(billed_amt)
+
+			if not self.calculate_progress_globally:
+				already_billed = flt(billed_amt) / flt(base_net_amount) * 100.0
+				item.qty = (flt(item.progress_percentage) - flt(already_billed)) / 100.0 * flt(qty)
+
+		if not self.calculate_progress_globally:
+			self.progress_percentage = (flt(self.base_net_total) + total_billed) / sum(item.so_amount for item in items) * 100.0

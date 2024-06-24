@@ -1,7 +1,6 @@
 import click
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 
 def after_install():
@@ -20,7 +19,6 @@ def add_custom_fields():
 	click.secho("* Adding Construction Custom Fields")
 	custom_fields = get_custom_fields()
 	create_custom_fields(custom_fields)
-	create_property_setters()
 
 
 def get_custom_fields_for_selling_doctype(dt: str):
@@ -47,7 +45,7 @@ def get_custom_fields_for_selling_doctype(dt: str):
 				"fieldtype": "Select",
 				"label": "Row Type",
 				"read_only": 0,
-				"hidden": 0,
+				"hidden": 1,
 				"default": "",
 				"options": "\nitem\ntitle1\ntitle2\ntitle3\ntext",
 				"print_hide": 1,
@@ -201,11 +199,30 @@ def get_custom_fields():
 				"insert_after": "is_down_payment_invoice",
 			},
 			{
+				"fieldname": "calculate_progress_globally",
+				"fieldtype": "Check",
+				"label": "Calculate Progress Globally",
+				"insert_after": "is_down_payment_invoice",
+				"depends_on": "is_progress_invoice",
+				"default": "1"
+			},
+			{
 				"fieldname": "progress_percentage",
 				"fieldtype": "Percent",
 				"label": "Progress Percentage",
-				"insert_after": "is_progress_invoice",
+				"insert_after": "calculate_progress_globally",
 				"depends_on": "is_progress_invoice",
+				"read_only_depends_on": "eval:!doc.calculate_progress_globally"
+			},
+		],
+		"Sales Invoice Item": [
+			{
+				"fieldname": "progress_percentage",
+				"fieldtype": "Percent",
+				"label": "Progress Percentage",
+				"insert_after": "qty",
+				"depends_on": "eval:parent.is_progress_invoice",
+				"read_only_depends_on": "eval:parent.calculate_progress_globally"
 			},
 		],
 	}
