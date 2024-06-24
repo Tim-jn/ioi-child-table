@@ -19,3 +19,7 @@ class ConstructionSalesInvoice(SalesInvoice):
 			validate_account_head(
 				item.idx, item.income_account, self.company, _("Income", context="Account Validation")
 			)
+
+	def validate_uom_is_integer(self, uom_field, qty_fields):
+		if not self.is_progress_invoice:
+			super(ConstructionSalesInvoice, self).validate_uom_is_integer(uom_field, qty_fields)
