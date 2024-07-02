@@ -1,0 +1,23 @@
+{%- set display_columns = visible_columns|map(attribute="fieldname")| list -%}
+
+<div>
+	{%- if doc.in_format_data("label") and "label" in display_columns -%}
+		<div class="primary bold">{{ doc.get_formatted("label", translated=True) }}</div>
+	{%- endif %}
+
+	{% if doc.in_format_data("sales_invoice") and "sales_invoice" in display_columns -%}
+		<div class="primary compact-item">
+			{{ doc.sales_invoice or "" }}
+		</div>
+	{%- endif %}
+
+	{% if doc.in_format_data("posting_date") and doc.posting_date -%}
+	<p class="text-muted">{{ doc.get_formatted("posting_date", translated=True) }}</p>
+	{%- endif %}
+</div>
+
+<style>
+	.bold {
+		font-weight: 700;
+	}
+</style>
