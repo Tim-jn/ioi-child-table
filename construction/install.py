@@ -133,7 +133,6 @@ def get_custom_fields_for_progress_invoicing_summary(dt: str):
 				"options": "Progress Invoicing Items",
 				"label": "Generated Invoices",
 				"insert_after": "progress_invoicing_summary_section",
-				"print_hide": 1,
 				"allow_on_submit": 1,
 				"read_only": 1
 			},
