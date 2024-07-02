@@ -17,8 +17,13 @@ def after_migrate():
 
 def add_custom_fields():
 	click.secho("* Adding Construction Custom Fields")
-	custom_fields = get_custom_fields()
-	create_custom_fields(custom_fields)
+	for custom_fields in [
+		get_custom_fields(),
+		get_progress_invoicing_fields(),
+		get_custom_fields_for_progress_invoicing_summary("Sales Invoice"),
+		get_custom_fields_for_progress_invoicing_summary("Sales Order"),
+	]:
+		create_custom_fields(custom_fields)
 
 
 def get_custom_fields_for_selling_doctype(dt: str):
@@ -111,7 +116,72 @@ def get_custom_fields_for_buying_doctype(dt: str):
 	}
 
 
+def get_custom_fields_for_progress_invoicing_summary(dt: str):
+	# _("Generated Invoices") _("Invoicing Summary")
+	return {
+		dt: [
+			{
+				"fieldname": "progress_invoicing_summary_section",
+				"label": "Invoicing Summary",
+				"fieldtype": "Tab Break",
+				"print_hide": 1,
+				"insert_after": "connections_tab",
+			},
+			{
+				"fieldname": "progress_invoicing_summary",
+				"fieldtype": "Table",
+				"options": "Progress Invoicing Items",
+				"label": "Generated Invoices",
+				"insert_after": "progress_invoicing_summary_section",
+				"print_hide": 1,
+				"allow_on_submit": 1,
+				"read_only": 1
+			},
+		],
+	}
+
+def get_progress_invoicing_fields():
+	return {
+		"Sales Invoice": [
+			{
+				"fieldname": "is_progress_invoice",
+				"fieldtype": "Check",
+				"label": "Is Progress Invoice",
+				"insert_after": "is_down_payment_invoice",
+			},
+			{
+				"fieldname": "calculate_progress_globally",
+				"fieldtype": "Check",
+				"label": "Calculate Progress Globally",
+				"insert_after": "is_down_payment_invoice",
+				"depends_on": "is_progress_invoice",
+				"default": "1"
+			},
+			{
+				"fieldname": "progress_percentage",
+				"fieldtype": "Percent",
+				"label": "Progress Percentage",
+				"insert_after": "calculate_progress_globally",
+				"depends_on": "is_progress_invoice",
+				"read_only_depends_on": "eval:!doc.calculate_progress_globally"
+			},
+		],
+		"Sales Invoice Item": [
+			{
+				"fieldname": "progress_percentage",
+				"fieldtype": "Percent",
+				"label": "Progress Percentage",
+				"insert_after": "qty",
+				"depends_on": "eval:parent.is_progress_invoice",
+				"read_only_depends_on": "eval:parent.calculate_progress_globally"
+			},
+		],
+	}
+
+
 def get_custom_fields():
+	# _("Calculate Progress Globally")
+
 	return {
 		**get_custom_fields_for_selling_doctype("Quotation"),
 		**get_custom_fields_for_selling_doctype("Sales Order"),
@@ -189,40 +259,6 @@ def get_custom_fields():
 				"fieldtype": "HTML",
 				"label": "Documents",
 				"insert_after": "documents_tab",
-			},
-		],
-		"Sales Invoice": [
-			{
-				"fieldname": "is_progress_invoice",
-				"fieldtype": "Check",
-				"label": "Is Progress Invoice",
-				"insert_after": "is_down_payment_invoice",
-			},
-			{
-				"fieldname": "calculate_progress_globally",
-				"fieldtype": "Check",
-				"label": "Calculate Progress Globally",
-				"insert_after": "is_down_payment_invoice",
-				"depends_on": "is_progress_invoice",
-				"default": "1"
-			},
-			{
-				"fieldname": "progress_percentage",
-				"fieldtype": "Percent",
-				"label": "Progress Percentage",
-				"insert_after": "calculate_progress_globally",
-				"depends_on": "is_progress_invoice",
-				"read_only_depends_on": "eval:!doc.calculate_progress_globally"
-			},
-		],
-		"Sales Invoice Item": [
-			{
-				"fieldname": "progress_percentage",
-				"fieldtype": "Percent",
-				"label": "Progress Percentage",
-				"insert_after": "qty",
-				"depends_on": "eval:parent.is_progress_invoice",
-				"read_only_depends_on": "eval:parent.calculate_progress_globally"
 			},
 		],
 	}
