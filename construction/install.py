@@ -1,5 +1,6 @@
 import click
 import frappe
+from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 
@@ -149,10 +150,19 @@ def get_progress_invoicing_fields():
 				"insert_after": "is_down_payment_invoice",
 			},
 			{
+				"fieldname": "progress_invoice_no",
+				"fieldtype": "Int",
+				"label": "Progress Invoice No",
+				"insert_after": "is_progress_invoice",
+				"read_only": True,
+				"no_copy": True,
+				"default": "1"
+			},
+			{
 				"fieldname": "calculate_progress_globally",
 				"fieldtype": "Check",
 				"label": "Calculate Progress Globally",
-				"insert_after": "is_down_payment_invoice",
+				"insert_after": "progress_invoice_no",
 				"depends_on": "is_progress_invoice",
 				"default": "1"
 			},
@@ -261,16 +271,6 @@ def get_custom_fields():
 			},
 		],
 	}
-
-def create_property_setters():
-	make_property_setter(
-		"Sales Invoice",
-		"update_stock",
-		"hidden",
-		1,
-		"Check",
-		validate_fields_for_doctype=False,
-	)
 
 def setup_default_quotation_builder_columns():
 	settings = frappe.get_single("Construction App Settings")

@@ -30,6 +30,7 @@ class ConstructionSalesInvoice(SalesInvoice):
 		super().validate()
 		self.calculate_progress()
 
+
 	def calculate_progress(self):
 		if not self.is_progress_invoice:
 			return
@@ -59,3 +60,14 @@ class ConstructionSalesInvoice(SalesInvoice):
 			doc = frappe.get_cached_doc("Sales Order", so)
 			set_invoicing_summary(doc, 'on_sales_invoice_submission')
 			doc.save()
+
+	def set_print_heading(self):
+		if self.is_progress_invoice:
+			print_heading = _("Progress Invoice No") + " " + str(self.progress_invoice_no)
+			if not frappe.get_cached_value("Print Heading", print_heading):
+				ph = frappe.new_doc("Print Heading")
+				ph.print_heading = print_heading
+				ph.flags.ignore_permissions = True
+				ph.insert(ignore_if_duplicate=True)
+
+			self.select_print_heading = print_heading
