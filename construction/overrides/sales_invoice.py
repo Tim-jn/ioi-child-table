@@ -6,6 +6,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.controllers.accounts_controller import validate_account_head
 
 from construction.overrides.status_updater import add_row_type_condition_to_status_updater
+from construction.construction.doctype.progress_invoicing_items.progress_invoicing_items import set_invoicing_summary
 
 class ConstructionSalesInvoice(SalesInvoice):
 	def __init__(self, *args, **kwargs):
@@ -41,9 +42,20 @@ class ConstructionSalesInvoice(SalesInvoice):
 			item.set("so_amount", base_net_amount)
 			total_billed += flt(billed_amt)
 
-			if not self.calculate_progress_globally:
+			if not self.calculate_progress_globally and base_net_amount:
 				already_billed = flt(billed_amt) / flt(base_net_amount) * 100.0
 				item.qty = (flt(item.progress_percentage) - flt(already_billed)) / 100.0 * flt(qty)
 
 		if not self.calculate_progress_globally:
-			self.progress_percentage = (flt(self.base_net_total) + total_billed) / sum(item.so_amount for item in items) * 100.0
+			if sum_so_amount := sum(item.so_amount for item in items):
+				self.progress_percentage = (flt(self.base_net_total) + total_billed) / sum_so_amount * 100.0
+
+	def on_submit(self):
+		super().on_submit()
+		frappe.enqueue_doc(self.doctype, self.name, "generate_invoicing_summary")
+
+	def generate_invoicing_summary(self):
+		for so in list(set([item.sales_order for item in self.items])):
+			doc = frappe.get_cached_doc("Sales Order", so)
+			set_invoicing_summary(doc, 'on_sales_invoice_submission')
+			doc.save()
