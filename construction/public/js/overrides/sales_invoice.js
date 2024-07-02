@@ -37,7 +37,7 @@ const calculate_progress = async(frm, line, progress) => {
 		const already_billed = flt(soi.message.billed_amt) / flt(soi.message.base_net_amount) * 100.0
 		const calculated_qty = (flt(progress) - flt(already_billed)) / 100.0 * flt(soi.message.qty)
 
-		if (calculated_qty != line.qty) {
+		if (calculated_qty && calculated_qty != line.qty) {
 			frappe.model.set_value(line.doctype, line.name, "qty", calculated_qty)
 		}
 
