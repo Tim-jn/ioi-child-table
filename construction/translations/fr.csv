@@ -1,3 +1,4 @@
+A progress invoice can only be linked to a single sales order,Une facture de situation ne peut être associée qu'à une seule commande,
 Actual Markup,Marque réelle,Markup by Project
 Actual Markup,Marque réelle,
 Actual Purchases,Achats réels,Markup by Project
@@ -10,6 +11,7 @@ Add Title,Ajouter un titre,Construction
 Additional Costs Amount,Montant charge,
 Additional Costs Percentage,Coef. charge,
 Base Unit Cost Price,PRU non chargé,
+Calculate Progress Globally,Caluler l'avancement pour toute la facture,
 Click on a row to select it.,Cliquez sur une ligne pour la sélectionner,
 Click on the <b>Add Item</b> button to add a new item.,Cliquez sur <b>Ajouter un article</b> pour ajouter un nouvel article.,
 Click on the <b>Delete</b> button to delete the selected rows.,Cliquez sur <b>Supprimer</b> pour supprimer une ligne.,
@@ -19,25 +21,35 @@ Configure your quotation,Configurez votre devis,
 Construction App Settings,Paramètres de l'application Chantier,
 Construction Quotation Builder Column,Colonne de l'éditeur de devis de chantier,
 Construction,Chantier,
+Default page size,Taille de la page par défaut,
 Display,Affichage,Quotation Item
 Display,Affichage,Sales Invoice Item
 Display,Affichage,Sales Order Item
 Drag and drop rows to reorder them.,Glissez-déposez les lignes pour les ré-organiser.,
 Estimated Costing,Coût total estimé,Markup by Project
 Estimated Markup,Marque estimée,Markup by Project
+Final Invoice,Facture finale,
+Generated Invoices,Factures déjà générées,
 Gross Profit Percentage,% Marge brute,
 Heading ,Titre,
 Hide Price,Masquer le prix,
 Hide Prices in Section,Masquer prix de la section,
 Hide Row,Masquer la ligne,
 Hide Rows in Section,Masquer lignes de la section,
+Invoicing Summary,Récapitulatif de facturation,
+Is Progress Invoice,Est une facture de situation,
 Markup by Project,Récapitulatif de marque par projet,
 Markup on quotation,Marque sur devis,Markup by Project
 Markup on quotation,Marque sur devis,
-Is Progress Invoice,Est une facture de situation,
 No documents to show,Aucun document à afficher,
 Percent Complete,Pourcentage d'avancement,Markup by Project
 Print Style,Style d'impression,Construction
+Progress Invoice no,Facture de situation n°,
+Progress Invoice,Facture de situation,
+Progress Invoicing Items,Factures de situation,
+Progress Percentage,Pourcentage d'avancement,
+Row Type,Type de ligne,
+With Subtotal,Avec sous-total,
 Project Settings,Paramètres des projets,
 Project,Projet,Markup by Project
 Projects expected to end after,Projets prévus après le,
@@ -51,8 +63,6 @@ Quotation Margin,Marge du devis,
 Quotation Markup %,Taux de marque %,
 Quotation Markup by Project,Récapitulatif de marque sur devis par projet,
 Quotation Selling Price,Prix de vente du devis,
-Progress Invoice,Facture de situation,
-Progress Percentage,Pourcentage d'avancement,
 Row Type,Type de ligne,
 Sales Invoice Cost Price,Prix de revient de la facture de vente,
 Sales Invoice Margin %,% de marge de la facture de vente,
@@ -63,6 +73,9 @@ Sales on quotation,Ventes sur devis,Markup by Project
 Sales on quotation,Ventes sur devis,
 Scroll horizontally using the mouse wheel while pressing \u21E7.,Faites défiler horizontalement en utilisant la molette de la souris tout en appuyant sur \u21E7.,
 Scroll horizontally using the mouse wheel while pressing ⇧.,Faites défiler horizontalement en utilisant la molette de la souris tout en appuyant sur ⇧.,
+Show for buying documents,Afficher dans les documents d'achat,
+Show for selling documents,Afficher dans les documents de vente,
+Stock cannot be updated directly from a progress invoice,Le stock ne peut pas être mis à jour depuis une facture de situation,
 Title,Titre,Construction
 Transaction Date After,Transaction après le,
 Transaction Date Before,Transaction avant le,
