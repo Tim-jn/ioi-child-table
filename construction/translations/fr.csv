@@ -11,7 +11,7 @@ Add Title,Ajouter un titre,Construction
 Additional Costs Amount,Montant charge,
 Additional Costs Percentage,Coef. charge,
 Base Unit Cost Price,PRU non chargé,
-Calculate Progress Globally,Caluler l'avancement pour toute la facture,
+Calculate Progress Globally,Calculer l'avancement pour toute la facture,
 Click on a row to select it.,Cliquez sur une ligne pour la sélectionner,
 Click on the <b>Add Item</b> button to add a new item.,Cliquez sur <b>Ajouter un article</b> pour ajouter un nouvel article.,
 Click on the <b>Delete</b> button to delete the selected rows.,Cliquez sur <b>Supprimer</b> pour supprimer une ligne.,
@@ -25,6 +25,7 @@ Default page size,Taille de la page par défaut,
 Display,Affichage,Quotation Item
 Display,Affichage,Sales Invoice Item
 Display,Affichage,Sales Order Item
+Down Payment,Acompte,
 Drag and drop rows to reorder them.,Glissez-déposez les lignes pour les ré-organiser.,
 Estimated Costing,Coût total estimé,Markup by Project
 Estimated Markup,Marque estimée,Markup by Project
@@ -44,7 +45,7 @@ Markup on quotation,Marque sur devis,
 No documents to show,Aucun document à afficher,
 Percent Complete,Pourcentage d'avancement,Markup by Project
 Print Style,Style d'impression,Construction
-Progress Invoice no,Facture de situation n°,
+Progress Invoice No,Facture de situation n°,
 Progress Invoice,Facture de situation,
 Progress Invoicing Items,Factures de situation,
 Progress Percentage,Pourcentage d'avancement,

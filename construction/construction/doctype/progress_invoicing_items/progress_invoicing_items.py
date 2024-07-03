@@ -56,7 +56,7 @@ def set_invoicing_summary(doc, method):
 
 	if previous_invoices and doc.docstatus == 0:
 		progress_invoice_no = max(cint(x.progress_invoice_no) for x in previous_invoices)
-		if progress_invoice_no and cint(doc.progress_invoice_no) != progress_invoice_no:
+		if progress_invoice_no and cint(doc.progress_invoice_no) <= progress_invoice_no:
 			doc.progress_invoice_no = progress_invoice_no + 1
 
 	doc.run_method("set_print_heading")
@@ -69,6 +69,6 @@ def get_label(invoice):
 		return _("Final Invoice")
 
 	if invoice.is_progress_invoice:
-		return _("Progress Invoice no") + " " + str(invoice.progress_invoice_no)
+		return _("Progress Invoice No") + " " + str(invoice.progress_invoice_no)
 
 	return _("Sales Invoice")

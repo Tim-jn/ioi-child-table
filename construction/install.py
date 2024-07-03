@@ -154,6 +154,7 @@ def get_progress_invoicing_fields():
 				"fieldtype": "Int",
 				"label": "Progress Invoice No",
 				"insert_after": "is_progress_invoice",
+				"depends_on": "is_progress_invoice",
 				"read_only": True,
 				"no_copy": True,
 				"default": "1"
@@ -365,3 +366,17 @@ def add_property_setters():
 		validate_fields_for_doctype=False,
 		is_system_generated=True,
 	)
+
+	for field in ["is_down_payment_invoice", "is_return", "is_debit_note"]:
+		frappe.make_property_setter(
+			dict(
+				doctype="Sales Invoice",
+				doctype_or_field="DocField",
+				fieldname=field,
+				property="depends_on",
+				value="eval:!doc.is_progress_invoice",
+				property_type="Data",
+			),
+			validate_fields_for_doctype=False,
+			is_system_generated=True,
+		)
