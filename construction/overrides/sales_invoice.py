@@ -47,9 +47,8 @@ class ConstructionSalesInvoice(SalesInvoice):
 				already_billed = flt(billed_amt) / flt(base_net_amount) * 100.0
 				item.qty = (flt(item.progress_percentage) - flt(already_billed)) / 100.0 * flt(qty)
 
-		if not self.calculate_progress_globally:
-			if sum_so_amount := sum(item.so_amount for item in items):
-				self.progress_percentage = (flt(self.base_net_total) + total_billed) / sum_so_amount * 100.0
+		if sum_so_amount := sum(item.so_amount for item in items):
+			self.progress_percentage = (flt(self.base_net_total) + total_billed) / sum_so_amount * 100.0
 
 	def on_submit(self):
 		super().on_submit()

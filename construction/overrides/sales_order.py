@@ -7,18 +7,13 @@ def make_progress_invoice(source_name, target_doc=None):
 	doclist = make_sales_invoice(source_name, target_doc=target_doc)
 	doclist.is_progress_invoice = 1
 
+	doclist.progress_percentage = frappe.flags.args.progress_percentage
+
 	project_advancement = 0.0
 	if doclist.project:
 		project_advancement = flt(frappe.db.get_value("Project", doclist.project, "percent_complete"))
 
-	if doclist.calculate_progress_globally:
-		per_billed = flt(frappe.db.get_value("Sales Order", source_name, "per_billed"), 2)
-		doclist.progress_percentage = max([project_advancement, per_billed])
-
-		if doclist.progress_percentage > 99:
-			doclist.progress_percentage = 100.0
-
-	_items = [i for i in doclist.items if (not i.so_detail or i.row_type not in ["Item", ""])]
+	_items = [i for i in doclist.items if i.so_detail and i.row_type in ["Item", ""]]
 	for item in _items:
 		base_net_amount, billed_amt = frappe.db.get_value("Sales Order Item", item.so_detail, ["base_net_amount", "billed_amt"])
 		if base_net_amount:
@@ -40,3 +35,20 @@ def make_progress_invoice(source_name, target_doc=None):
 		doclist.run_method("set_advances")
 
 	return doclist
+
+
+@frappe.whitelist()
+def get_progress_percentage(sales_order):
+	sales_order = frappe.parse_json(sales_order)
+
+	project_advancement = 0.0
+	if sales_order.get("project"):
+		project_advancement = flt(frappe.db.get_value("Project", sales_order.get("project"), "percent_complete"))
+
+	per_billed = flt(sales_order.per_billed, 2)
+	progress_percentage = max([project_advancement, per_billed])
+
+	if progress_percentage > 99.9:
+		progress_percentage = 100.0
+
+	return progress_percentage
