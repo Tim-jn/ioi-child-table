@@ -4,7 +4,7 @@ frappe.ui.form.on("Sales Invoice", {
 	},
 
 	progress_percentage(frm) {
-		if (!frm.calculate_progress) {
+		if (frm.doc.calculate_progress_globally) {
 			frm.doc.items.forEach(row => {
 				calculate_progress(frm, row, frm.doc.progress_percentage)
 			})
@@ -15,12 +15,19 @@ frappe.ui.form.on("Sales Invoice", {
 frappe.ui.form.on("Sales Invoice Item", {
 	progress_percentage(frm, cdt, cdn) {
 		const row = locals[cdt][cdn]
-		if (!frm.calculate_progress) {
-			frm.calculate_progress = true;
-			calculate_progress(frm, row, row.progress_percentage)
+
+		if (row.progress_percentage == 0.0) {
+			frappe.show_alert({
+				message: __("An item cannot be billed with a quantity of 0.<br>Please remove the line from your invoice."),
+				indicator: "orange"
+			})
 		}
 
-		calculate_total_progress(frm);
+		if (!frm.doc.calculate_progress_globally) {
+			calculate_progress(frm, row, row.progress_percentage)
+		} else {
+			calculate_total_progress(frm);
+		}
 	},
 })
 
@@ -47,23 +54,18 @@ const calculate_progress = async(frm, line, progress) => {
 }
 
 const calculate_total_progress = async(frm) => {
-	if (!frm.doc.calculate_progress_globally) {
+	let base_net_amount = 0.0
+	let billed_amt = 0.0
+	for await (const result of frm.doc.items.map(async item => {
+		const soi = await frappe.db.get_value("Sales Order Item", item.so_detail, ["base_net_amount", "billed_amt"], null, "Sales Order")
+		return soi.message
+	})) {
+		base_net_amount += result.base_net_amount
+		billed_amt += result.billed_amt
+	}
 
-		let base_net_amount = 0.0
-		let billed_amt = 0.0
-		for await (const result of frm.doc.items.map(async item => {
-			const soi = await frappe.db.get_value("Sales Order Item", item.so_detail, ["base_net_amount", "billed_amt"], null, "Sales Order")
-			return soi.message
-		})) {
-			base_net_amount += result.base_net_amount
-			billed_amt += result.billed_amt
-		}
-
-		const progress_prct = (flt(frm.doc.base_net_total) + billed_amt) / base_net_amount * 100.0
-		if (flt(progress_prct) != flt(frm.doc.progress_percentage)) {
-			frm.set_value("progress_percentage", progress_prct)
-		}
-
-		frm.calculate_progress = false;
+	const progress_prct = (flt(frm.doc.base_net_total) + billed_amt) / base_net_amount * 100.0
+	if (flt(progress_prct) != flt(frm.doc.progress_percentage)) {
+		frm.set_value("progress_percentage", progress_prct)
 	}
 }
