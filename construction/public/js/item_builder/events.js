@@ -51,3 +51,23 @@ export class CQBTableRenderedComment extends CustomEvent {
 		return this._detail;
 	}
 }
+
+export class CQBTableRenderedRowButtons extends CustomEvent {
+	static get EVENT_NAME() {
+		return "quotationbuildertable-row-ribbon-rendered";
+	}
+	constructor(
+		/** @type {import("./table").default} */ builder,
+		/** @type {import("./ButtonRibbon").ButtonRibbon} */ ribbon,
+		cell
+	) {
+		super(CQBTableRenderedRowButtons.EVENT_NAME, {
+			bubbles: true,
+			cancelable: true,
+		});
+		this._detail = { builder, ribbon, cell };
+	}
+	get detail() {
+		return this._detail;
+	}
+}

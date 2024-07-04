@@ -1,6 +1,7 @@
 import { TabulatorFull as Tabulator } from "tabulator-tables";
-import { CQBTableEditRow, CQBTableRenderedComment, CQBTableToolbarRendered } from "./events";
+import { CQBTableEditRow, CQBTableRenderedComment, CQBTableRenderedRowButtons, CQBTableToolbarRendered } from "./events";
 import { is_buying_doctype } from "./utils";
+import { ButtonRibbon } from "./ButtonRibbon";
 
 const DONOTUSE_DEFAULT_TABLE_COLUMNS = [
 	"item_code",
@@ -206,15 +207,36 @@ function formatEditButton(cell, formatterParams, onRendered) {
 	const el = document.createElement("div");
 
 	onRendered(() => {
-		const button = document.createElement("button");
-		button.type = "button";
-		button.classList.add("btn-reset");
-		button.innerHTML = frappe.utils.icon("edit", "sm");
-		button.ariaLabel = __("Edit");
-		button.addEventListener("click", () => {
+		const ribbon = new ButtonRibbon();
+		el.replaceWith(ribbon.root);
+
+		const editButton = document.createElement("button");
+		editButton.type = "button";
+		editButton.classList.add("btn-reset");
+		editButton.innerHTML = frappe.utils.icon("edit", "sm");
+		editButton.ariaLabel = __("Edit");
+		editButton.title = __("Edit");
+		editButton.addEventListener("click", () => {
 			document.dispatchEvent(new CQBTableEditRow(this.builder, cell));
 		});
-		el.appendChild(button);
+		ribbon.setTrigger(editButton);
+
+		if (this.builder.features.add_item) {
+			const insertButton = document.createElement("button");
+			insertButton.type = "button";
+			insertButton.classList.add("dropdown-item", "text-left");
+			insertButton.innerHTML = frappe.utils.icon("add", "sm");
+			insertButton.append(__("Insert Below"));
+			insertButton.addEventListener("click", () => {
+				const insertAfterIdx = cell.getRow().getData().idx;
+				this.builder.form_wrapper.get_grid().add_new_row(insertAfterIdx + 1, null, false, false);
+				// const insertAfterName = cell.getRow().getData().name;
+				// this.builder.form_wrapper.get_grid().get_row(insertAfterName).insert(false, true);
+			});
+			ribbon.appendButtons(insertButton);
+		}
+
+		document.dispatchEvent(new CQBTableRenderedRowButtons(this.builder, ribbon, cell));
 	});
 
 	return el;
@@ -311,7 +333,7 @@ class ItemBuilderForm {
 				field: "edit_btn",
 				editor: false,
 				headerSort: false,
-				cssClass: "item-builder-flex-center",
+				cssClass: "item-builder-flex-center ButtonRibbon__container",
 				formatter: formatEditButton.bind(this),
 				hozAlign: "center",
 				headerHozAlign: "center",
