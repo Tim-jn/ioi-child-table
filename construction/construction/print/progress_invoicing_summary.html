@@ -1,0 +1,41 @@
+{%- if doc.is_progress_invoice -%}
+	{%- set visible_columns = get_visible_columns(doc.get(df.fieldname),
+		table_meta, df) -%}
+	<div {{ fieldmeta(df) }}>
+		<table class="table table-bordered table-condensed">
+			<thead>
+				<tr>
+					{% for tdf in visible_columns %}
+					{% if tdf.fieldname not in doc.flags.compact_progress_item_fields %}
+					<th style="width: {{ get_width(tdf) }};" class="{{ get_align_class(tdf) }}" {{ fieldmeta(df) }}>
+						{{ _(tdf.label) }}</th>
+					{% endif %}
+					{% endfor %}
+				</tr>
+			</thead>
+			<tbody>
+				{% for d in doc.get(df.fieldname) %}
+				<tr>
+					{% for tdf in visible_columns %}
+					{% if tdf.fieldname not in doc.flags.compact_progress_item_fields %}
+					<td class="{{ get_align_class(tdf) }} no-padding" {{ fieldmeta(df) }}>
+						{% if doc.child_print_templates %}
+							{%- set child_templates = doc.child_print_templates.get(df.fieldname) %}
+							<div class="value">{{ print_value(tdf, d, doc, visible_columns, child_templates) }}</div></td>
+						{% else %}
+							<div class="value">{{ print_value(tdf, d, doc, visible_columns) }}</div></td>
+						{% endif %}
+					{% endif %}
+					{% endfor %}
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{%- endif -%}
+
+<style>
+	.print-format td.no-padding {
+		padding: 0 0.5em !important;
+	}
+</style>
