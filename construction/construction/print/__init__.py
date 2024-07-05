@@ -54,7 +54,7 @@ def chantier_prepare_sections(doc):
 
 	for section in section_list:
 		for key in item_sum_keys:
-			section[key] = sum(section[key])
+			section[key] = sum(filter(None, section[key]))
 
 	section_ends = defaultdict(lambda: [])  # map of row name to list of section names
 	for section in reversed(section_list):
