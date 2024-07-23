@@ -213,7 +213,11 @@ function formatEditButton(cell, formatterParams, onRendered) {
 		const editButton = document.createElement("button");
 		editButton.type = "button";
 		editButton.classList.add("btn-reset");
-		editButton.innerHTML = frappe.utils.icon("edit", "sm");
+		if (this.builder.features.write) {
+			editButton.innerHTML = frappe.utils.icon("edit", "sm");
+		} else {
+			editButton.innerHTML = frappe.utils.icon("view", "sm");
+		}
 		editButton.ariaLabel = __("Edit");
 		editButton.title = __("Edit");
 		editButton.addEventListener("click", () => {
@@ -242,12 +246,25 @@ function formatEditButton(cell, formatterParams, onRendered) {
 	return el;
 }
 
-
-class ItemBuilderForm {
-	constructor({ frm, detach = false, builder = null } = {}) {
+export class ItemBuilderForm {
+	/**
+	 * @constructor
+	 * @param {Object} opts
+	 * @param {FrappeForm} opts.frm - The form object.
+	 * @param {boolean} [opts.detach=false] - Whether to hide the original table.
+	 * @param {ItemBuilderTable} [opts.builder=null] - The parent table object.
+	 */
+	constructor({
+		frm,
+		detach = false,
+		builder = null
+	} = {}) {
+		/** @type {FrappeForm} */
 		this.frm = frm;
+
 		/** @type {boolean} */
 		this.detach = detach;
+
 		/** @type {ItemBuilderTable} */
 		this.builder = builder;
 	}
@@ -263,7 +280,7 @@ class ItemBuilderForm {
 		}
 	}
 
-	/** @type {string[]} @readonly */ get columns() {
+	/** @type {string[]} @readonly */ get_fieldnames() {
 		if (this.settings?.quotation_builder_columns?.[0]?.fieldname) {
 			return this.settings.quotation_builder_columns.map(x => x.fieldname);
 		}
@@ -272,18 +289,43 @@ class ItemBuilderForm {
 
 	assert(condition, message) {
 		if (!condition) {
-			throw message || "Assertion failed";
+			frappe.throw(message || "Assertion failed");
 		}
 	}
 
-	get_rows() {
-		return this.frm.doc.items;
-		// return JSON.parse(JSON.stringify(this.frm.doc.items));
+	get isHeadless() {
+		return !this.frm;
+	}
+
+	get_grid() {
+		this.assert(!this.isHeadless, "Item Builder get_grid: cannot get grid in headless mode");
+		return this.frm.get_field("items").grid;
+	}
+
+	get_frm() {
+		this.assert(!this.isHeadless, "Item Builder get_grid: cannot get grid in headless mode");
+		return this.frm;
+	}
+
+	get_doc() {
+		return this.get_frm().doc;
+	}
+
+	/** @type {any[]} @readonly */ get_rows() {
+		return this.get_doc().items;
+	}
+
+	get_row_by_name(name) {
+		return this.get_rows().find(x => x.name === name);
+	}
+
+	get_child_fields() {
+		return frappe.get_meta(this.row_doctype).fields;
 	}
 
 	get_columns() {
 		const meta = frappe.get_meta(this.row_doctype);
-		const order = this.columns.slice();
+		const order = this.get_fieldnames().slice();
 
 		// Append required fields to the end of the list.
 		order.push(...meta.fields.filter(df => (df.reqd && !df.read_only && !df.default)).map(df => df.fieldname));
@@ -294,20 +336,20 @@ class ItemBuilderForm {
 		const sorter = (a, b) => order.indexOf(a.fieldname) - order.indexOf(b.fieldname);
 		fields.sort(sorter); // sort in place
 
-		const me = this;
+		const writable = this.builder.features.write;
 		const columns = [
 			{
-				rowHandle: true,
+				rowHandle: writable,
 				headerSort: false,
 				frozen: true,
 				cssClass: "item-builder-flex-center",
 				formatter: "handle",
 				minWidth: 16, // width and maxWidth feel useless
-				get visible() { return me.frm.doc.docstatus == 0 },
+				visible: writable,
 				resizable: false,
 			},
 			{
-				rowHandle: true,
+				rowHandle: writable,
 				cssClass: "item-builder-flex-center",
 				formatter: "rowSelection",
 				titleFormatter: "rowSelection",
@@ -316,10 +358,11 @@ class ItemBuilderForm {
 				headerSort: false,
 				cellClick(e, cell) { cell.getRow().toggleSelect() },
 				minWidth: 16, // width and maxWidth feel useless
+				visible: writable,
 				resizable: false,
 			},
 			{
-				rowHandle: true,
+				rowHandle: writable,
 				title: __("Sr"),
 				cssClass: "item-builder-flex-center",
 				formatter: "rownum",
@@ -328,7 +371,7 @@ class ItemBuilderForm {
 				resizable: false,
 			},
 			{
-				rowHandle: true,
+				rowHandle: writable,
 				title: "",
 				field: "edit_btn",
 				editor: false,
@@ -363,7 +406,7 @@ class ItemBuilderForm {
 				field: df.fieldname,
 				editor: true,
 				editable: () => {
-					const displayStatus = frappe.perm.get_field_display_status(df, this.frm.doc);
+					const displayStatus = frappe.perm.get_field_display_status(df, this.get_doc());
 					return displayStatus === "Write";
 				},
 				headerSort: false,
@@ -403,10 +446,6 @@ class ItemBuilderForm {
 		}
 
 		return columns;
-	}
-
-	get_grid() {
-		return this.frm.get_field("items").grid;
 	}
 
 	append_row(values, atIndex = null) {
@@ -498,7 +537,7 @@ class ItemBuilderForm {
 		frappe.ui.form.on(child, "items_delete", doTableUpdate);
 	}
 
-	get parent_doctype() { return this.frm.doctype; }
+	get parent_doctype() { return this.get_frm().doctype; }
 	get row_doctype() { return frappe.meta.get_field(this.parent_doctype, "items").options; }
 
 	isRowEmpty(row) {
@@ -506,10 +545,19 @@ class ItemBuilderForm {
 	}
 }
 
-export default class ItemBuilderTable {
-	constructor(opts) {
-		Object.assign(this, opts);
-		this.frm = opts.frm;
+export class ItemBuilderTable {
+/**
+	 * Constructor for ItemBuilderTable.
+	 * @param {Object} opts - The options object.
+	 * @param {FrappeForm} opts.frm - The form object.
+	 * @param {JQuery} opts.$table_wrapper - The wrapper element.
+	 * @param {...any} opts - Additional options.
+	 */
+	constructor({ frm, $table_wrapper, ...opts }) {
+		// Object.assign(this, opts);
+		this.frm = frm;
+		this.$table_wrapper = $table_wrapper;
+
 		/** @type {ItemBuilderForm} */
 		this.form_wrapper = new ItemBuilderForm({ frm: this.frm, builder: this, detach: true });
 		this.ready_promise = this.make();
@@ -531,8 +579,8 @@ export default class ItemBuilderTable {
 	}
 
 	get features() {
-		const write = this.frm.doc.docstatus == 0;
-		const is_buying = is_buying_doctype(this.frm.doctype);
+		const write = this.form_wrapper.get_doc().docstatus == 0;
+		const is_buying = is_buying_doctype(this.doctype);
 		return {
 			read: 1,
 			write: write,
@@ -542,6 +590,10 @@ export default class ItemBuilderTable {
 		}
 	}
 
+	get doctype() {
+		return this.form_wrapper.parent_doctype;
+	}
+
 	async make() {
 		await this.build_table();
 		this.refresh_buttons();
@@ -549,6 +601,7 @@ export default class ItemBuilderTable {
 	}
 
 	async refresh() {
+		window.cur_construction_builder = this;
 		this.refresh_columns();
 		this.refresh_buttons();
 		const newRows = this.form_wrapper.get_rows();
@@ -654,16 +707,15 @@ export default class ItemBuilderTable {
 				return;
 			}
 			const cell = event.detail.cell;
-			const row = cell.getRow();
-			const rowData = row.getData();
-			const doc = this.frm.doc.items.find(x => x.name === rowData.name);
+			const rowData = cell.getRow().getData();
+			const rowDoc = this.form_wrapper.get_row_by_name(rowData.name);
 
 			const dialog = new frappe.ui.Dialog({
 				size: "large",
-				fields: frappe.get_meta(this.frm.doctype + " Item").fields,
-				frm: this.frm,
-				doc: this.frm.doc,
-				grid: this.frm.get_field("items").grid,
+				fields: this.form_wrapper.get_child_fields(),
+				frm: this.form_wrapper.get_frm(),
+				doc: this.form_wrapper.get_doc(),
+				grid: this.form_wrapper.get_grid(),
 				title: __("Edit"),
 				primary_action_label: __("Close"),
 				primary_action: () => {
@@ -673,7 +725,7 @@ export default class ItemBuilderTable {
 					this.open_form = null;
 				},
 			});
-			dialog.refresh(doc);
+			dialog.refresh(rowDoc);
 			dialog.show();
 			this.open_form = dialog;
 		};
@@ -734,7 +786,7 @@ export default class ItemBuilderTable {
 	async after_update() {
 		if (this.open_form) {
 			const dialog = this.open_form;
-			const item = this.frm.doc.items.find(x => x.name === dialog.doc.name)
+			const item = this.form_wrapper.get_row_by_name(dialog.doc.name)
 			if (item) {
 				dialog.refresh(item);
 			}
@@ -1033,6 +1085,9 @@ export default class ItemBuilderTable {
 		});
 
 		this.tabulator.on("rowMoved", (row) => {
+			if (!this.features.write) {
+				return
+			}
 			const newIndex = row.getPosition() - 1; // 1-based index (0 is the header row)
 			const name = row.getData().name;
 			this.form_wrapper.move_rows([name], newIndex);
