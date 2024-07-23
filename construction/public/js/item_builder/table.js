@@ -594,7 +594,7 @@ export class ItemBuilderTable {
 		return this.form_wrapper.parent_doctype;
 	}
 
-	async make() {
+	/** @private */ async make() {
 		await this.build_table();
 		this.refresh_buttons();
 		this.bind();
@@ -608,11 +608,11 @@ export class ItemBuilderTable {
 		await this.tabulator.replaceData(newRows);
 	}
 
-	refresh_columns() {
+	/** @private */ refresh_columns() {
 		this.tabulator.setColumns(this.form_wrapper.get_columns());
 	}
 
-	refresh_buttons() {
+	/** @private */ refresh_buttons() {
 		this.$table_buttons?.remove();
 		this.$table_footer?.remove();
 
@@ -691,14 +691,14 @@ export class ItemBuilderTable {
 		document.dispatchEvent(new CQBTableToolbarRendered(this));
 	}
 
-	bind() {
+	/** @private */ bind() {
 		this.bind_events();
 		this.bind_form();
 		this.bind_edit();
 		this.bind_observer();
 	}
 
-	bind_edit() {
+	/** @private */ bind_edit() {
 		this.show_row_form_in_dialog = (/** @type {CQBTableEditRow} */ event) => {
 			if (event.detail.builder !== this) {
 				return;
@@ -732,7 +732,7 @@ export class ItemBuilderTable {
 		document.addEventListener(CQBTableEditRow.EVENT_NAME, this.show_row_form_in_dialog);
 	}
 
-	bind_observer() {
+	/** @private */ bind_observer() {
 		const do_later = requestIdleCallback || setTimeout;
 
 		/** @type {IntersectionObserverCallback} */
@@ -761,7 +761,7 @@ export class ItemBuilderTable {
 		this.observer.observe(this.tabulator_wrapper);
 	}
 
-	async on_update(what, ...args) {
+	/** @private */ async on_update(what, ...args) {
 		if (this.destroyed) {
 			return;
 		}
@@ -783,7 +783,7 @@ export class ItemBuilderTable {
 		return this.after_update();
 	}
 
-	async after_update() {
+	/** @private */ async after_update() {
 		if (this.open_form) {
 			const dialog = this.open_form;
 			const item = this.form_wrapper.get_row_by_name(dialog.doc.name)
@@ -803,12 +803,12 @@ export class ItemBuilderTable {
 		} */
 	}
 
-	bind_form() {
+	/** @private */ bind_form() {
 		this.form_wrapper.watch_update(this.on_update.bind(this));
 		this.after_update();
 	}
 
-	async build_table() {
+	/** @private */ async build_table() {
 		await this.form_wrapper.setup();
 
 		const tabulator_options = {
@@ -864,11 +864,11 @@ export class ItemBuilderTable {
 		// });
 	}
 
-	get tabulator_wrapper() {
+	/** @private */ get tabulator_wrapper() {
 		return this.$table_wrapper.find(".tabulator-table")[0];
 	}
 
-	_get_pagination_config() {
+	/** @private */ _get_pagination_config() {
 		if (frappe.is_mobile()) {
 			return {}; // Hide pagination on mobile, until we make it responsive
 		}
@@ -895,7 +895,7 @@ export class ItemBuilderTable {
 		return {};
 	}
 
-	rowFormatter(row) {
+	/** @private */ rowFormatter(row) {
 		// https://tabulator.info/examples/5.5#nested-tables
 		const doc = row.getData();
 
@@ -906,7 +906,7 @@ export class ItemBuilderTable {
 		}
 	}
 
-	makeCheckbox(doc, fieldname, label) {
+	/** @private */ makeCheckbox(doc, fieldname, label) {
 		const checkboxWrapper = document.createElement("label");
 		checkboxWrapper.classList.add("m-0");
 		checkboxWrapper.innerHTML = `<div class="switch text-muted"><input type="checkbox"><span class="slider round"></span></div>`;
@@ -947,7 +947,7 @@ export class ItemBuilderTable {
 		return selectWrapper;
 	} */
 
-	rowFormatterForTitle(doc, row) {
+	/** @private */ rowFormatterForTitle(doc, row) {
 		const wrapper = this._buildWrapperInRow(row);
 
 		// Parse title level
@@ -1013,7 +1013,7 @@ export class ItemBuilderTable {
 		}
 	}
 
-	rowFormatterForText(doc, row) {
+	/** @private */ rowFormatterForText(doc, row) {
 		const wrapper = this._buildWrapperInRow(row);
 		const rowDt = this.form_wrapper.row_doctype;
 		const rowDf = frappe.meta.get_docfield(rowDt, "description");
@@ -1035,7 +1035,7 @@ export class ItemBuilderTable {
 		document.dispatchEvent(new CQBTableRenderedComment(this, control, doc, row));
 	}
 
-	_buildWrapperInRow(row) {
+	/** @private */ _buildWrapperInRow(row) {
 		const wrapper = document.createElement("div");
 		const rowEl = row.getElement();
 		// Remove all children except the first two (drag handle and checkbox)
@@ -1061,7 +1061,7 @@ export class ItemBuilderTable {
 		return wrapper;
 	}
 
-	bind_events() {
+	/** @private */ bind_events() {
 		if (!this.$table_buttons) {
 			return;
 		}
@@ -1094,11 +1094,11 @@ export class ItemBuilderTable {
 		});
 	}
 
-	scrollToBottom() {
+	/** @private */ scrollToBottom() {
 		this.$table_buttons.get(0).scrollIntoView({ block: "end" });
 	}
 
-	async _append_text_row_no_dialog(row_type, text = "", atIndex = null) {
+	/** @private */ async _append_text_row_no_dialog(row_type, text = "", atIndex = null) {
 		let description = "";
 		let item_name = "";
 		switch (row_type) {
@@ -1157,7 +1157,7 @@ export class ItemBuilderTable {
 		await this._append_text_row_no_dialog("title" + level, text ?? __("Heading " + level), atIndex);
 	}
 
-	show_text_title_dialog(row_type) {
+	/** @private */ show_text_title_dialog(row_type) {
 		const getTitle = (row_type) => (row_type == "text") ? __("Add Comment") : __("Add Heading");
 
 		const dialog = new frappe.ui.Dialog({
@@ -1253,7 +1253,7 @@ export class ItemBuilderTable {
 		dialog.show();
 	}
 
-	sync_item_cell(cell) {
+	/** @private */ sync_item_cell(cell) {
 		const row = cell.getRow();
 
 		const doc = row.getData();
@@ -1266,14 +1266,14 @@ export class ItemBuilderTable {
 		this.form_wrapper.update_row_value(doc, fieldname, newValue);
 	}
 
-	async get_default_stock_uom() {
+	/** @private */ async get_default_stock_uom() {
 		if (!this._get_default_stock_uom_memo) {
 			this._get_default_stock_uom_memo = await this._get_default_stock_uom();
 		}
 		return this._get_default_stock_uom_memo;
 	}
 
-	async _get_default_stock_uom() {
+	/** @private */ async _get_default_stock_uom() {
 		const default_uom = frappe.boot.sysdefaults.stock_uom;
 		if (default_uom) {
 			return default_uom;
