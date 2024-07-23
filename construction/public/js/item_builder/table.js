@@ -259,10 +259,10 @@ export class ItemBuilderForm {
 		detach = false,
 		builder = null
 	} = {}) {
-		/** @type {FrappeForm} */
+		/** @private @type {FrappeForm} */
 		this.frm = frm;
 
-		/** @type {boolean} */
+		/** @private @type {boolean} */
 		this.detach = detach;
 
 		/** @type {ItemBuilderTable} */
@@ -272,8 +272,8 @@ export class ItemBuilderForm {
 	async setup() {
 		this.settings ??= await frappe.db.get_doc("Construction App Settings");
 
-		if (this.detach) {
-			const field = this.frm.get_field("items");
+		if (!this.isHeadless && this.detach) {
+			const field = this.get_table_field();
 			/** @type {HTMLElement} */
 			const el = field.$wrapper.get(0);
 			el.style.display = "none";
@@ -299,11 +299,16 @@ export class ItemBuilderForm {
 
 	get_grid() {
 		this.assert(!this.isHeadless, "Item Builder get_grid: cannot get grid in headless mode");
-		return this.frm.get_field("items").grid;
+		return this.get_table_field().grid;
+	}
+
+	get_table_field() {
+		this.assert(!this.isHeadless, "Item Builder get_table_field: cannot get table field in headless mode");
+		return this.frm.get_field("items");
 	}
 
 	get_frm() {
-		this.assert(!this.isHeadless, "Item Builder get_grid: cannot get grid in headless mode");
+		this.assert(!this.isHeadless, "Item Builder get_frm: cannot get frm in headless mode");
 		return this.frm;
 	}
 
@@ -311,8 +316,12 @@ export class ItemBuilderForm {
 		return this.get_frm().doc;
 	}
 
-	/** @type {any[]} @readonly */ get_rows() {
+	/** @return {readonly any[]} */ get_rows() {
 		return this.get_doc().items;
+	}
+
+	/** @return {any[]} */ get_mutable_rows() {
+		return this.get_grid().get_data();
 	}
 
 	get_row_by_name(name) {
@@ -449,6 +458,12 @@ export class ItemBuilderForm {
 	}
 
 	append_row(values, atIndex = null) {
+		if (this.isHeadless) {
+			const rows = this.get_mutable_rows();
+			rows.splice(atIndex || rows.length, 0, values);
+			return;
+		}
+
 		// idx, callback, show, copy_doc, go_to_last_page = false, go_to_first_page = false
 		this.get_grid().add_new_row(atIndex, null, null, values, false, false);
 
@@ -458,6 +473,11 @@ export class ItemBuilderForm {
 	}
 
 	update_row_value(doc, key, value) {
+		if (this.isHeadless) {
+			doc[key] = value; // Don't bother with the grid, assume the doc is a shared reference.
+			return;
+		}
+
 		this.assert(doc.name, "Row doc.name is required")
 		// Because Tabulator will update the value directly in the row object, we need to delete the key first.
 		// This is assumed to be done by the calling function itself.
@@ -470,9 +490,7 @@ export class ItemBuilderForm {
 	}
 
 	remove_rows(names) {
-		const grid = this.get_grid();
-		const data = grid.get_data();
-
+		const data = this.get_mutable_rows();
 		for (const name of names) {
 			const oldIndex = data.findIndex(row => row.name == name);
 			data.splice(oldIndex, 1);
@@ -484,6 +502,11 @@ export class ItemBuilderForm {
 			data[i].idx = i + 1;
 		}
 
+		if (this.isHeadless) {
+			return;
+		}
+
+		const grid = this.get_grid();
 		grid.refresh();
 		this.frm.dirty();
 		this.frm.script_manager.trigger("items_delete", this.row_doctype);
@@ -493,10 +516,7 @@ export class ItemBuilderForm {
 		if (!Number.isInteger(targetIndex)) {
 			throw new Error("Item Builder move_rows: `targetIndex` must be an integer");
 		}
-		const grid = this.get_grid();
-
-		/** @type {unknown[]} */
-		const data = grid.get_data();
+		const data = this.get_mutable_rows();
 
 		for (const name of names) {
 			const oldIndex = data.findIndex(row => row.name == name);
@@ -512,12 +532,21 @@ export class ItemBuilderForm {
 			data[i].idx = i + 1;
 		}
 
+		if (this.isHeadless) {
+			return;
+		}
+
+		const grid = this.get_grid();
 		grid.refresh();
 		this.frm.dirty();
 		// $(this.frm.wrapper).trigger("grid-move-row", [this.frm, row]);
 	}
 
 	watch_update(fn) {
+		if (this.isHeadless) {
+			return;
+		}
+
 		const _doRowUpdate = (...args) => fn("row", ...args);
 		const _doTableUpdate = (...args) => fn("table", ...args);
 
@@ -559,7 +588,7 @@ export class ItemBuilderTable {
 		this.$table_wrapper = $table_wrapper;
 
 		/** @type {ItemBuilderForm} */
-		this.form_handler = new ItemBuilderForm({ frm: this.frm, builder: this, detach: true });
+		this.form_handler = this.make_form_handler();
 		this.ready_promise = this.make();
 		this.destroyed = false;
 	}
@@ -576,6 +605,10 @@ export class ItemBuilderTable {
 		if (this.show_row_form_in_dialog) {
 			document.removeEventListener(CQBTableEditRow.EVENT_NAME, this.show_row_form_in_dialog);
 		}
+	}
+
+	make_form_handler() {
+		return new ItemBuilderForm({ frm: this.frm, builder: this, detach: true });
 	}
 
 	get features() {
@@ -595,6 +628,7 @@ export class ItemBuilderTable {
 	}
 
 	/** @private */ async make() {
+		await this.form_handler.setup();
 		await this.build_table();
 		this.refresh_buttons();
 		this.bind();
@@ -809,8 +843,6 @@ export class ItemBuilderTable {
 	}
 
 	/** @private */ async build_table() {
-		await this.form_handler.setup();
-
 		const tabulator_options = {
 			data: [],
 			index: "name",
