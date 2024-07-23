@@ -233,9 +233,9 @@ function formatEditButton(cell, formatterParams, onRendered) {
 			insertButton.append(__("Insert Below"));
 			insertButton.addEventListener("click", () => {
 				const insertAfterIdx = cell.getRow().getData().idx;
-				this.builder.form_wrapper.get_grid().add_new_row(insertAfterIdx + 1, null, false, false);
+				this.builder.form_handler.get_grid().add_new_row(insertAfterIdx + 1, null, false, false);
 				// const insertAfterName = cell.getRow().getData().name;
-				// this.builder.form_wrapper.get_grid().get_row(insertAfterName).insert(false, true);
+				// this.builder.form_handler.get_grid().get_row(insertAfterName).insert(false, true);
 			});
 			ribbon.appendButtons(insertButton);
 		}
@@ -559,14 +559,14 @@ export class ItemBuilderTable {
 		this.$table_wrapper = $table_wrapper;
 
 		/** @type {ItemBuilderForm} */
-		this.form_wrapper = new ItemBuilderForm({ frm: this.frm, builder: this, detach: true });
+		this.form_handler = new ItemBuilderForm({ frm: this.frm, builder: this, detach: true });
 		this.ready_promise = this.make();
 		this.destroyed = false;
 	}
 
 	destroy() {
 		this.destroyed = true;
-		this.form_wrapper = null;
+		this.form_handler = null;
 		this.tabulator = null;
 		this.open_form = null;
 
@@ -579,7 +579,7 @@ export class ItemBuilderTable {
 	}
 
 	get features() {
-		const write = this.form_wrapper.get_doc().docstatus == 0;
+		const write = this.form_handler.get_doc().docstatus == 0;
 		const is_buying = is_buying_doctype(this.doctype);
 		return {
 			read: 1,
@@ -591,7 +591,7 @@ export class ItemBuilderTable {
 	}
 
 	get doctype() {
-		return this.form_wrapper.parent_doctype;
+		return this.form_handler.parent_doctype;
 	}
 
 	/** @private */ async make() {
@@ -604,12 +604,12 @@ export class ItemBuilderTable {
 		window.cur_construction_builder = this;
 		this.refresh_columns();
 		this.refresh_buttons();
-		const newRows = this.form_wrapper.get_rows();
+		const newRows = this.form_handler.get_rows();
 		await this.tabulator.replaceData(newRows);
 	}
 
 	/** @private */ refresh_columns() {
-		this.tabulator.setColumns(this.form_wrapper.get_columns());
+		this.tabulator.setColumns(this.form_handler.get_columns());
 	}
 
 	/** @private */ refresh_buttons() {
@@ -666,7 +666,7 @@ export class ItemBuilderTable {
 		this.$new_text_button = this.$table_buttons.find(".new-text");
 
 		this.$new_item_button.on("click", () => {
-			this.form_wrapper.append_row({});
+			this.form_handler.append_row({});
 		});
 
 		this.$new_title_button.on("click", () => {
@@ -684,7 +684,7 @@ export class ItemBuilderTable {
 				const rowData = row.getData();
 				return rowData.name;
 			}).filter(Boolean);
-			this.form_wrapper.remove_rows(names)
+			this.form_handler.remove_rows(names)
 			this.tabulator.deselectRow();
 		})
 
@@ -708,14 +708,14 @@ export class ItemBuilderTable {
 			}
 			const cell = event.detail.cell;
 			const rowData = cell.getRow().getData();
-			const rowDoc = this.form_wrapper.get_row_by_name(rowData.name);
+			const rowDoc = this.form_handler.get_row_by_name(rowData.name);
 
 			const dialog = new frappe.ui.Dialog({
 				size: "large",
-				fields: this.form_wrapper.get_child_fields(),
-				frm: this.form_wrapper.get_frm(),
-				doc: this.form_wrapper.get_doc(),
-				grid: this.form_wrapper.get_grid(),
+				fields: this.form_handler.get_child_fields(),
+				frm: this.form_handler.get_frm(),
+				doc: this.form_handler.get_doc(),
+				grid: this.form_handler.get_grid(),
 				title: __("Edit"),
 				primary_action_label: __("Close"),
 				primary_action: () => {
@@ -778,7 +778,7 @@ export class ItemBuilderTable {
 		}
 
 		// Is a full table update
-		const newRows = this.form_wrapper.get_rows();
+		const newRows = this.form_handler.get_rows();
 		await this.tabulator.replaceData(newRows);
 		return this.after_update();
 	}
@@ -786,7 +786,7 @@ export class ItemBuilderTable {
 	/** @private */ async after_update() {
 		if (this.open_form) {
 			const dialog = this.open_form;
-			const item = this.form_wrapper.get_row_by_name(dialog.doc.name)
+			const item = this.form_handler.get_row_by_name(dialog.doc.name)
 			if (item) {
 				dialog.refresh(item);
 			}
@@ -795,26 +795,26 @@ export class ItemBuilderTable {
 		/* const rows = this.tabulator.getData();
 		if (!rows?.length) {
 			// Last row deleted, do nothing
-		} else if (this.form_wrapper.isRowEmpty(rows[rows.length - 1])) {
+		} else if (this.form_handler.isRowEmpty(rows[rows.length - 1])) {
 			// Last row is empty, do nothing
 		} else {
 			// Append empty row when the last row is not empty
-			return await this.form_wrapper.append_row({});
+			return await this.form_handler.append_row({});
 		} */
 	}
 
 	/** @private */ bind_form() {
-		this.form_wrapper.watch_update(this.on_update.bind(this));
+		this.form_handler.watch_update(this.on_update.bind(this));
 		this.after_update();
 	}
 
 	/** @private */ async build_table() {
-		await this.form_wrapper.setup();
+		await this.form_handler.setup();
 
 		const tabulator_options = {
 			data: [],
 			index: "name",
-			columns: this.form_wrapper.get_columns(),
+			columns: this.form_handler.get_columns(),
 			maxHeight: "unset",
 			debugInvalidOptions: false,
 			resizableRows: false,
@@ -918,7 +918,7 @@ export class ItemBuilderTable {
 			checkbox.disabled = true;
 		} else {
 			checkbox.addEventListener("change", (e) => {
-				this.form_wrapper.update_row_value(doc, fieldname, e.target.checked);
+				this.form_handler.update_row_value(doc, fieldname, e.target.checked);
 			});
 		}
 
@@ -935,7 +935,7 @@ export class ItemBuilderTable {
 				input_class: "input-xs",
 				onchange: () => {
 					const value = control.get_value();
-					this.form_wrapper.update_row_value(doc, df.fieldname, value);
+					this.form_handler.update_row_value(doc, df.fieldname, value);
 				},
 			},
 			parent: selectWrapper,
@@ -963,7 +963,7 @@ export class ItemBuilderTable {
 		// Add checkbox
 		header_wrapper.appendChild(this.makeCheckbox(doc, "with_subtotal", __("Compute Subtotal")));
 		// wrapper.appendChild(this.makeSelect(doc, {
-		// 	...frappe.get_meta(this.form_wrapper.row_doctype).fields.find(x => x.fieldname === "row_print_style"),
+		// 	...frappe.get_meta(this.form_handler.row_doctype).fields.find(x => x.fieldname === "row_print_style"),
 		// 	label: __("Print Style"),
 		// }));
 
@@ -986,7 +986,7 @@ export class ItemBuilderTable {
 			counter.appendChild(select);
 			select.classList.add("btn-reset");
 			select.addEventListener("change", () => {
-				this.form_wrapper.update_row_value(doc, "row_type", select.value);
+				this.form_handler.update_row_value(doc, "row_type", select.value);
 			});
 			const icon = document.createElement("span");
 			icon.innerHTML = frappe.utils.icon("es-line-select", "md");
@@ -1008,14 +1008,14 @@ export class ItemBuilderTable {
 			input.readOnly = true;
 		} else {
 			input.addEventListener("change", (e) => {
-				this.form_wrapper.update_row_value(doc, KEY, e.target.value);
+				this.form_handler.update_row_value(doc, KEY, e.target.value);
 			});
 		}
 	}
 
 	/** @private */ rowFormatterForText(doc, row) {
 		const wrapper = this._buildWrapperInRow(row);
-		const rowDt = this.form_wrapper.row_doctype;
+		const rowDt = this.form_handler.row_doctype;
 		const rowDf = frappe.meta.get_docfield(rowDt, "description");
 
 		const control = frappe.ui.form.make_control({
@@ -1029,7 +1029,7 @@ export class ItemBuilderTable {
 		setTextEditorStyle(control);
 		onControlBlur(control, () => {
 			const value = control.get_value();
-			this.form_wrapper.update_row_value(doc, "description", value);
+			this.form_handler.update_row_value(doc, "description", value);
 		});
 
 		document.dispatchEvent(new CQBTableRenderedComment(this, control, doc, row));
@@ -1090,7 +1090,7 @@ export class ItemBuilderTable {
 			}
 			const newIndex = row.getPosition() - 1; // 1-based index (0 is the header row)
 			const name = row.getData().name;
-			this.form_wrapper.move_rows([name], newIndex);
+			this.form_handler.move_rows([name], newIndex);
 		});
 	}
 
@@ -1113,7 +1113,7 @@ export class ItemBuilderTable {
 				item_name = __("Comment");
 				break;
 		}
-		this.form_wrapper.append_row({
+		this.form_handler.append_row({
 			"row_type": row_type,
 			"item_name": item_name,
 			"qty": 1,
@@ -1147,7 +1147,7 @@ export class ItemBuilderTable {
 	async append_title_row({ atIndex = null, level = null, text = null } = {}) {
 		if (!level) {
 			level = 1;
-			const rows = this.form_wrapper.get_rows()
+			const rows = this.form_handler.get_rows()
 			const prevRow = rows.length ? rows[(atIndex ?? rows.length) - 1] : null;
 			if (prevRow?.row_type?.startsWith?.("title")) {
 				level = parseInt(prevRow.row_type.replace("title", "")) + 1;
@@ -1239,7 +1239,7 @@ export class ItemBuilderTable {
 						break;
 				}
 
-				this.form_wrapper.append_row({
+				this.form_handler.append_row({
 					"row_type": row_type,
 					"item_name": item_name,
 					"qty": 1,
@@ -1263,7 +1263,7 @@ export class ItemBuilderTable {
 
 		// Because Tabulator did update the value directly in the row object, we need to REVERT the value first
 		doc[fieldname] = oldValue;
-		this.form_wrapper.update_row_value(doc, fieldname, newValue);
+		this.form_handler.update_row_value(doc, fieldname, newValue);
 	}
 
 	/** @private */ async get_default_stock_uom() {
