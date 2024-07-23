@@ -666,7 +666,7 @@ export class ItemBuilderTable {
 		this.$new_text_button = this.$table_buttons.find(".new-text");
 
 		this.$new_item_button.on("click", () => {
-			this.form_handler.append_row({});
+			this.append_item_row();
 		});
 
 		this.$new_title_button.on("click", () => {
@@ -1121,6 +1121,18 @@ export class ItemBuilderTable {
 			"rate": 0,
 			"description": description,
 		}, atIndex);
+	}
+
+	/**
+	 * Append an item row to the table.
+	 *
+	 * @param {Object} [options] - Optional parameters.
+	 * @param {number} [options.atIndex] - The index at which to append the row.
+	 * @param {string} [options.text] - The text to display in the row.
+	 * @return {Promise<void>}
+	 */
+	async append_item_row({ atIndex = null } = {}) {
+		this.form_handler.append_row({}, atIndex);
 	}
 
 	/**
