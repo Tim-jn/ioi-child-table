@@ -409,9 +409,9 @@ class ItemBuilderForm {
 		return this.frm.get_field("items").grid;
 	}
 
-	append_row(values) {
+	append_row(values, atIndex = null) {
 		// idx, callback, show, copy_doc, go_to_last_page = false, go_to_first_page = false
-		this.get_grid().add_new_row(null, null, null, values, false, false);
+		this.get_grid().add_new_row(atIndex, null, null, values, false, false);
 
 		// https://frappeframework.com/docs/user/en/api/form#frm-add-child
 		// this.frm.add_child("items", values);
@@ -510,6 +510,7 @@ export default class ItemBuilderTable {
 	constructor(opts) {
 		Object.assign(this, opts);
 		this.frm = opts.frm;
+		/** @type {ItemBuilderForm} */
 		this.form_wrapper = new ItemBuilderForm({ frm: this.frm, builder: this, detach: true });
 		this.ready_promise = this.make();
 		this.destroyed = false;
@@ -616,20 +617,11 @@ export default class ItemBuilderTable {
 		});
 
 		this.$new_title_button.on("click", () => {
-			let level = 1;
-
-			const rows = this.form_wrapper.get_rows()
-			const lastRow = rows.length ? rows[rows.length - 1] : null;
-			if (lastRow?.row_type?.startsWith?.("title")) {
-				level = parseInt(lastRow.row_type.replace("title", "")) + 1;
-			}
-			level = Math.min(level, 3);
-
-			this.append_text_row_no_dialog("title" + level, __("Heading " + level));
+			this.append_title_row();
 		});
 
 		this.$new_text_button.on("click", () => {
-			this.append_text_row_no_dialog("text", "");
+			this.append_comment_row();
 		});
 
 		this.$delete_row_button.on("click", () => {
@@ -1051,7 +1043,7 @@ export default class ItemBuilderTable {
 		this.$table_buttons.get(0).scrollIntoView({ block: "end" });
 	}
 
-	async append_text_row_no_dialog(row_type, text = "") {
+	async _append_text_row_no_dialog(row_type, text = "", atIndex = null) {
 		let description = "";
 		let item_name = "";
 		switch (row_type) {
@@ -1073,7 +1065,41 @@ export default class ItemBuilderTable {
 			"uom": (await this.get_default_stock_uom()) || __("Unit"),
 			"rate": 0,
 			"description": description,
-		})
+		}, atIndex);
+	}
+
+	/**
+	 * Append a comment row to the table.
+	 *
+	 * @param {Object} [options] - Optional parameters.
+	 * @param {number} [options.atIndex] - The index at which to append the row.
+	 * @param {string} [options.text] - The text to display in the row.
+	 * @return {Promise<void>}
+	 */
+	async append_comment_row({ atIndex = null, text = null } = {}) {
+		await this._append_text_row_no_dialog("text", text || "", atIndex);
+	}
+
+	/**
+	 * Append a title row to the table.
+	 *
+	 * @param {Object} [options] - Optional parameters.
+	 * @param {number} [options.atIndex] - The index at which to append the row.
+	 * @param {number} [options.level] - The level of the heading, from 1 to 3.
+	 * @param {string} [options.text] - The text to display in the row.
+	 * @return {Promise<void>}
+	 */
+	async append_title_row({ atIndex = null, level = null, text = null } = {}) {
+		if (!level) {
+			level = 1;
+			const rows = this.form_wrapper.get_rows()
+			const prevRow = rows.length ? rows[(atIndex ?? rows.length) - 1] : null;
+			if (prevRow?.row_type?.startsWith?.("title")) {
+				level = parseInt(prevRow.row_type.replace("title", "")) + 1;
+			}
+		}
+		level = Math.max(1, Math.min(3, level));
+		await this._append_text_row_no_dialog("title" + level, text ?? __("Heading " + level), atIndex);
 	}
 
 	show_text_title_dialog(row_type) {

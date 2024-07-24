@@ -35,6 +35,10 @@
 		box-shadow: var(--shadow-md);
 		border-radius: var(--border-radius-lg);
 		padding: 4px 4px;
+
+		&:empty {
+			display: none;
+		}
 	}
 
 	// Hide the ribbon from sighted users
