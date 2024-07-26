@@ -1219,31 +1219,33 @@ export default class ItemBuilderTable {
 	}
 
 	async _get_default_stock_uom() {
-		await frappe.model.with_doctype("Item")
-		const { stock_uom } = frappe.model.get_new_doc("Item");
-		if (!stock_uom) {
-			const prom = new Promise((resolve, reject) => {
-				const dialog = new frappe.ui.Dialog({
-					title: __("Default Stock UOM"),
-					fields: [
-						{
-							fieldtype: "Link",
-							fieldname: "stock_uom",
-							options: "UOM",
-							label: __("Stock UOM"),
-							reqd: 1,
-						},
-					],
-					primary_action_label: __("Set"),
-					primary_action: (values) => {
-						resolve(values.stock_uom);
-						dialog.hide();
-					},
-				});
-				dialog.show();
-			});
-			return prom;
+		const default_uom = frappe.boot.sysdefaults.stock_uom;
+		if (default_uom) {
+			return default_uom;
 		}
-		return stock_uom;
+
+		// @deprecated
+		console.warn("construction: Please define a default Stock UOM in Stock Settings");
+		const prom = new Promise((resolve, reject) => {
+			const dialog = new frappe.ui.Dialog({
+				title: __("Default Stock UOM"),
+				fields: [
+					{
+						fieldtype: "Link",
+						fieldname: "stock_uom",
+						options: "UOM",
+						label: __("Stock UOM"),
+						reqd: 1,
+					},
+				],
+				primary_action_label: __("Set"),
+				primary_action: (values) => {
+					resolve(values.stock_uom);
+					dialog.hide();
+				},
+			});
+			dialog.show();
+		});
+		return prom;
 	}
 }
