@@ -31,6 +31,9 @@ export class CQBTableEditRow extends CustomEvent {
 	get detail() {
 		return this._detail;
 	}
+	clone() {
+		return new CQBTableEditRow(this.detail.builder, this.detail.cell);
+	}
 }
 
 export class CQBTableRenderedComment extends CustomEvent {
