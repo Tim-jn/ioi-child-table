@@ -2,7 +2,7 @@ export class CQBTableToolbarRendered extends CustomEvent {
 	static get EVENT_NAME() {
 		return "quotationbuildertable-toolbar-rendered";
 	}
-	constructor(/** @type {import("./table").default} */ builder) {
+	constructor(/** @type {import("./table").ItemBuilderTable} */ builder) {
 		super(CQBTableToolbarRendered.EVENT_NAME, {
 			bubbles: true,
 			cancelable: true,
@@ -19,7 +19,7 @@ export class CQBTableEditRow extends CustomEvent {
 		return "quotationbuildertable-edit-row";
 	}
 	constructor(
-		/** @type {import("./table").default} */ builder,
+		/** @type {import("./table").ItemBuilderTable} */ builder,
 		/** @type {import("tabulator-tables").CellComponent} */ cell
 	) {
 		super(CQBTableEditRow.EVENT_NAME, {
@@ -38,7 +38,7 @@ export class CQBTableRenderedComment extends CustomEvent {
 		return "quotationbuildertable-comment-rendered";
 	}
 	constructor(
-		/** @type {import("./table").default} */ builder,
+		/** @type {import("./table").ItemBuilderTable} */ builder,
 		control, doc, row
 	) {
 		super(CQBTableRenderedComment.EVENT_NAME, {
@@ -57,7 +57,7 @@ export class CQBTableRenderedRowButtons extends CustomEvent {
 		return "quotationbuildertable-row-ribbon-rendered";
 	}
 	constructor(
-		/** @type {import("./table").default} */ builder,
+		/** @type {import("./table").ItemBuilderTable} */ builder,
 		/** @type {import("./ButtonRibbon").ButtonRibbon} */ ribbon,
 		cell
 	) {

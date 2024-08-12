@@ -16,6 +16,12 @@ const DONOTUSE_DEFAULT_TABLE_COLUMNS = [
 	"row_print_style",
 ];
 
+function assert(condition, message) {
+	if (!condition) {
+		frappe.throw(message || "Assertion failed");
+	}
+}
+
 function onControlBlur(control, callback) {
 	const input = $(control.$input || control.input || control.input_area).get(0);
 	if (["Date", "Datetime", "Duration"].includes(control.df.fieldtype)) {
@@ -250,22 +256,30 @@ export class ItemBuilderForm {
 	/**
 	 * @constructor
 	 * @param {Object} opts
-	 * @param {FrappeForm} opts.frm - The form object.
+	 * @param {ItemBuilderTable} opts.builder - The parent table object.
+	 * @param {FrappeForm} [opts.frm=null] - The form object.
 	 * @param {boolean} [opts.detach=false] - Whether to hide the original table.
-	 * @param {ItemBuilderTable} [opts.builder=null] - The parent table object.
 	 */
 	constructor({
-		frm,
+		builder,
+		frm = null,
 		detach = false,
-		builder = null
+		options = {},
 	} = {}) {
-		/** @private @type {FrappeForm} */
+		/** @private @type {FrappeForm | null} */
 		this.frm = frm;
 
 		/** @private @type {boolean} */
 		this.detach = detach;
 
+		/** @private @type {Object} */
+		this.settings = {};
+
+		/** @private @type {Object} */
+		this.options = options;
+
 		/** @type {ItemBuilderTable} */
+		assert(builder, "ItemBuilderForm: builder is required");
 		this.builder = builder;
 	}
 
@@ -278,6 +292,8 @@ export class ItemBuilderForm {
 			const el = field.$wrapper.get(0);
 			el.style.display = "none";
 		}
+
+		await frappe.model.with_doctype(this.parent_doctype);
 	}
 
 	/** @type {string[]} @readonly */ get_fieldnames() {
@@ -287,32 +303,29 @@ export class ItemBuilderForm {
 		return DONOTUSE_DEFAULT_TABLE_COLUMNS;
 	}
 
-	assert(condition, message) {
-		if (!condition) {
-			frappe.throw(message || "Assertion failed");
-		}
-	}
-
 	get isHeadless() {
 		return !this.frm;
 	}
 
 	get_grid() {
-		this.assert(!this.isHeadless, "Item Builder get_grid: cannot get grid in headless mode");
+		assert(!this.isHeadless, "Item Builder get_grid: cannot get grid in headless mode");
 		return this.get_table_field().grid;
 	}
 
 	get_table_field() {
-		this.assert(!this.isHeadless, "Item Builder get_table_field: cannot get table field in headless mode");
+		assert(!this.isHeadless, "Item Builder get_table_field: cannot get table field in headless mode");
 		return this.frm.get_field("items");
 	}
 
 	get_frm() {
-		this.assert(!this.isHeadless, "Item Builder get_frm: cannot get frm in headless mode");
+		assert(!this.isHeadless, "Item Builder get_frm: cannot get frm in headless mode");
 		return this.frm;
 	}
 
 	get_doc() {
+		if (this.options.doc) {
+			return this.options.doc;
+		}
 		return this.get_frm().doc;
 	}
 
@@ -321,6 +334,9 @@ export class ItemBuilderForm {
 	}
 
 	/** @return {any[]} */ get_mutable_rows() {
+		if (this.isHeadless) {
+			return this.get_rows();
+		}
 		return this.get_grid().get_data();
 	}
 
@@ -330,6 +346,14 @@ export class ItemBuilderForm {
 
 	get_child_fields() {
 		return frappe.get_meta(this.row_doctype).fields;
+	}
+
+	get parent_doctype() {
+		return this.get_doc().doctype;
+	}
+
+	get row_doctype() {
+		return frappe.meta.get_field(this.parent_doctype, "items").options;
 	}
 
 	get_columns() {
@@ -415,7 +439,7 @@ export class ItemBuilderForm {
 				field: df.fieldname,
 				editor: true,
 				editable: () => {
-					const displayStatus = frappe.perm.get_field_display_status(df, this.get_doc());
+					const displayStatus = this.getDisplayStatus(df);
 					return displayStatus === "Write";
 				},
 				headerSort: false,
@@ -457,15 +481,32 @@ export class ItemBuilderForm {
 		return columns;
 	}
 
-	append_row(values, atIndex = null) {
+	getDisplayStatusByFieldname(fieldname) {
+		const df = frappe.meta.get_docfield(this.row_doctype, fieldname);
+		return this.getDisplayStatus(df);
+	}
+
+	getDisplayStatus(df) {
+		return frappe.perm.get_field_display_status(df, this.get_doc());
+	}
+
+	/** @public */ append_row(rowValues, atIndex = null) {
 		if (this.isHeadless) {
-			const rows = this.get_mutable_rows();
-			rows.splice(atIndex || rows.length, 0, values);
+			const row = frappe.model.get_new_doc(this.row_doctype);
+			Object.assign(row, rowValues);
+
+			const data = this.get_mutable_rows();
+			data.splice(atIndex || data.length, 0, row);
+			for (let i = 0; i < data.length; i++) {
+				data[i].idx = i + 1;
+			}
+
+			this.builder.refresh();
 			return;
 		}
 
 		// idx, callback, show, copy_doc, go_to_last_page = false, go_to_first_page = false
-		this.get_grid().add_new_row(atIndex, null, null, values, false, false);
+		this.get_grid().add_new_row(atIndex, null, null, rowValues, false, false);
 
 		// https://frappeframework.com/docs/user/en/api/form#frm-add-child
 		// this.frm.add_child("items", values);
@@ -475,10 +516,11 @@ export class ItemBuilderForm {
 	update_row_value(doc, key, value) {
 		if (this.isHeadless) {
 			doc[key] = value; // Don't bother with the grid, assume the doc is a shared reference.
+			// this.builder.refresh();
 			return;
 		}
 
-		this.assert(doc.name, "Row doc.name is required")
+		assert(doc.name, "Row doc.name is required")
 		// Because Tabulator will update the value directly in the row object, we need to delete the key first.
 		// This is assumed to be done by the calling function itself.
 		// doc[key] = previousValue;
@@ -503,6 +545,7 @@ export class ItemBuilderForm {
 		}
 
 		if (this.isHeadless) {
+			this.builder.refresh();
 			return;
 		}
 
@@ -533,6 +576,7 @@ export class ItemBuilderForm {
 		}
 
 		if (this.isHeadless) {
+			this.builder.refresh();
 			return;
 		}
 
@@ -566,11 +610,33 @@ export class ItemBuilderForm {
 		frappe.ui.form.on(child, "items_delete", doTableUpdate);
 	}
 
-	get parent_doctype() { return this.get_frm().doctype; }
-	get row_doctype() { return frappe.meta.get_field(this.parent_doctype, "items").options; }
-
 	isRowEmpty(row) {
 		return !row.name || (!row.item_code && !row.item_name && !row.description);
+	}
+
+	showEditDialog(docname, opts) {
+		const rowDoc = this.get_row_by_name(docname);
+		const frm = this.isHeadless ? opts.frm : this.get_frm();
+		assert(frm, "showEditDialog: frm is required");
+
+		const dialog = new frappe.ui.Dialog({
+			size: "large",
+			fields: this.get_child_fields(),
+			doc: this.get_doc(),
+			frm: frm,
+			grid: this.isHeadless ? null : this.get_grid(),
+			title: __("Edit"),
+			primary_action_label: __("Close"),
+			primary_action: () => {
+				dialog.hide();
+				this.builder.refresh();
+				return;
+			},
+			...opts,
+		});
+		dialog.refresh(rowDoc);
+		dialog.show();
+		return dialog;
 	}
 }
 
@@ -588,7 +654,7 @@ export class ItemBuilderTable {
 		this.$table_wrapper = $table_wrapper;
 
 		/** @type {ItemBuilderForm} */
-		this.form_handler = this.make_form_handler();
+		this.form_handler = this.make_form_handler({ frm: this.frm, builder: this, detach: true });
 		this.ready_promise = this.make();
 		this.destroyed = false;
 	}
@@ -607,12 +673,12 @@ export class ItemBuilderTable {
 		}
 	}
 
-	make_form_handler() {
-		return new ItemBuilderForm({ frm: this.frm, builder: this, detach: true });
+	make_form_handler(args) {
+		return new ItemBuilderForm(args);
 	}
 
 	get features() {
-		const write = this.form_handler.get_doc().docstatus == 0;
+		const write = this.form_handler.get_doc().docstatus == 0; // TODO: this.frm.has_perm("write")
 		const is_buying = is_buying_doctype(this.doctype);
 		return {
 			read: 1,
@@ -742,26 +808,12 @@ export class ItemBuilderTable {
 			}
 			const cell = event.detail.cell;
 			const rowData = cell.getRow().getData();
-			const rowDoc = this.form_handler.get_row_by_name(rowData.name);
 
-			const dialog = new frappe.ui.Dialog({
-				size: "large",
-				fields: this.form_handler.get_child_fields(),
-				frm: this.form_handler.get_frm(),
-				doc: this.form_handler.get_doc(),
-				grid: this.form_handler.get_grid(),
-				title: __("Edit"),
-				primary_action_label: __("Close"),
-				primary_action: () => {
-					dialog.hide();
-				},
+			this.open_form = this.form_handler.showEditDialog(rowData.name, {
 				onhide: () => {
 					this.open_form = null;
 				},
 			});
-			dialog.refresh(rowDoc);
-			dialog.show();
-			this.open_form = dialog;
 		};
 		document.addEventListener(CQBTableEditRow.EVENT_NAME, this.show_row_form_in_dialog);
 	}
@@ -942,19 +994,20 @@ export class ItemBuilderTable {
 		const checkboxWrapper = document.createElement("label");
 		checkboxWrapper.classList.add("m-0");
 		checkboxWrapper.innerHTML = `<div class="switch text-muted"><input type="checkbox"><span class="slider round"></span></div>`;
+		checkboxWrapper.append("\xa0", label);
 		const checkbox = checkboxWrapper.querySelector("input");
 		checkbox.type = "checkbox";
 		checkbox.checked = doc[fieldname];
 
-		if (doc.docstatus > 0) {
-			checkbox.disabled = true;
-		} else {
+		const writable = this.form_handler.getDisplayStatusByFieldname(fieldname) === "Write";
+
+		if (writable) {
 			checkbox.addEventListener("change", (e) => {
 				this.form_handler.update_row_value(doc, fieldname, e.target.checked);
 			});
+		} else {
+			checkbox.disabled = true;
 		}
-
-		checkboxWrapper.append("\xa0", label);
 		return checkboxWrapper;
 	}
 
@@ -1003,7 +1056,9 @@ export class ItemBuilderTable {
 		element.appendChild(counter);
 		counter.classList.add("chantier-counter", "m-0");
 
-		if (doc.docstatus == 0) {
+		const writable = this.form_handler.getDisplayStatusByFieldname("description") === "Write";
+
+		if (writable) {
 			const select = document.createElement("select");
 			for (let i = 1; i <= 3; i++) {
 				const option = document.createElement("option");
@@ -1036,12 +1091,12 @@ export class ItemBuilderTable {
 		const KEY = "item_name";
 		input.value = doc[KEY];
 
-		if (doc.docstatus > 0) {
-			input.readOnly = true;
-		} else {
+		if (writable) {
 			input.addEventListener("change", (e) => {
 				this.form_handler.update_row_value(doc, KEY, e.target.value);
 			});
+		} else {
+			input.readOnly = true;
 		}
 	}
 
@@ -1056,7 +1111,7 @@ export class ItemBuilderTable {
 			render_input: true,
 			only_input: true,
 			value: doc.description,
-			disabled: doc.docstatus > 0
+			disabled: this.form_handler.getDisplayStatus(rowDf) !== "Write",
 		});
 		setTextEditorStyle(control);
 		onControlBlur(control, () => {
@@ -1250,5 +1305,64 @@ export class ItemBuilderTable {
 			dialog.show();
 		});
 		return prom;
+	}
+
+	static async HeadlessForDocument({ doc, frm, element, rest }) {
+		assert(doc, "doc is required");
+		assert(frm, "frm is required");
+		assert(element, "element is required");
+
+		element.innerHTML = `<div class="item-builder-table"><div class="tabulator-table"></div></div>`;
+
+		class HeadlessForDocument_ItemBuilderForm extends ItemBuilderForm {
+			get detach() {
+				return true
+			}
+			set detach(v) {
+				// no-op
+			}
+			get isHeadless() {
+				return true
+			}
+			get_frm() {
+				return frm;
+			}
+			get_doc() {
+				return doc;
+			}
+			getDisplayStatus(df) {
+				return "Write";
+			}
+			showEditDialog(docname, opts) {
+				return super.showEditDialog(docname, {
+					...opts,
+					frm,
+				})
+			}
+		}
+		class HeadlessForDocument_ItemBuilderTable extends ItemBuilderTable {
+			get features() {
+				const write = true;
+				const is_buying = is_buying_doctype(this.doctype);
+				return {
+					...super.features,
+					write: write,
+					add_item: write,
+					add_title: write && !is_buying,
+					add_comment: write && !is_buying,
+				}
+			}
+			make_form_handler(args) {
+				return new HeadlessForDocument_ItemBuilderForm(args);
+			}
+		}
+		const builder = new HeadlessForDocument_ItemBuilderTable({
+			frm: frm,
+			$table_wrapper: $(element),
+			...rest,
+		});
+		await builder.ready_promise;
+		await builder.refresh();
+		return builder;
 	}
 }
