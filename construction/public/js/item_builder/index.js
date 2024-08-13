@@ -1,4 +1,4 @@
-import ItemBuilderTable from "./table";
+import { ItemBuilderTable } from "./table";
 import ItemBuilderTree from "./tree";
 import { is_buying_doctype } from "./utils";
 
