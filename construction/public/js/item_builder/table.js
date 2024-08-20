@@ -284,7 +284,8 @@ export class ItemBuilderForm {
 	}
 
 	async setup() {
-		this.settings ??= await frappe.db.get_doc("Construction App Settings");
+		const appSettings = await frappe.db.get_doc("Construction App Settings");
+		this.settings = { ...appSettings, ...this.settings };
 
 		if (!this.isHeadless && this.detach) {
 			const field = this.get_table_field();
