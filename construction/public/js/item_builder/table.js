@@ -771,7 +771,7 @@ export class ItemBuilderTable {
 		});
 
 		this.$new_title_button.on("click", () => {
-			this.append_title_row();
+			this.append_title_row({ level: 1 });
 		});
 
 		this.$new_text_button.on("click", () => {
@@ -1246,6 +1246,7 @@ export class ItemBuilderTable {
 	 */
 	async append_title_row({ atIndex = null, level = null, text = null } = {}) {
 		if (!level) {
+			// Smart default for increasing the level of the heading
 			level = 1;
 			const rows = this.form_handler.get_rows()
 			const prevRow = rows.length ? rows[(atIndex ?? rows.length) - 1] : null;
