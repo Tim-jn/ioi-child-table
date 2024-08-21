@@ -239,9 +239,7 @@ function formatEditButton(cell, formatterParams, onRendered) {
 			insertButton.append(__("Insert Below"));
 			insertButton.addEventListener("click", () => {
 				const insertAfterIdx = cell.getRow().getData().idx;
-				this.builder.form_handler.get_grid().add_new_row(insertAfterIdx + 1, null, false, false);
-				// const insertAfterName = cell.getRow().getData().name;
-				// this.builder.form_handler.get_grid().get_row(insertAfterName).insert(false, true);
+				this.append_row({}, insertAfterIdx + 1)
 			});
 			ribbon.appendButtons(insertButton);
 		}
@@ -497,7 +495,7 @@ export class ItemBuilderForm {
 			Object.assign(row, rowValues);
 
 			const data = this.get_mutable_rows();
-			data.splice(atIndex || data.length, 0, row);
+			data.splice(atIndex !== null ? Math.max(0, atIndex - 1) : data.length, 0, row);
 			for (let i = 0; i < data.length; i++) {
 				data[i].idx = i + 1;
 			}
@@ -697,6 +695,7 @@ export class ItemBuilderTable {
 	/** @private */ async make() {
 		await this.form_handler.setup();
 		await this.build_table();
+		this.refresh_columns();
 		this.refresh_buttons();
 		this.bind();
 	}
@@ -710,6 +709,7 @@ export class ItemBuilderTable {
 	}
 
 	/** @private */ refresh_columns() {
+		this.tabulator.options.movableRows = this.features.write;
 		this.tabulator.setColumns(this.form_handler.get_columns());
 	}
 
@@ -771,7 +771,7 @@ export class ItemBuilderTable {
 		});
 
 		this.$new_title_button.on("click", () => {
-			this.append_title_row();
+			this.append_title_row({ level: 1 });
 		});
 
 		this.$new_text_button.on("click", () => {
@@ -899,12 +899,12 @@ export class ItemBuilderTable {
 		const tabulator_options = {
 			data: [],
 			index: "name",
+			movableRows: this.features.write,
 			columns: this.form_handler.get_columns(),
 			maxHeight: "unset",
 			debugInvalidOptions: false,
 			resizableRows: false,
 			reactiveData: false,
-			movableRows: true,
 			rowFormatter: this.rowFormatter.bind(this),
 
 			langs: {
@@ -1246,6 +1246,7 @@ export class ItemBuilderTable {
 	 */
 	async append_title_row({ atIndex = null, level = null, text = null } = {}) {
 		if (!level) {
+			// Smart default for increasing the level of the heading
 			level = 1;
 			const rows = this.form_handler.get_rows()
 			const prevRow = rows.length ? rows[(atIndex ?? rows.length) - 1] : null;
