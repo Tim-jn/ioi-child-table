@@ -239,9 +239,7 @@ function formatEditButton(cell, formatterParams, onRendered) {
 			insertButton.append(__("Insert Below"));
 			insertButton.addEventListener("click", () => {
 				const insertAfterIdx = cell.getRow().getData().idx;
-				this.builder.form_handler.get_grid().add_new_row(insertAfterIdx + 1, null, false, false);
-				// const insertAfterName = cell.getRow().getData().name;
-				// this.builder.form_handler.get_grid().get_row(insertAfterName).insert(false, true);
+				this.append_row({}, insertAfterIdx + 1)
 			});
 			ribbon.appendButtons(insertButton);
 		}
@@ -497,7 +495,7 @@ export class ItemBuilderForm {
 			Object.assign(row, rowValues);
 
 			const data = this.get_mutable_rows();
-			data.splice(atIndex || data.length, 0, row);
+			data.splice(atIndex !== null ? Math.max(0, atIndex - 1) : data.length, 0, row);
 			for (let i = 0; i < data.length; i++) {
 				data[i].idx = i + 1;
 			}
