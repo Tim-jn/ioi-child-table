@@ -1356,7 +1356,7 @@ export class ItemBuilderTable {
 				}
 			}
 			make_form_handler(args) {
-				args.settings = settings;
+				args.settings = settings || {};
 				return new HeadlessForDocument_ItemBuilderForm(args);
 			}
 		}
