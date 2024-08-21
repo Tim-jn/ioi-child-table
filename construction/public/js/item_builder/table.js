@@ -263,6 +263,7 @@ export class ItemBuilderForm {
 		frm = null,
 		detach = false,
 		options = {},
+		settings = {},
 	} = {}) {
 		/** @private @type {FrappeForm | null} */
 		this.frm = frm;
@@ -271,7 +272,7 @@ export class ItemBuilderForm {
 		this.detach = detach;
 
 		/** @private @type {Object} */
-		this.settings = {};
+		this.settings = settings;
 
 		/** @private @type {Object} */
 		this.options = options;
@@ -1309,7 +1310,7 @@ export class ItemBuilderTable {
 		return prom;
 	}
 
-	static async HeadlessForDocument({ doc, frm, element, rest }) {
+	static async HeadlessForDocument({ doc, frm, element, rest, settings }) {
 		assert(doc, "doc is required");
 		assert(frm, "frm is required");
 		assert(element, "element is required");
@@ -1355,6 +1356,7 @@ export class ItemBuilderTable {
 				}
 			}
 			make_form_handler(args) {
+				args.settings = settings;
 				return new HeadlessForDocument_ItemBuilderForm(args);
 			}
 		}
