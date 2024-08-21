@@ -697,6 +697,7 @@ export class ItemBuilderTable {
 	/** @private */ async make() {
 		await this.form_handler.setup();
 		await this.build_table();
+		this.refresh_columns();
 		this.refresh_buttons();
 		this.bind();
 	}
@@ -710,6 +711,7 @@ export class ItemBuilderTable {
 	}
 
 	/** @private */ refresh_columns() {
+		this.tabulator.options.movableRows = this.features.write;
 		this.tabulator.setColumns(this.form_handler.get_columns());
 	}
 
@@ -899,12 +901,12 @@ export class ItemBuilderTable {
 		const tabulator_options = {
 			data: [],
 			index: "name",
+			movableRows: this.features.write,
 			columns: this.form_handler.get_columns(),
 			maxHeight: "unset",
 			debugInvalidOptions: false,
 			resizableRows: false,
 			reactiveData: false,
-			movableRows: true,
 			rowFormatter: this.rowFormatter.bind(this),
 
 			langs: {
