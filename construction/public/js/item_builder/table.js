@@ -417,6 +417,7 @@ export class ItemBuilderForm {
 				resizable: false,
 			},
 			{
+				rowHandle: true, // Ensure that there is at least one rowHandle column, this one is hidden to prevent dragging on readonly documents
 				title: __("Row Type"),
 				field: "row_type",
 				editor: false,
@@ -900,7 +901,7 @@ export class ItemBuilderTable {
 		const tabulator_options = {
 			data: [],
 			index: "name",
-			movableRows: this.features.write,
+			movableRows: true,
 			columns: this.form_handler.get_columns(),
 			maxHeight: "unset",
 			debugInvalidOptions: false,
