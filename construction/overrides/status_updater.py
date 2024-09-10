@@ -9,6 +9,6 @@ def add_row_type_condition_to_status_updater(status_updater):
 				"Sales Invoice Item",
 				"Delivery Note Item",
 			):
-				updater["target_dt_condition"] = "and COALESCE(row_type, '') in ('', 'item')"
+				updater["target_dt_condition"] = {"row_type": ("in", ["", "item"])}
 
 	return updated_status_updater
