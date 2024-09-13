@@ -111,6 +111,94 @@ def get_custom_fields_for_buying_doctype(dt: str):
 	}
 
 
+def get_custom_fields_for_progress_invoicing_summary(dt: str):
+	# _("Generated Invoices") _("Invoicing Summary")
+	return {
+		dt: [
+			{
+				"fieldname": "progress_invoicing_summary_section",
+				"label": "Invoicing Summary",
+				"fieldtype": "Tab Break",
+				"print_hide": 1,
+				"insert_after": "connections_tab",
+			},
+			{
+				"fieldname": "progress_invoicing_summary",
+				"fieldtype": "Table",
+				"options": "Progress Invoicing Items",
+				"label": "Generated Invoices",
+				"insert_after": "progress_invoicing_summary_section",
+				"allow_on_submit": 1,
+				"read_only": 1
+			},
+		],
+	}
+
+def get_progress_invoicing_fields():
+	return {
+		"Sales Invoice": [
+			{
+				"fieldname": "is_progress_invoice",
+				"fieldtype": "Check",
+				"label": "Is Progress Invoice",
+				"insert_after": "is_down_payment_invoice",
+			},
+			{
+				"fieldname": "progress_invoice_no",
+				"fieldtype": "Int",
+				"label": "Progress Invoice No",
+				"insert_after": "is_progress_invoice",
+				"depends_on": "is_progress_invoice",
+				"read_only": True,
+				"no_copy": True,
+				"default": "1"
+			},
+			{
+				"fieldname": "calculate_progress_globally",
+				"fieldtype": "Check",
+				"label": "Calculate Progress Globally",
+				"insert_after": "progress_invoice_no",
+				"depends_on": "is_progress_invoice",
+				"default": "1"
+			},
+			{
+				"fieldname": "progress_percentage",
+				"fieldtype": "Percent",
+				"label": "Progress Percentage",
+				"insert_after": "calculate_progress_globally",
+				"depends_on": "is_progress_invoice",
+				"read_only_depends_on": "eval:!doc.calculate_progress_globally"
+			},
+		],
+		"Sales Invoice Item": [
+			{
+				"fieldname": "progress_percentage",
+				"fieldtype": "Percent",
+				"label": "Progress Percentage",
+				"insert_after": "qty",
+				"depends_on": "eval:parent.is_progress_invoice",
+				"read_only_depends_on": "eval:parent.calculate_progress_globally"
+			},
+			{
+				"fieldname": "sales_order_qty",
+				"fieldtype": "Float",
+				"label": "Sales Order Quantity",
+				"insert_after": "progress_percentage",
+				"depends_on": "eval:parent.is_progress_invoice",
+				"read_only": 1,
+			},
+			{
+				"fieldname": "sales_order_amount",
+				"fieldtype": "Currency",
+				"label": "Sales Order Amount",
+				"insert_after": "sales_order_qty",
+				"depends_on": "eval:parent.is_progress_invoice",
+				"read_only": 1,
+			},
+		],
+	}
+
+
 def get_custom_fields():
 	return {
 		**get_custom_fields_for_selling_doctype("Quotation"),
