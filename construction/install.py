@@ -185,6 +185,30 @@ def get_progress_invoicing_fields():
 				"depends_on": "eval:parent.is_progress_invoice",
 				"read_only_depends_on": "eval:parent.calculate_progress_globally"
 			},
+			{
+				"fieldname": "sales_order_qty",
+				"fieldtype": "Float",
+				"label": "Sales Order Quantity",
+				"insert_after": "progress_percentage",
+				"depends_on": "eval:parent.is_progress_invoice",
+				"read_only": 1,
+			},
+			{
+				"fieldname": "sales_order_amount",
+				"fieldtype": "Currency",
+				"label": "Sales Order Amount",
+				"insert_after": "sales_order_qty",
+				"depends_on": "eval:parent.is_progress_invoice",
+				"read_only": 1,
+			},
+			{
+				"fieldname": "sales_order_billed_amount",
+				"fieldtype": "Currency",
+				"label": "Sales Order Billed Amount",
+				"insert_after": "sales_order_amount",
+				"depends_on": "eval:parent.is_progress_invoice",
+				"read_only": 1,
+			},
 		],
 	}
 
