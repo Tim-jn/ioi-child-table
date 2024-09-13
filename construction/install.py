@@ -201,6 +201,14 @@ def get_progress_invoicing_fields():
 				"depends_on": "eval:parent.is_progress_invoice",
 				"read_only": 1,
 			},
+			{
+				"fieldname": "sales_order_billed_amount",
+				"fieldtype": "Currency",
+				"label": "Sales Order Billed Amount",
+				"insert_after": "sales_order_amount",
+				"depends_on": "eval:parent.is_progress_invoice",
+				"read_only": 1,
+			},
 		],
 	}
 

@@ -27,6 +27,7 @@ class ConstructionSalesInvoice(SalesInvoice):
 			super().validate_uom_is_integer(uom_field, qty_fields)
 
 	def validate(self):
+		self.get_sales_order_details()
 		super().validate()
 
 		if self.is_progress_invoice:
@@ -36,8 +37,29 @@ class ConstructionSalesInvoice(SalesInvoice):
 			if self.update_stock:
 				self.update_stock = 0
 				frappe.msgprint(_("Stock cannot be updated directly from a progress invoice"), alert=True)
+		else:
+			self.progress_invoice_no = 0
 
 		self.calculate_progress()
+
+	def get_sales_order_details(self):
+		if not self.is_progress_invoice:
+			return
+
+		items = [item for item in self.items if item.row_type in ("Item", "")]
+
+		for item in items:
+			if item.so_detail:
+				base_net_amount, qty, billed_amt = frappe.db.get_value("Sales Order Item", item.so_detail, ["base_net_amount", "qty", "billed_amt"])
+				item.sales_order_qty = qty
+				item.sales_order_amount = base_net_amount
+				item.sales_order_billed_amount = billed_amt
+
+				if base_net_amount:
+					if self.calculate_progress_globally:
+						item.progress_percentage = self.progress_percentage
+					already_billed = flt(billed_amt) / flt(base_net_amount) * 100.0
+					item.qty = (flt(item.progress_percentage) - flt(already_billed)) / 100.0 * flt(qty)
 
 	def calculate_progress(self):
 		if not self.is_progress_invoice:
@@ -45,30 +67,9 @@ class ConstructionSalesInvoice(SalesInvoice):
 
 		items = [item for item in self.items if item.row_type in ("Item", "")]
 
-		total_billed = 0.0
-		for item in items:
-			if item.so_detail:
-				base_net_amount, qty, billed_amt = frappe.db.get_value("Sales Order Item", item.so_detail, ["base_net_amount", "qty", "billed_amt"])
-				item.sales_order_qty = qty
-				item.sales_order_amount = base_net_amount
-				total_billed += flt(billed_amt)
-
-				if not self.calculate_progress_globally and base_net_amount:
-					already_billed = flt(billed_amt) / flt(base_net_amount) * 100.0
-					item.qty = (flt(item.progress_percentage) - flt(already_billed)) / 100.0 * flt(qty)
-
+		total_billed = sum(item.sales_order_billed_amount for item in items)
 		if sum_so_amount := sum(item.sales_order_amount for item in items):
 			self.progress_percentage = (flt(self.base_net_total) + total_billed) / sum_so_amount * 100.0
-
-	def on_submit(self):
-		super().on_submit()
-		frappe.enqueue_doc(self.doctype, self.name, "generate_invoicing_summary")
-
-	def generate_invoicing_summary(self):
-		for so in list(set([item.sales_order for item in self.items])):
-			doc = frappe.get_cached_doc("Sales Order", so)
-			set_invoicing_summary(doc, 'on_sales_invoice_submission')
-			doc.save()
 
 	def set_print_heading(self):
 		if self.is_progress_invoice:
