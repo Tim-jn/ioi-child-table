@@ -28,8 +28,10 @@ def make_progress_invoice(source_name, target_doc=None):
 			break
 
 	doclist.advances = []
-	doclist.run_method("calculate_progress")
+
+	doclist.run_method("get_sales_order_details")
 	doclist.run_method("calculate_taxes_and_totals")
+	doclist.run_method("calculate_progress")
 
 	if doclist.allocate_advances_automatically:
 		doclist.run_method("set_advances")

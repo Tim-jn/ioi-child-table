@@ -47,17 +47,17 @@ def set_invoicing_summary(doc, method):
 	sales_invoices = frappe.get_all("Sales Invoice Item", filters=filters, pluck="parent")
 
 	fields = ["name", "progress_percentage", "posting_date", "grand_total", "is_down_payment_invoice", "is_progress_invoice", "creation", "progress_invoice_no"]
-	previous_invoices = frappe.get_all("Sales Invoice", filters={"docstatus": 1, "name": ("in", sales_invoices)}, fields=fields, order_by="posting_date ASC")
-	for invoice in previous_invoices:
-		invoice["label"] = get_label(invoice)
-		invoice["sales_invoice"] = invoice.name
-		invoice["name"] = None
-		doc.append("progress_invoicing_summary", invoice)
+	if previous_invoices := frappe.get_all("Sales Invoice", filters={"docstatus": 1, "name": ("in", sales_invoices)}, fields=fields, order_by="posting_date ASC"):
+		for invoice in previous_invoices:
+			invoice["label"] = get_label(invoice)
+			invoice["sales_invoice"] = invoice.name
+			invoice["name"] = None
+			doc.append("progress_invoicing_summary", invoice)
 
-	if previous_invoices and doc.docstatus == 0:
-		progress_invoice_no = max(cint(x.progress_invoice_no) for x in previous_invoices)
-		if progress_invoice_no and cint(doc.progress_invoice_no) <= progress_invoice_no:
-			doc.progress_invoice_no = progress_invoice_no + 1
+		if prev_progress_invoices := [previous_invoice for previous_invoice in previous_invoices if not previous_invoice.is_down_payment_invoice]:
+			if max_invoice_no := max(cint(previous_invoice.progress_invoice_no) for previous_invoice in prev_progress_invoices):
+				if doc.is_progress_invoice and doc.progress_invoice_no <= max_invoice_no:
+					doc.progress_invoice_no = max_invoice_no + 1
 
 	doc.run_method("set_print_heading")
 
