@@ -8,8 +8,9 @@ from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.controllers.accounts_controller import InvalidQtyError
 
 from construction.overrides.sales_order import make_progress_invoice
+from construction.overrides.sales_invoice import InvalidProgressCalculationMethodError
 
-test_dependencies = ["Sales Invoice"]
+test_dependencies = ["Customer", "Sales Invoice"]
 
 class TestProgressInvoice(FrappeTestCase):
 	@classmethod
@@ -127,6 +128,38 @@ class TestProgressInvoice(FrappeTestCase):
 		self.assertEqual(sales_invoice.grand_total, 600.0)
 		self.assertEqual(sales_invoice.progress_percentage, 80.0)
 		self.assertEqual(sales_invoice.progress_invoice_no, 2)
+
+	def test_progress_while_removing_one_line_item(self):
+		sales_order = self.create_sales_order()
+
+		frappe.flags.args.progress_percentage = 50.0
+		sales_invoice = make_progress_invoice(sales_order.name)
+		sales_invoice.remove(sales_invoice.items[1])
+		sales_invoice.items[0].progress_percentage = 65
+		sales_invoice.calculate_progress_globally = False
+		sales_invoice.save()
+
+		self.assertEqual(sales_invoice.items[0].progress_percentage, 65.0)
+		self.assertEqual(sales_invoice.items[0].qty, 6.5)
+		self.assertEqual(flt(sales_invoice.progress_percentage, 2), 32.50)
+
+		sales_invoice.calculate_progress_globally = True
+		sales_invoice.progress_percentage = 50.0
+		
+		self.assertRaises(InvalidProgressCalculationMethodError, sales_invoice.save)
+
+	def test_progress_while_adding_a_comment(self):
+		sales_order = self.create_sales_order()
+
+		frappe.flags.args.progress_percentage = 50.0
+		sales_invoice = make_progress_invoice(sales_order.name)
+		sales_invoice.append("items", {
+			"row_type": "text",
+			"description": "This is a comment",
+			"item_name": "This is a comment",
+			"qty": 1
+		})
+		sales_invoice.save()
 
 
 
