@@ -71,7 +71,7 @@ def before_print(doc, method, settings, *args, **kwargs):
 	doc.print_templates["items"] = "construction/print/items.html"
 	doc.print_templates["progress_invoicing_summary"] = "construction/print/progress_invoicing_summary.html"
 
-	doc.flags.compact_item_fields = ["posting_date", "sales_invoice"]
+	doc.flags.compact_progress_item_fields = ["posting_date", "sales_invoice"]
 	doc.child_print_templates = {
 		"progress_invoicing_summary": {
 			"label": "construction/print/progress_invoicing_summary_description.html"
