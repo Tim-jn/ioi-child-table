@@ -56,4 +56,4 @@ tests:
     - wait $build_pid
 
   script:
-    - bench --site test_site run-parallel-tests --app erpnext
+    - bench --site test_site run-parallel-tests --app construction
