@@ -1,5 +1,6 @@
 import click
 import frappe
+from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 
@@ -17,8 +18,13 @@ def after_migrate():
 
 def add_custom_fields():
 	click.secho("* Adding Construction Custom Fields")
-	custom_fields = get_custom_fields()
-	create_custom_fields(custom_fields)
+	for custom_fields in [
+		get_custom_fields(),
+		get_progress_invoicing_fields(),
+		get_custom_fields_for_progress_invoicing_summary("Sales Invoice"),
+		get_custom_fields_for_progress_invoicing_summary("Sales Order"),
+	]:
+		create_custom_fields(custom_fields)
 
 
 def get_custom_fields_for_selling_doctype(dt: str):
@@ -45,7 +51,7 @@ def get_custom_fields_for_selling_doctype(dt: str):
 				"fieldtype": "Select",
 				"label": "Row Type",
 				"read_only": 0,
-				"hidden": 0,
+				"hidden": 1,
 				"default": "",
 				"options": "\nitem\ntitle1\ntitle2\ntitle3\ntext",
 				"print_hide": 1,
@@ -208,6 +214,8 @@ def get_progress_invoicing_fields():
 
 
 def get_custom_fields():
+	# _("Calculate Progress Globally")
+
 	return {
 		**get_custom_fields_for_selling_doctype("Quotation"),
 		**get_custom_fields_for_selling_doctype("Sales Order"),
@@ -289,7 +297,6 @@ def get_custom_fields():
 		],
 	}
 
-
 def setup_default_quotation_builder_columns():
 	settings = frappe.get_single("Construction App Settings")
 	if not settings.quotation_builder_columns:
@@ -370,3 +377,30 @@ def add_property_setters():
 		validate_fields_for_doctype=False,
 		is_system_generated=True,
 	)
+
+	frappe.make_property_setter(
+		dict(
+			doctype="Sales Invoice",
+			doctype_or_field="DocField",
+			fieldname="update_stock",
+			property="hidden",
+			value=1,
+			property_type="Check",
+		),
+		validate_fields_for_doctype=False,
+		is_system_generated=True,
+	)
+
+	for field in ["is_down_payment_invoice", "is_return", "is_debit_note"]:
+		frappe.make_property_setter(
+			dict(
+				doctype="Sales Invoice",
+				doctype_or_field="DocField",
+				fieldname=field,
+				property="depends_on",
+				value="eval:!doc.is_progress_invoice",
+				property_type="Data",
+			),
+			validate_fields_for_doctype=False,
+			is_system_generated=True,
+		)
