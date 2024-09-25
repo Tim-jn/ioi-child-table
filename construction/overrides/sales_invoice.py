@@ -30,7 +30,7 @@ class ConstructionSalesInvoice(SalesInvoice):
 		super().validate()
 
 		if self.is_progress_invoice:
-			if len(set(item.sales_order for item in self.items)) > 1:
+			if len(set(item.sales_order for item in self.items if item.sales_order)) > 1:
 				frappe.throw(_("A progress invoice can only be linked to a single sales order"))
 
 			if self.update_stock:
