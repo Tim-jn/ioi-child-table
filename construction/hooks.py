@@ -4,7 +4,7 @@ app_publisher = "Dokos SAS"
 app_description = "Dokos application for the construction industry"
 app_email = "hello@dokos.io"
 app_license = "agpl-3.0"
-required_apps = ["dokos/dokos"]
+required_apps = ["erpnext"]
 
 # Includes in <head>
 # ------------------
