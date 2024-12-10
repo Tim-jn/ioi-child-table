@@ -29,12 +29,28 @@ frappe.ui.form.on("Sales Invoice Item", {
 			calculate_total_progress(frm);
 		}
 	},
+
+	qty(frm, cdt, cdn) {
+		const row = locals[cdt][cdn]
+
+		if (row.qty == 0.0) {
+			frappe.show_alert({
+				message: __("An item cannot be billed with a quantity of 0.<br>Please remove the line from your invoice."),
+				indicator: "orange"
+			})
+		}
+
+		if (!frm.doc.calculate_progress_globally) {
+			calculate_progress_from_qty(frm, row)
+		} else {
+			calculate_total_progress(frm);
+		}
+	},
 })
 
 
 const calculate_progress = async(frm, line, progress) => {
-	if (line.sales_order && line.so_detail && ["item", ""].includes(line.row_type)) {
-
+	if (!frm.dont_calculate_progress && line.sales_order && line.so_detail && ["item", ""].includes(line.row_type)) {
 		if (progress != line.progress_percentage) {
 			frappe.model.set_value(line.doctype, line.name, "progress_percentage", progress)
 		}
@@ -49,7 +65,21 @@ const calculate_progress = async(frm, line, progress) => {
 		}
 
 		frm.cscript.calculate_taxes_and_totals();
-		frm.calculate_progress = false;
+	}
+}
+
+
+const calculate_progress_from_qty = async(frm, line) => {
+	if (line.sales_order && line.so_detail && ["item", ""].includes(line.row_type)) {
+
+		const soi = await frappe.db.get_value("Sales Order Item", line.so_detail, ["qty", "base_net_amount", "billed_amt"], null, "Sales Order")
+		const already_billed = flt(soi.message.billed_amt) / flt(soi.message.base_net_amount) * 100.0
+		const calculated_progress = flt(line.qty) / (flt(soi.message.qty) - (flt(soi.message.qty) * already_billed / 100.0)) * 100.0;
+
+		if (calculated_progress && calculated_progress != line.progress_percentage) {
+			frm.dont_calculate_progress = true;
+			frappe.model.set_value(line.doctype, line.name, "progress_percentage", calculated_progress).then(() => { frm.dont_calculate_progress = false })
+		}
 	}
 }
 
