@@ -1,7 +1,7 @@
 import frappe
 
 from frappe.utils import flt
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
@@ -10,9 +10,9 @@ from erpnext.controllers.accounts_controller import InvalidQtyError
 from construction.overrides.sales_order import make_progress_invoice
 from construction.overrides.sales_invoice import InvalidProgressCalculationMethodError
 
-test_dependencies = ["Customer", "Sales Invoice"]
+EXTRA_TEST_RECORD_DEPENDENCIES = ["Customer", "Sales Invoice"]
 
-class TestProgressInvoice(FrappeTestCase):
+class TestProgressInvoice(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
 		if not frappe.flags.args:
