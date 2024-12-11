@@ -1,7 +1,8 @@
 import frappe
 
 from frappe.utils import flt
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import make_test_records
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
@@ -10,11 +11,8 @@ from erpnext.controllers.accounts_controller import InvalidQtyError
 from construction.overrides.sales_order import make_progress_invoice
 from construction.overrides.sales_invoice import InvalidProgressCalculationMethodError
 
-test_dependencies = ["Customer", "Sales Invoice"]
-
-class TestProgressInvoice(FrappeTestCase):
-	@classmethod
-	def setUpClass(cls):
+class TestProgressInvoice(IntegrationTestCase):
+	def setUp(cls):
 		if not frappe.flags.args:
 			frappe.flags.args = frappe._dict(progress_percentage=0.0)
 
@@ -24,6 +22,9 @@ class TestProgressInvoice(FrappeTestCase):
 			"default_advance_received_account",
 			"_Test Down Payment - _TC",
 		)
+
+		make_test_records("Customer")
+		make_test_records("Sales Order")
 
 
 	@staticmethod
