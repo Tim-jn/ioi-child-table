@@ -56,7 +56,7 @@ def set_invoicing_summary(doc, method):
 
 		if prev_progress_invoices := [previous_invoice for previous_invoice in previous_invoices if not previous_invoice.is_down_payment_invoice]:
 			if max_invoice_no := max(cint(previous_invoice.progress_invoice_no) for previous_invoice in prev_progress_invoices):
-				if doc.is_progress_invoice and doc.progress_invoice_no <= max_invoice_no:
+				if doc.get("is_progress_invoice") and doc.progress_invoice_no <= max_invoice_no:
 					doc.progress_invoice_no = max_invoice_no + 1
 
 	doc.run_method("set_print_heading")
