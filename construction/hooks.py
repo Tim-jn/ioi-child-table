@@ -142,19 +142,27 @@ override_doctype_class = {
 doc_events = {
 	"Quotation": {
 		"before_print": "construction.construction.print.before_print",
+		"validate": "construction.overrides.transaction.calculate_section_total"
 	},
 	"Sales Order": {
 		"before_print": "construction.construction.print.before_print",
-		"validate": "construction.construction.doctype.progress_invoicing_items.progress_invoicing_items.set_invoicing_summary",
+		"validate": [
+			"construction.overrides.transaction.calculate_section_total",
+			"construction.construction.doctype.progress_invoicing_items.progress_invoicing_items.set_invoicing_summary"
+		],
 		"on_update_after_submit": "construction.construction.doctype.progress_invoicing_items.progress_invoicing_items.set_invoicing_summary"
 	},
 	"Sales Invoice": {
 		"before_print": "construction.construction.print.before_print",
-		"validate": "construction.construction.doctype.progress_invoicing_items.progress_invoicing_items.set_invoicing_summary",
+		"validate": [
+			"construction.overrides.transaction.calculate_section_total",
+			"construction.construction.doctype.progress_invoicing_items.progress_invoicing_items.set_invoicing_summary"
+		],
 		"on_update_after_submit": "construction.construction.doctype.progress_invoicing_items.progress_invoicing_items.set_invoicing_summary"
 	},
 	"Delivery Note": {
 		"before_print": "construction.construction.print.before_print",
+		"validate": "construction.overrides.transaction.calculate_section_total",
 	},
 	"Purchase Order": {
 		"before_print": "construction.construction.print.before_print",
