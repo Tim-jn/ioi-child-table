@@ -80,6 +80,16 @@ def get_custom_fields_for_selling_doctype(dt: str):
 				"print_hide": 1,
 				"allow_on_submit": 1,
 			},
+			{
+				"fieldname": "section_total",
+				"fieldtype": "Currency",
+				"label": "Section Total",
+				"insert_after": "with_subtotal",
+				"print_hide": 1,
+				"allow_on_submit": 1,
+				"read_only": 1,
+				"depends_on": "eval:doc.row_type?.startsWith?.('title')"
+			},
 		],
 	}
 

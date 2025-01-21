@@ -65,7 +65,7 @@ def chantier_prepare_sections(doc):
 
 
 def before_print(doc, method, settings, *args, **kwargs):
-	if doc.doctype not in ("Quotation", "Sales Order", "Sales Invoice"):
+	if doc.doctype not in ("Quotation", "Sales Order", "Sales Invoice", "Delivery Note"):
 		return
 
 	doc.print_templates["items"] = "construction/print/items.html"
