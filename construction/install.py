@@ -28,6 +28,14 @@ def add_custom_fields():
 
 
 def get_custom_fields_for_selling_doctype(dt: str):
+	# For translations
+	__ = _("Item Builder")
+	__ = _("Row Type")
+	__ = _("Row Type")
+	__ = _("Display")
+	__ = _("With Subtotal")
+	__ = _("Section Total")
+
 	child_dt = dt + " Item"
 	return {
 		dt: [
@@ -118,7 +126,10 @@ def get_custom_fields_for_buying_doctype(dt: str):
 
 
 def get_custom_fields_for_progress_invoicing_summary(dt: str):
-	# _("Generated Invoices") _("Invoicing Summary")
+	# For translations
+	__ =_("Generated Invoices")
+	__ = _("Invoicing Summary")
+
 	return {
 		dt: [
 			{
@@ -141,6 +152,15 @@ def get_custom_fields_for_progress_invoicing_summary(dt: str):
 	}
 
 def get_progress_invoicing_fields():
+	# For translations
+	__ = _("Is Progress Invoice")
+	__ = _("Progress Invoice No")
+	__ = _("Calculate Progress Globally")
+	__ = _("Progress Percentage")
+	__ = _("Sales Order Quantity")
+	__ = _("Sales Order Amount")
+	__ = _("Sales Order Billed Amount")
+
 	return {
 		"Sales Invoice": [
 			{
@@ -214,7 +234,10 @@ def get_progress_invoicing_fields():
 
 
 def get_custom_fields():
-	# _("Calculate Progress Globally")
+	# For translations
+	__ = _("Documents")
+	__ = _("Address")
+	__ = _("Address")
 
 	return {
 		**get_custom_fields_for_selling_doctype("Quotation"),
