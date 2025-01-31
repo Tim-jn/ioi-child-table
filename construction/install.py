@@ -99,7 +99,7 @@ def get_custom_fields_for_selling_doctype(dt: str):
 				"print_hide": 1,
 				"allow_on_submit": 1,
 				"read_only": 1,
-				"depends_on": "eval:doc.row_type?.startsWith?.('title')"
+				"depends_on": "eval:doc.row_type?.startsWith?.('title')",
 			},
 		],
 	}
@@ -140,7 +140,7 @@ def get_custom_fields_for_buying_doctype(dt: str):
 
 def get_custom_fields_for_progress_invoicing_summary(dt: str):
 	# For translations
-	__ =_("Generated Invoices")
+	__ = _("Generated Invoices")
 	__ = _("Invoicing Summary")
 
 	return {
@@ -159,10 +159,11 @@ def get_custom_fields_for_progress_invoicing_summary(dt: str):
 				"label": "Generated Invoices",
 				"insert_after": "progress_invoicing_summary_section",
 				"allow_on_submit": 1,
-				"read_only": 1
+				"read_only": 1,
 			},
 		],
 	}
+
 
 def get_progress_invoicing_fields():
 	# For translations
@@ -190,7 +191,7 @@ def get_progress_invoicing_fields():
 				"depends_on": "is_progress_invoice",
 				"read_only": True,
 				"no_copy": True,
-				"default": "1"
+				"default": "1",
 			},
 			{
 				"fieldname": "calculate_progress_globally",
@@ -198,7 +199,7 @@ def get_progress_invoicing_fields():
 				"label": "Calculate Progress Globally",
 				"insert_after": "progress_invoice_no",
 				"depends_on": "is_progress_invoice",
-				"default": "1"
+				"default": "1",
 			},
 			{
 				"fieldname": "progress_percentage",
@@ -206,7 +207,7 @@ def get_progress_invoicing_fields():
 				"label": "Progress Percentage",
 				"insert_after": "calculate_progress_globally",
 				"depends_on": "is_progress_invoice",
-				"read_only_depends_on": "eval:!doc.calculate_progress_globally"
+				"read_only_depends_on": "eval:!doc.calculate_progress_globally",
 			},
 		],
 		"Sales Invoice Item": [
@@ -216,7 +217,7 @@ def get_progress_invoicing_fields():
 				"label": "Progress Percentage",
 				"insert_after": "qty",
 				"depends_on": "eval:parent.is_progress_invoice",
-				"read_only_depends_on": "eval:parent.calculate_progress_globally"
+				"read_only_depends_on": "eval:parent.calculate_progress_globally",
 			},
 			{
 				"fieldname": "sales_order_qty",
@@ -332,6 +333,7 @@ def get_custom_fields():
 			},
 		],
 	}
+
 
 def setup_default_quotation_builder_columns():
 	settings = frappe.get_single("Construction App Settings")
