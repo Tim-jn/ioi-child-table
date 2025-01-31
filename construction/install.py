@@ -24,6 +24,9 @@ def add_custom_fields():
 		get_custom_fields_for_progress_invoicing_summary("Sales Invoice"),
 		get_custom_fields_for_progress_invoicing_summary("Sales Order"),
 	]:
+		for dt, fields in custom_fields.items():
+			for df in fields:
+				df["module"] = "Construction"
 		create_custom_fields(custom_fields)
 
 
