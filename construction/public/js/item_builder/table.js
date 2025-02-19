@@ -507,7 +507,7 @@ export class ItemBuilderForm {
 		}
 
 		// idx, callback, show, copy_doc, go_to_last_page = false, go_to_first_page = false
-		this.get_grid().add_new_row(atIndex, null, null, rowValues, false, false);
+		return this.get_grid().add_new_row(atIndex, null, null, rowValues, false, false);
 
 		// https://frappeframework.com/docs/user/en/api/form#frm-add-child
 		// this.frm.add_child("items", values);
