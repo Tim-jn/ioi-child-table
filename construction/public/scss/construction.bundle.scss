@@ -1,1 +1,6 @@
-@import "./item_builder"
+@import "./item_builder";
+
+// Fix alignment of "select-all" checkbox in table header
+.tabulator-headers > .tabulator-col[tabulator-field="select"] .tabulator-col-title {
+  text-align: center;
+}
