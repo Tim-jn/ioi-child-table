@@ -122,6 +122,16 @@
 	content: counter(chantierheading1, decimal) '.' counter(chantierheading2, decimal) '.' counter(chantierheading3, decimal) '. ';
 }
 
+.construction--disable-title-counters {
+	.chantier-heading-1,
+	.chantier-heading-2,
+	.chantier-heading-3 {
+		.chantier-counter::before {
+			content: "";
+		}
+	}
+}
+
 .chantier-counter {
 	position: relative;
 	cursor: pointer;

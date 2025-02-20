@@ -898,6 +898,9 @@ export class ItemBuilderTable {
 	}
 
 	/** @private */ async build_table() {
+		if (frappe.boot?.construction_app_settings?.disable_title_counters) {
+			this.$table_wrapper.addClass("construction--disable-title-counters");
+		}
 		const tabulator_options = {
 			data: [],
 			index: "name",
