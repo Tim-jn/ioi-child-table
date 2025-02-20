@@ -16,4 +16,5 @@ def get_bootinfo(bootinfo):
 		"allow_buying": settings.allow_buying,
 		"allow_selling": settings.allow_selling,
 		"default_table_page_size": settings.default_table_page_size,
+		"disable_title_counters": settings.disable_title_counters,
 	}
