@@ -375,7 +375,7 @@ export class ItemBuilderForm {
 				rowHandle: writable,
 				headerSort: false,
 				frozen: true,
-				cssClass: "item-builder-flex-center",
+				cssClass: "item-builder-flex-center item-builder-keep-for-comment-row",
 				formatter: "handle",
 				minWidth: 16, // width and maxWidth feel useless
 				visible: writable,
@@ -383,7 +383,7 @@ export class ItemBuilderForm {
 			},
 			{
 				rowHandle: writable,
-				cssClass: "item-builder-flex-center",
+				cssClass: "item-builder-flex-center item-builder-keep-for-comment-row",
 				formatter: "rowSelection",
 				titleFormatter: "rowSelection",
 				hozAlign: "center",
@@ -397,7 +397,7 @@ export class ItemBuilderForm {
 			{
 				rowHandle: writable,
 				title: __("Sr"),
-				cssClass: "item-builder-flex-center",
+				cssClass: "item-builder-flex-center item-builder-keep-for-comment-row",
 				formatter: "rownum",
 				headerSort: false,
 				minWidth: 16, // width and maxWidth feel useless
@@ -1133,6 +1133,8 @@ export class ItemBuilderTable {
 			if (child.classList.contains("tabulator-row-handle")) {
 				continue;
 			} else if (child.classList.contains("tabulator-col-resize-handle")) {
+				continue;
+			} else if (child.classList.contains("item-builder-keep-for-comment-row")) {
 				continue;
 			} else if (child.querySelector(":scope > [type='checkbox']")) {
 				continue;
