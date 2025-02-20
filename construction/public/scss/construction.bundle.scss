@@ -1,1 +1,14 @@
-@import "./item_builder"
+@import "./item_builder";
+
+// Fix alignment of "select-all" checkbox in table header
+.tabulator-headers > .tabulator-col[tabulator-field="select"] .tabulator-col-title {
+  text-align: center;
+}
+
+// Disable padding of Text Editor fields in table cells
+.tabulator .tabulator-cell:has(.ql-editor) {
+  padding: 0px;
+}
+.tabulator .tabulator-cell .ql-editor {
+  padding: 4px;
+}

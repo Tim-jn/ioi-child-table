@@ -90,7 +90,7 @@ function makeTextEditorDocField(df, row) {
 	};
 }
 
-function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorParams) {
+export function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorParams) {
 	// cell - the cell component for the editable cell
 	// onRendered - function to call when the editor has been rendered
 	// success - function to call to pass thesuccessfully updated value to Tabulator
@@ -148,7 +148,7 @@ function frappeTabulatorCellEditor(cell, onRendered, success, cancel, editorPara
 	return el;
 }
 
-function withTabulatorLinkEditor_mut(col, df, ref_dt) {
+export function withTabulatorLinkEditor(col, df, ref_dt) {
 	col.editor = "list";
 	col.editorParams = {
 		// https://tabulator.info/docs/5.5/edit#editor-list
@@ -193,7 +193,7 @@ function setTextEditorStyle(control) {
 	control.inside_change_event = true; // force ignore onchange event
 }
 
-function frappeTabulatorCellFormatter(cell, formatterParams, onRendered) {
+export function frappeTabulatorCellFormatter(cell, formatterParams, onRendered) {
 	const value = cell.getValue();
 	const doc = cell.getRow().getData();
 	const html = frappe.format(value, formatterParams.df, null, doc);
@@ -452,7 +452,7 @@ export class ItemBuilderForm {
 
 			if (df.fieldtype === "Link") {
 				const ref_dt = this.parent_doctype;
-				withTabulatorLinkEditor_mut(col, df, ref_dt);
+				withTabulatorLinkEditor(col, df, ref_dt);
 			}
 			else if (df.fieldname == "description") {
 				col.variableHeight = true;
@@ -507,7 +507,7 @@ export class ItemBuilderForm {
 		}
 
 		// idx, callback, show, copy_doc, go_to_last_page = false, go_to_first_page = false
-		this.get_grid().add_new_row(atIndex, null, null, rowValues, false, false);
+		return this.get_grid().add_new_row(atIndex, null, null, rowValues, false, false);
 
 		// https://frappeframework.com/docs/user/en/api/form#frm-add-child
 		// this.frm.add_child("items", values);
