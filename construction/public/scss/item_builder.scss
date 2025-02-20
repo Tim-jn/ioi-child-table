@@ -151,3 +151,22 @@
 		opacity: 0;
 	}
 }
+
+// Improve UX with hover/select/focus styles
+.item-builder-table {
+	.tabulator-row:focus-within {
+		background: var(--highlight-color) !important;
+	}
+	.tabulator-selected {
+		background: var(--bg-yellow) !important;
+	}
+	.tabulator-moving {
+		background: var(--fg-color) !important;
+	}
+	.tabulator-cell:not(.tabulator-editable) {
+		cursor: default;
+	}
+	.tabulator-editable:hover {
+		background: var(--highlight-color) !important;
+	}
+}
