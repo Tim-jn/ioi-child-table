@@ -15,6 +15,7 @@
   "use_table_view",
   "allow_selling",
   "allow_buying",
+  "disable_title_counters",
   "default_table_page_size",
   "column_break_mcdy",
   "quotation_builder_columns"
@@ -67,12 +68,18 @@
    "fieldtype": "Select",
    "label": "Default page size",
    "options": "None\n20\n100\nAll"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_title_counters",
+   "fieldtype": "Check",
+   "label": "Désactiver la numérotation des titres"
   }
  ],
  "icon": "uil uil-wrench",
  "issingle": 1,
  "links": [],
- "modified": "2024-04-23 18:46:21.855079",
+ "modified": "2025-02-20 16:39:14.131954",
  "modified_by": "Administrator",
  "module": "Construction",
  "name": "Construction App Settings",
