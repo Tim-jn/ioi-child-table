@@ -1,5 +1,8 @@
 .ButtonRibbon__container {
 	overflow: visible !important;
+	&:hover {
+		z-index: 11; // Go over .tabulator-col-resize-handle
+	}
 }
 
 .ButtonRibbon {
