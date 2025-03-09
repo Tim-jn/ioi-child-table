@@ -7,7 +7,7 @@ def make_progress_invoice(source_name, target_doc=None):
 	doclist = make_sales_invoice(source_name, target_doc=target_doc)
 	doclist.is_progress_invoice = 1
 
-	doclist.progress_percentage = frappe.flags.args.progress_percentage
+	doclist.progress_percentage = frappe.flags.args.progress_percentage or 0.0
 
 	project_advancement = 0.0
 	if doclist.project:
