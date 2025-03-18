@@ -217,7 +217,7 @@ def get_progress_invoicing_fields():
 				"label": "Progress Percentage",
 				"insert_after": "qty",
 				"depends_on": "eval:parent.is_progress_invoice",
-				"read_only_depends_on": "eval:parent.calculate_progress_globally",
+				"read_only_depends_on": "eval:!parent.is_progress_invoice || parent.calculate_progress_globally",
 			},
 			{
 				"fieldname": "sales_order_qty",
