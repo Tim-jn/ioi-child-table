@@ -4,7 +4,7 @@ frappe.ui.form.on("Sales Invoice", {
 	},
 
 	progress_percentage(frm) {
-		if (frm.doc.is_down_payment_invoice && frm.doc.calculate_progress_globally) {
+		if (frm.doc.is_progress_invoice && frm.doc.calculate_progress_globally) {
 			frm.doc.items.forEach(row => {
 				calculate_progress(frm, row, frm.doc.progress_percentage)
 			})
@@ -16,7 +16,7 @@ frappe.ui.form.on("Sales Invoice Item", {
 	progress_percentage(frm, cdt, cdn) {
 		const row = locals[cdt][cdn]
 
-		if (!frm.doc.is_down_payment_invoice) {
+		if (!frm.doc.is_progress_invoice) {
 			row.progress_percentage = 0.0;
 			return
 		}
@@ -36,7 +36,7 @@ frappe.ui.form.on("Sales Invoice Item", {
 	},
 
 	qty(frm, cdt, cdn) {
-		if (!frm.doc.is_down_payment_invoice) {
+		if (!frm.doc.is_progress_invoice) {
 			return
 		}
 
