@@ -243,6 +243,16 @@ def get_progress_invoicing_fields():
 				"depends_on": "eval:parent.is_progress_invoice",
 				"read_only": 1,
 			},
+			{
+				"fieldname": "sales_order_section_total",
+				"fieldtype": "Currency",
+				"label": "Sales Order Section Total",
+				"insert_after": "with_subtotal",
+				"depends_on": "eval:parent.is_progress_invoice && doc.row_type?.startsWith?.('title')",
+				"read_only": 1,
+				"print_hide": 1,
+				"allow_on_submit": 1,
+			},
 		],
 	}
 
