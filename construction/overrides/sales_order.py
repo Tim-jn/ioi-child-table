@@ -54,3 +54,20 @@ def get_progress_percentage(sales_order):
 		progress_percentage = 100.0
 
 	return progress_percentage
+
+
+def calculate_subtotals(doc, method):
+	from construction.construction.print import chantier_prepare_sections
+
+	sections, _ = chantier_prepare_sections(doc, calculate_all_subtotals=True)
+
+	for item in doc.items:
+		if row := sections.get(item.name):
+			if not row.get("amount"):
+				continue
+
+			item.section_total = row.get("amount")
+
+			if method == "on_update_after_submit":
+				frappe.db.set_value(item.doctype, item.name, "section_total", row.get("amount"))
+
