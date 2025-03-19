@@ -3,7 +3,7 @@ from collections import defaultdict
 item_sum_keys = ["amount"]
 
 
-def chantier_prepare_sections(doc):
+def chantier_prepare_sections(doc, calculate_all_subtotals=False):
 	last_counter = (0, 0, 0, 0)
 
 	def counters(cnt: tuple[int], sep="."):
@@ -41,7 +41,7 @@ def chantier_prepare_sections(doc):
 			section_map[section["name"]] = section
 			active_sections[section["level"]] = None
 
-			if item.with_subtotal:
+			if calculate_all_subtotals or item.with_subtotal:
 				section_list.append(section)
 				active_sections[section["level"]] = section
 
