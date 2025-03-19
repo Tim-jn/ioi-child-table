@@ -6,7 +6,6 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.controllers.accounts_controller import validate_account_head
 
 from construction.overrides.status_updater import add_row_type_condition_to_status_updater
-from construction.construction.doctype.progress_invoicing_items.progress_invoicing_items import set_invoicing_summary
 
 class InvalidProgressCalculationMethodError(frappe.ValidationError):
 	pass
