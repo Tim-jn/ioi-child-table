@@ -6,7 +6,6 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice
 from erpnext.controllers.accounts_controller import validate_account_head
 
 from construction.overrides.status_updater import add_row_type_condition_to_status_updater
-from construction.construction.doctype.progress_invoicing_items.progress_invoicing_items import set_invoicing_summary
 
 class InvalidProgressCalculationMethodError(frappe.ValidationError):
 	pass
@@ -62,10 +61,8 @@ class ConstructionSalesInvoice(SalesInvoice):
 		if not self.is_progress_invoice:
 			return
 
-		items = [item for item in self.items if item.row_type in ("Item", "")]
-
-		for item in items:
-			if item.so_detail:
+		for item in self.items:
+			if item.so_detail and item.row_type in ("Item", ""):
 				base_net_amount, qty, billed_amt = frappe.db.get_value("Sales Order Item", item.so_detail, ["base_net_amount", "qty", "billed_amt"])
 				item.sales_order_qty = qty
 				item.sales_order_amount = base_net_amount
@@ -76,6 +73,9 @@ class ConstructionSalesInvoice(SalesInvoice):
 						item.progress_percentage = self.progress_percentage
 					already_billed = flt(billed_amt) / flt(base_net_amount) * 100.0
 					item.qty = (flt(item.progress_percentage) - flt(already_billed)) / 100.0 * flt(qty)
+
+			elif item.so_detail:
+				item.sales_order_section_total = frappe.db.get_value("Sales Order Item", item.so_detail, "section_total")
 
 	def calculate_progress(self):
 		if not self.is_progress_invoice:
