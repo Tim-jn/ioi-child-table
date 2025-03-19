@@ -99,3 +99,7 @@ class ConstructionSalesInvoice(SalesInvoice):
 				ph.insert(ignore_if_duplicate=True)
 
 			self.select_print_heading = print_heading
+
+	def validate_qty_is_not_zero(self):
+		if self.get("update_stock") or not [item for item in self.items if flt(item.qty) > 0]:
+			super().validate_qty_is_not_zero()
