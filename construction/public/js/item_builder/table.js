@@ -220,6 +220,7 @@ export function withTabulatorLinkEditor(col, df, ref_dt) {
 
 			return results;
 		},
+		filterDelay: 150,
 		filterRemote: true,
 		listOnEmpty: true,
 		allowEmpty: true,
