@@ -188,6 +188,7 @@ export function withTabulatorLinkEditor(col, df, ref_dt) {
 				doctype: df.options,
 				ignore_user_permissions: false,
 				reference_doctype: ref_dt,
+				page_length: 30,
 			};
 			const res = await frappe.call({
 				type: "POST",
