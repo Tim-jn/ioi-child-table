@@ -164,6 +164,16 @@ export function withTabulatorLinkEditor(col, df, ref_dt) {
 			return html;
 		},
 		async valuesLookup(cell, filterTerm) {
+			const currentValue = cell.getValue();
+
+			// fix: Defaults to current value in search to avoid
+			// issue where the input is cleared because the current
+			// value does not appear in the search results,
+			// because filterTerm is briefly set to an empty string.
+			if (!filterTerm && currentValue) {
+				filterTerm = currentValue;
+			}
+
 			const args = {
 				txt: filterTerm,
 				doctype: df.options,
