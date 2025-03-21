@@ -157,18 +157,38 @@ export function withTabulatorLinkEditor(col, df, ref_dt) {
 		placeholderEmpty: __("No Result"),
 		valuesLookupField: "label", // search returns { value, label?, description? }
 		itemFormatter(label, value, item, element) {
-			let html = `<strong>${label}</strong>`;
+			let html = `<strong>${frappe.utils.escape_html(label)}</strong>`;
+			if (item?.verbatim) {
+				html = `<em><q> ${html} </q></em>`;
+			}
+			if (item?.isAction) {
+				html = `<em style="opacity:0.8;">${html}</em>`;
+			}
+			if (item?.icon) {
+				html = `<div class="flex align-center"><span>${frappe.utils.icon(item.icon, "lg")}</span><span>${html}</span></div>`;
+			}
 			if (item?.description) {
-				html += `<div style="line-height:1.1;font-size:var(--text-xs);">${item.description}</div>`;
+				html += `<div style="line-height:1.1;font-size:var(--text-xs);max-width:250px;">${frappe.dom.remove_script_and_style(item.description)}</div>`;
 			}
 			return html;
 		},
 		async valuesLookup(cell, filterTerm) {
+			const currentValue = cell.getValue();
+
+			// fix: Defaults to current value in search to avoid
+			// issue where the input is cleared because the current
+			// value does not appear in the search results,
+			// because filterTerm is briefly set to an empty string.
+			if (!filterTerm && currentValue) {
+				filterTerm = currentValue;
+			}
+
 			const args = {
 				txt: filterTerm,
 				doctype: df.options,
 				ignore_user_permissions: false,
 				reference_doctype: ref_dt,
+				page_length: 30,
 			};
 			const res = await frappe.call({
 				type: "POST",
@@ -176,15 +196,35 @@ export function withTabulatorLinkEditor(col, df, ref_dt) {
 				no_spinner: true,
 				args: args,
 			});
-			return res.message.map((o) => {
+
+			const results = res.message.map((o) => {
 				o.label ??= o.value;
 				return o;
-			})
+			});
+
+			if (results.length === 1 || currentValue) {
+				results.splice(1, 0, {
+					label: "Effacer la valeur saisie",
+					value: "",
+					isAction: true,
+					icon: "uil uil-backspace",
+				});
+			}
+
+			// if (filterTerm && results.length === args.page_length) {
+			// 	if (!results.find((x) => x.value === filterTerm || x.label === filterTerm)) {
+			// 		// Exact result might exist somewhere?
+			// 		results.push({ label: filterTerm, value: filterTerm, verbatim: true });
+			// 	}
+			// }
+
+			return results;
 		},
+		filterDelay: 150,
 		filterRemote: true,
 		listOnEmpty: true,
 		allowEmpty: true,
-		clearable: true,
+		clearable: false, // clearable = set input type="search" to show a native clear button
 	};
 	return col;
 }
