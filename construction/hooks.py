@@ -140,45 +140,45 @@ override_doctype_class = {
 # Hook on document methods and events
 
 doc_events = {
-	"Quotation": {
-		"before_print": "construction.construction.print.before_print",
-		"validate": [
-			"construction.overrides.sales_order.calculate_subtotals",
-		],
-	},
-	"Sales Order": {
-		"before_print": "construction.construction.print.before_print",
-		"validate": [
-			"construction.overrides.sales_order.calculate_subtotals",
-			"construction.construction.doctype.progress_invoicing_items.progress_invoicing_items.set_invoicing_summary",
-		],
-		"on_update_after_submit": [
-			"construction.overrides.sales_order.calculate_subtotals",
-			"construction.construction.doctype.progress_invoicing_items.progress_invoicing_items.set_invoicing_summary",
-		]
-	},
-	"Sales Invoice": {
-		"before_print": "construction.construction.print.before_print",
-		"validate": [
-			"construction.overrides.sales_order.calculate_subtotals",
-			"construction.construction.doctype.progress_invoicing_items.progress_invoicing_items.set_invoicing_summary",
-		],
-		"on_update_after_submit": [
-			"construction.overrides.sales_order.calculate_subtotals",
-			"construction.construction.doctype.progress_invoicing_items.progress_invoicing_items.set_invoicing_summary",
-		]
-	},
-	"Delivery Note": {
-		"before_print": "construction.construction.print.before_print",
-		"validate": "construction.overrides.transaction.calculate_section_total",
-	},
-	"Purchase Order": {
-		"before_print": "construction.construction.print.before_print",
-	},
-	"Supplier Quotation": {
-		"before_print": "construction.construction.print.before_print",
-	},
-	"Project": {"on_update": "construction.utils.projects.on_update"},
+	# "Quotation": {
+	# 	"before_print": "construction.construction.print.before_print",
+	# 	"validate": [
+	# 		"construction.overrides.sales_order.calculate_subtotals",
+	# 	],
+	# },
+	# "Sales Order": {
+	# 	"before_print": "construction.construction.print.before_print",
+	# 	"validate": [
+	# 		"construction.overrides.sales_order.calculate_subtotals",
+	# 		"construction.construction.doctype.progress_invoicing_items.progress_invoicing_items.set_invoicing_summary",
+	# 	],
+	# 	"on_update_after_submit": [
+	# 		"construction.overrides.sales_order.calculate_subtotals",
+	# 		"construction.construction.doctype.progress_invoicing_items.progress_invoicing_items.set_invoicing_summary",
+	# 	]
+	# },
+	# "Sales Invoice": {
+	# 	"before_print": "construction.construction.print.before_print",
+	# 	"validate": [
+	# 		"construction.overrides.sales_order.calculate_subtotals",
+	# 		"construction.construction.doctype.progress_invoicing_items.progress_invoicing_items.set_invoicing_summary",
+	# 	],
+	# 	"on_update_after_submit": [
+	# 		"construction.overrides.sales_order.calculate_subtotals",
+	# 		"construction.construction.doctype.progress_invoicing_items.progress_invoicing_items.set_invoicing_summary",
+	# 	]
+	# },
+	# "Delivery Note": {
+	# 	"before_print": "construction.construction.print.before_print",
+	# 	"validate": "construction.overrides.transaction.calculate_section_total",
+	# },
+	# "Purchase Order": {
+	# 	"before_print": "construction.construction.print.before_print",
+	# },
+	# "Supplier Quotation": {
+	# 	"before_print": "construction.construction.print.before_print",
+	# },
+	# "Project": {"on_update": "construction.utils.projects.on_update"},
 }
 
 # Scheduled Tasks
