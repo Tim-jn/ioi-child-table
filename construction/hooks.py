@@ -4,7 +4,7 @@ app_publisher = "Dokos SAS"
 app_description = "Dokos application for the construction industry"
 app_email = "hello@dokos.io"
 app_license = "agpl-3.0"
-required_apps = ["erpnext"]
+required_apps = ["./silicon_ioi"]
 
 # Includes in <head>
 # ------------------
@@ -29,14 +29,14 @@ app_include_js = "construction.bundle.js"
 
 # include js in doctype views
 doctype_js = {
-	"Quotation": "public/js/overrides/quotation.js",
-	"Project": "public/js/overrides/project.js",
-	"Task": "public/js/overrides/task.js",
-	"Sales Order": "public/js/overrides/sales_order.js",
-	"Sales Invoice": "public/js/overrides/sales_invoice.js",
-	"Purchase Order": "public/js/overrides/purchase_order.js",
-	"Supplier Quotation": "public/js/overrides/supplier_quotation.js",
-	"Delivery Note": "public/js/overrides/delivery_note.js",
+	# "Quotation": "public/js/overrides/quotation.js",
+	# "Project": "public/js/overrides/project.js",
+	# "Task": "public/js/overrides/task.js",
+	# "Sales Order": "public/js/overrides/sales_order.js",
+	# "Sales Invoice": "public/js/overrides/sales_invoice.js",
+	# "Purchase Order": "public/js/overrides/purchase_order.js",
+	# "Supplier Quotation": "public/js/overrides/supplier_quotation.js",
+	# "Delivery Note": "public/js/overrides/delivery_note.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -128,11 +128,11 @@ boot_session = "construction.boot.get_bootinfo"
 # Override standard doctype classes
 
 override_doctype_class = {
-	"Sales Invoice": "construction.overrides.sales_invoice.ConstructionSalesInvoice",
-	"Delivery Note": "construction.overrides.delivery_note.ConstructionDeliveryNote",
-	"Purchase Receipt": "construction.overrides.purchase_receipt.ConstructionPurchaseReceipt",
-	"Purchase Order": "construction.overrides.purchase_order.ConstructionPurchaseOrder",
-	"Quotation": "construction.overrides.quotation.ConstructionQuotation",
+	# "Sales Invoice": "construction.overrides.sales_invoice.ConstructionSalesInvoice",
+	# "Delivery Note": "construction.overrides.delivery_note.ConstructionDeliveryNote",
+	# "Purchase Receipt": "construction.overrides.purchase_receipt.ConstructionPurchaseReceipt",
+	# "Purchase Order": "construction.overrides.purchase_order.ConstructionPurchaseOrder",
+	# "Quotation": "construction.overrides.quotation.ConstructionQuotation",
 }
 
 # Document Events

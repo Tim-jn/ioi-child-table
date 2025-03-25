@@ -35,11 +35,11 @@ frappe.ui.form.on("Project", {
 	},
 
 	address: function(frm) {
-		erpnext.utils.get_address_display(
-			frm,
-			"address",
-			"address_display",
-			true
-		);
+		// erpnext.utils.get_address_display(
+		// 	frm,
+		// 	"address",
+		// 	"address_display",
+		// 	true
+		// );
 	}
 })

@@ -354,7 +354,7 @@ export class ItemBuilderForm {
 
 	get_table_field() {
 		assert(!this.isHeadless, "Item Builder get_table_field: cannot get table field in headless mode");
-		return this.frm.get_field("items");
+		return this.frm.get_field("line_detail");
 	}
 
 	get_frm() {
@@ -370,7 +370,7 @@ export class ItemBuilderForm {
 	}
 
 	/** @return {readonly any[]} */ get_rows() {
-		return this.get_doc().items;
+		return this.get_doc().line_detail;
 	}
 
 	/** @return {any[]} */ get_mutable_rows() {
@@ -393,7 +393,7 @@ export class ItemBuilderForm {
 	}
 
 	get row_doctype() {
-		return frappe.meta.get_field(this.parent_doctype, "items").options;
+		return frappe.meta.get_field(this.parent_doctype, "line_detail").options;
 	}
 
 	get_columns() {

@@ -3,7 +3,7 @@ frappe.provide("construction.utils");
 construction.utils.update_child_items = function (opts) {
 	const frm = opts.frm;
 	const cannot_add_row = typeof opts.cannot_add_row === "undefined" ? true : opts.cannot_add_row;
-	const child_docname = typeof opts.cannot_add_row === "undefined" ? "items" : opts.child_docname;
+	const child_docname = typeof opts.cannot_add_row === "undefined" ? "line_detail" : opts.child_docname;
 	const child_meta = frappe.get_meta(`${frm.doc.doctype} Item`);
 	const has_reserved_stock = opts.has_reserved_stock ? true : false;
 	const get_precision = (fieldname) => child_meta.fields.find((f) => f.fieldname == fieldname).precision;
@@ -49,26 +49,26 @@ construction.utils.update_child_items = function (opts) {
 			read_only_depends: "bom_no",
 			disabled: 0,
 			label: __("Item Code"),
-			get_query: function () {
-				let filters;
-				if (frm.doc.doctype == "Sales Order") {
-					filters = { is_sales_item: 1 };
-				} else if (frm.doc.doctype == "Purchase Order") {
-					if (frm.doc.is_subcontracted) {
-						if (frm.doc.is_old_subcontracting_flow) {
-							filters = { is_sub_contracted_item: 1 };
-						} else {
-							filters = { is_stock_item: 0 };
-						}
-					} else {
-						filters = { is_purchase_item: 1 };
-					}
-				}
-				return {
-					query: "erpnext.controllers.queries.item_query",
-					filters: filters,
-				};
-			},
+			// get_query: function () {
+			// 	let filters;
+			// 	if (frm.doc.doctype == "Sales Order") {
+			// 		filters = { is_sales_item: 1 };
+			// 	} else if (frm.doc.doctype == "Purchase Order") {
+			// 		if (frm.doc.is_subcontracted) {
+			// 			if (frm.doc.is_old_subcontracting_flow) {
+			// 				filters = { is_sub_contracted_item: 1 };
+			// 			} else {
+			// 				filters = { is_stock_item: 0 };
+			// 			}
+			// 		} else {
+			// 			filters = { is_purchase_item: 1 };
+			// 		}
+			// 	}
+			// 	return {
+			// 		query: "erpnext.controllers.queries.item_query",
+			// 		filters: filters,
+			// 	};
+			// },
 		},
 		{
 			fieldtype: "Data",
@@ -90,24 +90,24 @@ construction.utils.update_child_items = function (opts) {
 			label: __("UOM"),
 			reqd: 1,
 			onchange: function () {
-				frappe.call({
-					method: "erpnext.stock.get_item_details.get_conversion_factor",
-					args: { item_code: this.doc.item_code, uom: this.value },
-					callback: (r) => {
-						if (!r.exc) {
-							if (this.doc.conversion_factor == r.message.conversion_factor) return;
+				// frappe.call({
+				// 	method: "erpnext.stock.get_item_details.get_conversion_factor",
+				// 	args: { item_code: this.doc.item_code, uom: this.value },
+				// 	callback: (r) => {
+				// 		if (!r.exc) {
+				// 			if (this.doc.conversion_factor == r.message.conversion_factor) return;
 
-							const docname = this.doc.docname;
-							dialog.fields_dict.trans_items.df.data.some((doc) => {
-								if (doc.docname == docname) {
-									doc.conversion_factor = r.message.conversion_factor;
-									dialog.fields_dict.trans_items.grid.refresh();
-									return true;
-								}
-							});
-						}
-					},
-				});
+				// 			const docname = this.doc.docname;
+				// 			dialog.fields_dict.trans_items.df.data.some((doc) => {
+				// 				if (doc.docname == docname) {
+				// 					doc.conversion_factor = r.message.conversion_factor;
+				// 					dialog.fields_dict.trans_items.grid.refresh();
+				// 					return true;
+				// 				}
+				// 			});
+				// 		}
+				// 	},
+				// });
 			},
 		},
 		{
@@ -221,21 +221,21 @@ construction.utils.update_child_items = function (opts) {
 			const trans_items = this.get_values()["trans_items"].filter((item) => (!!item.item_code && (!item.row_type || ["item", ""].includes(item.row_type))));
 			trans_items.push(...comments_and_titles)
 			
-			frappe.call({
-				method: "erpnext.controllers.accounts_controller.update_child_qty_rate",
-				freeze: true,
-				args: {
-					parent_doctype: frm.doc.doctype,
-					trans_items: trans_items,
-					parent_doctype_name: frm.doc.name,
-					child_docname: child_docname,
-				},
-				callback: function () {
-					frm.reload_doc();
-				},
-			});
+			// frappe.call({
+			// 	method: "erpnext.controllers.accounts_controller.update_child_qty_rate",
+			// 	freeze: true,
+			// 	args: {
+			// 		parent_doctype: frm.doc.doctype,
+			// 		trans_items: trans_items,
+			// 		parent_doctype_name: frm.doc.name,
+			// 		child_docname: child_docname,
+			// 	},
+			// 	callback: function () {
+			// 		frm.reload_doc();
+			// 	},
+			// });
 			this.hide();
-			refresh_field("items");
+			refresh_field("line_detail");
 		},
 		primary_action_label: __("Update"),
 	});
@@ -244,6 +244,6 @@ construction.utils.update_child_items = function (opts) {
 };
 
 
-$(document).ready(() => {
-	erpnext.utils.update_child_items = construction.utils.update_child_items;
-})
+// $(document).ready(() => {
+// 	erpnext.utils.update_child_items = construction.utils.update_child_items;
+// })
